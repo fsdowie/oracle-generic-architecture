@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0 — 2026-09-30
+- Estate map moved to private hosting: login page on Vercel (`site/public/`), map data in a private Supabase Storage bucket readable only by allow-listed users (`supabase/setup.sql`).
+- Map content separated into `site/model/map-model.json`; `tools/build_map_data.py` merges it with the integration register.
+- New workflow `.github/workflows/deploy-map.yml` (validate → build → upload → deploy). Setup guide: `site/SETUP-MAP.md`.
+- Removed the self-contained `site/index.html` (it embedded all content).
+
 ## 0.1.0 — 2026-09-30
 Initial import of the knowledge pack.
 - 35 typed files across foundation, Oracle modules, external systems, integrations, processes, operations, governance and validation.

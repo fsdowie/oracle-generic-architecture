@@ -43,6 +43,6 @@ python tools/validate_pack.py
 
 CI runs the same script on every pull request (`.github/workflows/validate.yml`).
 
-## Rebuilding the map
+## Changing the map
 
-`site/index.html` is the interactive estate map. It is a static snapshot. When the register or the estate changes, regenerate it or edit its data arrays (`N`, `E`, `INTS`) in the script block.
+The hosted map reads its data from a private Supabase bucket, not from the website. Edit `site/model/map-model.json` (layout, nodes, flows, process text) or `integrations/integration-register.yaml` (integration table) and push to `main`; `.github/workflows/deploy-map.yml` rebuilds `map.json`, uploads it and redeploys. Never put content in `site/public/`: everything there is public. See `site/SETUP-MAP.md`.

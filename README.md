@@ -76,7 +76,7 @@ that one retrieved chunk is enough to answer one question correctly.
 
 - **Validate:** see `CONTRIBUTING.md`. Every change is a pull request reviewed by the owning team in `.github/CODEOWNERS`.
 - **Check:** `python tools/validate_pack.py` (runs in CI on every PR).
-- **Browse:** open `site/index.html` for the interactive estate map.
+- **Browse:** the interactive estate map is hosted privately (Vercel + Supabase sign-in). Setup: `site/SETUP-MAP.md`.
 - **Feed an agent:** point retrieval at the repository root; start from `00-index.yaml` and `01-principles.md`.
 
 ## Scope

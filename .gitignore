@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 .venv/
+build/
+site/public/config.js
+.vercel/
