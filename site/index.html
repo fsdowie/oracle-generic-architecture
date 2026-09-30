@@ -1,0 +1,414 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body>
+<title>Oracle Finance Estate Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a ledger-like band diagram — six horizontal layers narrowing to one engine and one ledger, detail rail on the right */
+:root{
+  --bg:#F2F4F1; --panel:#FFFFFF; --fg:#1A2327; --muted:#5B676C; --line:#CDD3CF; --soft:#E6EAE6;
+  --accent:#0E6A6C; --accent-soft:#D5E8E6;
+  --oic:#0E6A6C; --airflow:#A8701A; --bulk:#7B4C8C; --extract:#4F6C86; --ext:#8A8F87;
+  --warn:#B4541C; --ok:#2E7D4F;
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12181A; --panel:#1A2226; --fg:#E4EAE8; --muted:#97A3A6; --line:#33403F; --soft:#222C2F;
+  --accent:#5EC2BF; --accent-soft:#1D3A3A; --oic:#5EC2BF; --airflow:#E0A649; --bulk:#C08BD4; --extract:#8FB0CF; --ext:#8C938C;
+  --warn:#E88A55; --ok:#6CC08D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12181A; --panel:#1A2226; --fg:#E4EAE8; --muted:#97A3A6; --line:#33403F; --soft:#222C2F;
+  --accent:#5EC2BF; --accent-soft:#1D3A3A; --oic:#5EC2BF; --airflow:#E0A649; --bulk:#C08BD4; --extract:#8FB0CF; --ext:#8C938C;
+  --warn:#E88A55; --ok:#6CC08D; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body)}
+.wrap{max-width:1320px;margin:0 auto;padding-inline:20px;padding-block:28px 56px}
+header.top{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:18px}
+h1{font-family:var(--f-display);font-stretch:85%;font-weight:750;font-size:clamp(28px,4vw,40px);line-height:1.05;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:6px 0 0;max-width:62ch}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.facts b{display:block;font-family:var(--f-display);font-stretch:90%;font-size:20px;color:var(--fg);font-weight:700}
+nav.tabs{display:flex;flex-wrap:wrap;gap:4px;margin:18px 0 20px}
+nav.tabs button{font:600 14px var(--f-body);border:1px solid var(--line);background:transparent;color:var(--fg);padding:7px 14px;border-radius:999px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+button:focus-visible,.node:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.eyebrow{font:500 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h2{font-family:var(--f-display);font-stretch:90%;font-weight:700;font-size:22px;margin:0 0 4px}
+.lede{color:var(--muted);margin:0 0 16px;max-width:75ch}
+
+/* estate */
+.estate{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+@media (max-width:980px){.estate{grid-template-columns:minmax(0,1fr)}}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;align-items:center}
+.chip{font:500 12px var(--f-mono);border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:4px 10px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--fg)}
+.diagram{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px 12px;overflow:hidden}
+svg.edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.band{position:relative;display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;padding:12px 4px;border-top:1px dashed var(--line)}
+.band:first-of-type{border-top:0}
+.band .lab{font:500 11px/1.3 var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.band .lab b{display:block;font-family:var(--f-display);font-stretch:90%;font-size:15px;letter-spacing:0;text-transform:none;color:var(--fg);font-weight:700;margin-top:2px}
+.nodes{display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
+.band.narrow .nodes{justify-content:center}
+@media (max-width:560px){.band{grid-template-columns:minmax(0,1fr)}}
+.node{font:600 13px/1.2 var(--f-body);background:var(--panel);color:var(--fg);border:1.5px solid var(--line);border-radius:6px;padding:7px 10px;cursor:pointer;text-align:left;transition:opacity .15s,border-color .15s}
+.node small{display:block;font:400 11px var(--f-mono);color:var(--muted);margin-top:2px}
+.node.ext{border-style:dashed}
+.node.core{border-color:var(--accent);border-width:2px;padding:10px 16px;font-size:14px}
+.node.sel{background:var(--accent-soft);border-color:var(--accent)}
+.node.dim{opacity:.28}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font:12px var(--f-mono);color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:0;border-top:2px solid;vertical-align:middle;margin-right:6px}
+.legend .dash i{border-top-style:dashed}
+aside.detail{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+aside.detail h3{font-family:var(--f-display);font-stretch:90%;font-size:20px;margin:2px 0 6px}
+aside.detail p{margin:0 0 10px}
+aside.detail dl{margin:0;display:grid;gap:8px}
+aside.detail dt{font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+aside.detail dd{margin:0}
+.tag{display:inline-block;font:12px var(--f-mono);background:var(--soft);border-radius:4px;padding:1px 6px;margin:2px 4px 2px 0;white-space:nowrap}
+.fm{border-left:3px solid var(--warn);padding-left:8px;margin:4px 0}
+.ev{font:11px var(--f-mono);color:var(--muted)}
+
+/* p2p chain */
+.chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:900px){.chain{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.chain{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.stage .n{font:500 12px var(--f-mono);color:var(--muted)}
+.stage h4{margin:0;font-family:var(--f-display);font-stretch:90%;font-size:17px}
+.stage .sys{font:12px var(--f-mono);color:var(--accent)}
+.stage ul{margin:0;padding-left:18px;font-size:14px}
+.acct{align-self:flex-start;font:600 11px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--fg)}
+.acct.none{background:var(--soft);color:var(--muted)}
+.rail{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.note{background:var(--soft);border-radius:8px;padding:12px 14px;font-size:14px}
+.note b{font-family:var(--f-display);font-stretch:90%}
+
+/* onboarding */
+.lanes{display:grid;gap:14px}
+.lane{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.lane header{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;margin-bottom:10px}
+.lane header h3{margin:0;font-family:var(--f-display);font-stretch:90%;font-size:18px}
+.steps{display:flex;flex-wrap:wrap;gap:6px;align-items:stretch}
+.step{flex:1 1 150px;min-width:0;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:14px;position:relative}
+.step b{display:block;font:600 11px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.step.int{border-color:var(--oic);background:var(--accent-soft)}
+.step.ext{border-style:dashed}
+
+/* close timeline */
+.timeline{display:grid;gap:8px}
+.trow{display:grid;grid-template-columns:120px minmax(0,1fr) 150px;gap:12px;align-items:baseline;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.trow .when{font:600 13px var(--f-mono)}
+.trow .who{font:12px var(--f-mono);color:var(--muted);text-align:right}
+.trow.cons{border-left:4px solid var(--airflow)}
+@media (max-width:620px){.trow{grid-template-columns:minmax(0,1fr)}.trow .who{text-align:left}}
+
+/* integrations */
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.tools input,.tools select{font:14px var(--f-body);background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:7px 10px;min-width:0}
+.tools input{flex:1 1 220px}
+.tablewrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:760px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--soft);vertical-align:top}
+th{font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);position:sticky;top:0;background:var(--panel)}
+td.id{font:500 13px var(--f-mono);white-space:nowrap}
+.lane-pill{font:11px var(--f-mono);padding:1px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.count{font:12px var(--f-mono);color:var(--muted);margin-left:auto;align-self:center}
+footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div>
+    <div class="eyebrow">Finance Technology Group · Current state · Oracle Fusion 26C</div>
+    <h1>Oracle Finance Estate Map</h1>
+    <p class="sub">Many systems originate transactions, many Oracle modules record them, and everything narrows into one accounting engine and one ledger family. Select any system to see what it owns, how it connects and where it breaks.</p>
+  </div>
+  <div class="facts">
+    <div><b>1</b>accounting method</div>
+    <div><b>9</b>COA segments</div>
+    <div><b>66</b>integrations mapped</div>
+    <div><b>10–12M</b>FAH events / day</div>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" aria-selected="true" data-tab="estate">Estate</button>
+  <button role="tab" aria-selected="false" data-tab="p2p">Procure to Pay</button>
+  <button role="tab" aria-selected="false" data-tab="onboard">Supplier onboarding</button>
+  <button role="tab" aria-selected="false" data-tab="close">Close rhythm</button>
+  <button role="tab" aria-selected="false" data-tab="ints">Integrations</button>
+</nav>
+
+<section id="tab-estate">
+  <div class="estate">
+    <div>
+      <div class="filters" id="wsFilters">
+        <span class="eyebrow">Workstream</span>
+        <button class="chip" aria-pressed="true" data-ws="all">All</button>
+        <button class="chip" aria-pressed="false" data-ws="P2P">Procure to Pay</button>
+        <button class="chip" aria-pressed="false" data-ws="R2R">Record to Report</button>
+        <button class="chip" aria-pressed="false" data-ws="PLAT">Platform accounting</button>
+      </div>
+      <div class="diagram" id="diagram">
+        <svg class="edges" id="edges" aria-hidden="true"></svg>
+        <div id="bands"></div>
+      </div>
+      <div class="legend">
+        <span><i style="border-color:var(--oic)"></i>OIC integration</span>
+        <span><i style="border-color:var(--airflow)"></i>Airflow DAG</span>
+        <span><i style="border-color:var(--bulk)"></i>FBDI / EIB bulk</span>
+        <span><i style="border-color:var(--extract)"></i>BICC / BIP extract</span>
+        <span class="dash"><i style="border-color:var(--ext)"></i>return path / internal</span>
+        <span>Dashed box = external system</span>
+      </div>
+    </div>
+    <aside class="detail" id="detail" aria-live="polite"></aside>
+  </div>
+</section>
+
+<section id="tab-p2p" hidden>
+  <div class="eyebrow">Workstream</div>
+  <h2>Procure to Pay: eight stages</h2>
+  <p class="lede">Zip orchestrates, Oracle decides. The first four stages move a commitment without touching the ledger. Receipt, invoice and payment each create accounting through Subledger Accounting under <code>CORP_GAAP_SLAM</code>. Bank outcomes return hourly and can cancel a payment Oracle already considers made.</p>
+  <div class="chain" id="chain"></div>
+  <div class="rail">
+    <div class="note"><b>Spend category → code combination.</b> Zip proposes segments through three chained lookups. Oracle re-derives the charge account, applies requisition validations and cross-validation rules, and stores the result. A mis-posting has two possible homes: compare what Zip sent with what Oracle stored.</div>
+    <div class="note"><b>Holds are the Payables workload.</b> 23,722 holds on 15,309 invoices in 12 months; 52% self-clear within an hour; median release 6.3 days, mean 17 days.</div>
+    <div class="note"><b>No acknowledgement means the bank does not have the payment.</b> Either transmission failed or the file is still in flight. Check Kyriba file status first.</div>
+  </div>
+</section>
+
+<section id="tab-onboard" hidden>
+  <div class="eyebrow">Process</div>
+  <h2>Two paths into the supplier master</h2>
+  <p class="lede">PO suppliers are onboarded through Apex and arrive in Oracle through INT055A. Non-PO, ad hoc and Treasury payees are created in Oracle through the Supplier Registration Request and completed by INT959. Both land in the same supplier master.</p>
+  <div class="lanes">
+    <div class="lane">
+      <header><h3>PO suppliers</h3><span class="eyebrow">Zip → Apex → INT055A → Oracle</span></header>
+      <div class="steps">
+        <div class="step ext"><b>Zip</b>Request needs a new supplier</div>
+        <div class="step ext"><b>Apex portal</b>Supplier completes questionnaires, risk, bank and tax detail; status Pending ERP</div>
+        <div class="step int"><b>INT055A · every 30 min</b>Create or update by ERP Unique ID; banks and branches first; sites per company code from the enterprise-structure crosswalk</div>
+        <div class="step"><b>Oracle Suppliers</b>Header, addresses, sites, bank accounts, tax registrations, classifications; 1099 and CNPJ flags set automatically</div>
+        <div class="step int"><b>Feedback to Apex</b>Oracle IDs back per record; errors to the Apex event log</div>
+      </div>
+    </div>
+    <div class="lane">
+      <header><h3>Non-PO, ad hoc and Treasury payees</h3><span class="eyebrow">Oracle SRR → INT959</span></header>
+      <div class="steps">
+        <div class="step"><b>Supplier Registration Request</b>Internal Redwood form and questionnaire; six pages, bank accounts on page 5</div>
+        <div class="step"><b>Internal registration approval</b>Separate approval task from external registration</div>
+        <div class="step"><b>Supplier created</b>On approval</div>
+        <div class="step int"><b>INT959</b>Completes profile, payment methods and tax flags from the questionnaire</div>
+      </div>
+    </div>
+    <div class="rail">
+      <div class="note"><b>Crosswalk dependency.</b> A new legal entity needs a row in the company-code crosswalk, or INT055A cannot create a supplier site for it.</div>
+      <div class="note"><b>In flight on the SRR path.</b> Address required at submission, selected payment method as default with others kept active, Tax Type and TRN/DUNS requiredness under analysis.</div>
+      <div class="note"><b>Return legs.</b> INT055B and INT055C send Oracle-side supplier changes back to Apex.</div>
+    </div>
+  </div>
+</section>
+
+<section id="tab-close" hidden>
+  <div class="eyebrow">Operating rhythm</div>
+  <h2>The close runs on a calendar, not on events</h2>
+  <p class="lede">Nineteen-plus feeders converge into GL, which then feeds FCCS, ARCS, planning and the warehouse on their own clocks. Most apparent system dependencies are sequencing dependencies.</p>
+  <div class="timeline" id="timeline"></div>
+</section>
+
+<section id="tab-ints" hidden>
+  <div class="eyebrow">Register</div>
+  <h2>Integration register</h2>
+  <p class="lede">A strong sample assembled from production monitoring names and design documents, not a certified register. The lane a flow sits in tells you who operates it and where a failure surfaces.</p>
+  <div class="tools">
+    <label class="eyebrow" for="q" style="align-self:center">Search</label>
+    <input id="q" type="search" placeholder="ID, system or flow, e.g. Kyriba or INT959">
+    <select id="laneSel" aria-label="Lane"><option value="">All lanes</option><option>OIC</option><option>Airflow</option><option>Bulk</option><option>Extract</option></select>
+    <select id="wsSel" aria-label="Workstream"><option value="">All workstreams</option><option>P2P</option><option>R2R</option><option>Platform</option><option>Foundation</option></select>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="tablewrap"><table><thead><tr><th>ID</th><th>Flow</th><th>Source → Target</th><th>Lane</th><th>Cadence</th><th>Workstream</th></tr></thead><tbody id="tbody"></tbody></table></div>
+</section>
+
+<footer>Source: this repository (anonymised review copy), validated against Oracle 26C implementation guides. Current state as of 30 September 2026. In-flight work is labelled as such and is not shown as architecture.</footer>
+</div>
+
+<script>
+const INTS = [{"id": "INT026A", "n": "MultiPeriod Account to Oracle", "s": "tbd", "t": "Oracle GL", "d": "in", "l": "OIC", "c": "tbd", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT026B", "n": "Oracle to Oracle GL journals (with companion reconciliation report)", "s": "Oracle", "t": "Oracle GL", "d": "oracle-to-oracle", "l": "OIC", "c": "tbd", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT026J", "n": "Oracle to Oracle GL journals", "s": "Oracle", "t": "Oracle GL", "d": "oracle-to-oracle", "l": "OIC", "c": "", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT026F", "n": "Variable accrual", "s": "tbd", "t": "Oracle GL", "d": "in", "l": "OIC", "c": "periodic", "w": "P2P->R2R", "g": "gl-feeders", "x": "Known duplicate-journal failure"}, {"id": "INT026H", "n": "Workday to Oracle GL - Canada", "s": "Workday", "t": "Oracle GL", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT028", "n": "Workday to Oracle GL", "s": "Workday", "t": "Oracle GL", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT274", "n": "Workday to Oracle GL", "s": "Workday", "t": "Oracle GL", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT072", "n": "ReconArt to Oracle GL", "s": "ReconArt", "t": "Oracle GL", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT221", "n": "CloudPay to Oracle GL", "s": "CloudPay", "t": "Oracle GL", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT236", "n": "Spacebase to Oracle GL", "s": "Spacebase", "t": "Oracle GL", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT246", "n": "Kyriba to Oracle GL", "s": "Kyriba", "t": "Oracle GL", "d": "in", "l": "OIC", "c": "scheduled", "w": "P2P->R2R", "g": "gl-feeders", "x": ""}, {"id": "INT305", "n": "Clearwater to Oracle GL journal", "s": "Clearwater", "t": "Oracle GL", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT824", "n": "Statistical journal entries to GL", "s": "tbd", "t": "Oracle GL", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT931", "n": "Workday payroll journals to Oracle GL (outbound leg)", "s": "Workday", "t": "Oracle GL", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "gl-feeders", "x": "Direction listed Out/In across 931/931B — confirm legs (Q-INT-3)"}, {"id": "INT931B", "n": "Workday payroll journals to Oracle GL (inbound leg)", "s": "Workday", "t": "Oracle GL", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT210", "n": "Workday to Oracle journals - EIB", "s": "Workday", "t": "Oracle GL", "d": "out", "l": "EIB", "c": "", "w": "R2R", "g": "gl-feeders", "x": ""}, {"id": "INT156", "n": "Exchange rates", "s": "tbd", "t": "Oracle GL daily rates", "d": "in", "l": "OIC", "c": "daily", "w": "Foundation", "g": "gl-feeders", "x": ""}, {"id": "INT992", "n": "FAH intercompany accounting - imbalance detect and balance", "s": "Oracle (REP026)", "t": "Oracle GL (FBDI", "d": "oracle-to-oracle", "l": "OIC+FBDI", "c": "daily 00:00 UTC + ad hoc", "w": "R2R", "g": "intercompany-and-platform", "x": "Detects imbalance on account 19500"}, {"id": "INT977", "n": "Cash redenomination to GL", "s": "", "t": "", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "intercompany-and-platform", "x": ""}, {"id": "INT985", "n": "Brazil intercompany redenomination to GL", "s": "", "t": "", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "intercompany-and-platform", "x": ""}, {"id": "INT988", "n": "Global intercompany redenomination", "s": "", "t": "", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "intercompany-and-platform", "x": "Ledger amount mismatch threshold"}, {"id": "INT162", "n": "Oracle FAH to Workday Finance", "s": "Oracle FAH", "t": "Workday Finance", "d": "out", "l": "OIC", "c": "", "w": "Platform", "g": "intercompany-and-platform", "x": ""}, {"id": "API157", "n": "Workday Finance to Oracle FAH", "s": "Workday Finance", "t": "Oracle FAH", "d": "in", "l": "OIC", "c": "", "w": "Platform", "g": "intercompany-and-platform", "x": ""}, {"id": "INT978", "n": "Subsidiary brand accounted detail with reversal", "s": "", "t": "", "d": "out", "l": "OIC", "c": "", "w": "Platform", "g": "intercompany-and-platform", "x": ""}, {"id": "FAH-LOAD", "n": "Event Enrichment-enriched events to FAH (daily platform run)", "s": "Payments Platform/Event Enrichment/others", "t": "Oracle FAH", "d": "in", "l": "S3 + OIC", "c": "daily, 5-7h window", "w": "Platform", "g": "intercompany-and-platform", "x": "Integration ID not documented (Q-INT-1)"}, {"id": "ZIP-REQ", "n": "Zip to Oracle requisition import", "s": "Zip", "t": "Oracle SSP", "d": "in", "l": "OIC", "c": "on approval", "w": "P2P", "g": "procure-to-pay", "x": "Carries defaulted COA segments; ID undocumented (Q-ZIP-1)"}, {"id": "INT826", "n": "Zip approved payment-terms exceptions to Oracle", "s": "Zip", "t": "Oracle supplier site / PO / invoice", "d": "in", "l": "OIC", "c": "daily ~01:00 US Eastern", "w": "P2P", "g": "procure-to-pay", "x": "Docs said 04:00 UTC; corrected. See INT826.md"}, {"id": "INT959", "n": "Supplier creation - completes supplier details from SRR questionnaire", "s": "Oracle Supplier Registration Request questionnaire", "t": "Oracle Suppliers (profile", "d": "oracle-to-oracle", "l": "OIC", "c": "event", "w": "P2P", "g": "procure-to-pay", "x": "Non-PO path; Apex not involved in this path (USER). Change FIN-24752 in flight. See INT959.md"}, {"id": "INT055A", "n": "Apex Portal suppliers to Oracle - create/update, bidirectional (Scheduler + Main + Sync Supp Key ATP)", "s": "Apex Portal (REST, SFTP attachments)", "t": "Oracle Suppliers (REST + Address FBDI); feedback to Apex Batch Update / Log Event APIs", "d": "in", "l": "OIC", "c": "every 30 minutes", "w": "P2P", "g": "procure-to-pay", "x": "PO suppliers; create vs update by ERP Unique ID; site/site-assignment via XXCO_ENTERPRISE_STRUCTURE crosswalk; see INT055A.md"}, {"id": "INT055B", "n": "Oracle to Apex Portal supplier change outbound", "s": "Oracle Suppliers", "t": "Apex Portal", "d": "out", "l": "OIC", "c": "event", "w": "P2P", "g": "procure-to-pay", "x": "Return leg of the PO-supplier path (Apex remains in use for PO suppliers, USER 2026-09-30)"}, {"id": "INT055C", "n": "Oracle to Apex Portal supplier change outbound (extended for new entities)", "s": "Oracle Suppliers", "t": "Apex Portal", "d": "out", "l": "OIC", "c": "", "w": "P2P", "g": "procure-to-pay", "x": ""}, {"id": "INT101", "n": "Oracle to Mulesoft requisition outbound", "s": "Oracle SSP", "t": "Mulesoft", "d": "out", "l": "OIC", "c": "event", "w": "P2P", "g": "procure-to-pay", "x": ""}, {"id": "INT270", "n": "Requisition steps to Salesforce", "s": "Oracle SSP", "t": "Salesforce", "d": "out", "l": "OIC", "c": "event", "w": "P2P", "g": "procure-to-pay", "x": ""}, {"id": "INT301A", "n": "SimpleLegal invoices inbound", "s": "SimpleLegal", "t": "Oracle Payables", "d": "in", "l": "OIC", "c": "scheduled", "w": "P2P", "g": "procure-to-pay", "x": ""}, {"id": "INT301B", "n": "Oracle invoice status to SimpleLegal", "s": "Oracle Payables", "t": "SimpleLegal", "d": "out", "l": "OIC", "c": "scheduled", "w": "P2P", "g": "procure-to-pay", "x": ""}, {"id": "INT960", "n": "AP non-PO invoice above 5K extension", "s": "Oracle Payables", "t": "Oracle Payables (hold)", "d": "internal", "l": "OIC", "c": "scheduled", "w": "P2P", "g": "procure-to-pay", "x": "Cumulative amount per invoice line"}, {"id": "INT062A", "n": "Generali to Oracle ad hoc payment", "s": "Generali", "t": "Oracle Payables", "d": "in", "l": "OIC", "c": "scheduled", "w": "P2P", "g": "procure-to-pay", "x": ""}, {"id": "INT955", "n": "Kyriba payment acknowledgement to Oracle", "s": "Kyriba", "t": "Oracle Payments", "d": "in", "l": "OIC", "c": "hourly", "w": "P2P", "g": "procure-to-pay", "x": "Daily rejection summary email to AP and Treasury"}, {"id": "INT955B", "n": "Kyriba bank rejections cancel Oracle bank transfers and payments", "s": "Kyriba", "t": "Oracle Payments/CM", "d": "in", "l": "OIC", "c": "event", "w": "P2P", "g": "procure-to-pay", "x": ""}, {"id": "INT234", "n": "Ad hoc bank transactions", "s": "", "t": "Oracle Cash Management", "d": "in", "l": "OIC", "c": "scheduled", "w": "P2P", "g": "procure-to-pay", "x": ""}, {"id": "INT819", "n": "Bank statements to Cash Management", "s": "", "t": "Oracle Cash Management", "d": "in", "l": "OIC", "c": "daily", "w": "P2P/R2R", "g": "procure-to-pay", "x": ""}, {"id": "INT820", "n": "Bank statements to Cash Management", "s": "", "t": "Oracle Cash Management", "d": "in", "l": "OIC", "c": "daily", "w": "P2P/R2R", "g": "procure-to-pay", "x": ""}, {"id": "INT934", "n": "Workday worker data outbound", "s": "Workday", "t": "Oracle", "d": "out", "l": "OIC", "c": "scheduled", "w": "P2P", "g": "procure-to-pay", "x": "Listed as Outbound; direction relative to Oracle unclear (Q-INT-3)"}, {"id": "INT970", "n": "Asset updates integration", "s": "", "t": "Oracle Fixed Assets", "d": "in", "l": "OIC", "c": "", "w": "R2R", "g": "procure-to-pay", "x": ""}, {"id": "INT071A", "n": "Oracle to ReconArt - balances", "s": "Oracle GL", "t": "ReconArt", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT071B", "n": "Oracle to ReconArt - transactions", "s": "Oracle", "t": "ReconArt", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT091A", "n": "Trial balance export to Box", "s": "", "t": "", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT091B", "n": "Journal-line export to Box", "s": "", "t": "", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT029", "n": "Oracle to EPBCS actuals", "s": "", "t": "", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT110AA", "n": "Oracle to Anaplan - P&L", "s": "", "t": "", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT110AB", "n": "Oracle to Anaplan", "s": "", "t": "", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT110C", "n": "Oracle to Anaplan", "s": "", "t": "", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT110D", "n": "Oracle to Anaplan", "s": "", "t": "", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT110F", "n": "Oracle to Anaplan", "s": "", "t": "", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "outbound-reconciliation-planning-reporting", "x": "AA/AB/C/D/F cover P&L, assets, cost centers, currency — exact mapping per suffix unknown"}, {"id": "INT239", "n": "Oracle to Snowflake", "s": "", "t": "", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT267", "n": "Ledger account balance validation", "s": "", "t": "", "d": "out", "l": "OIC", "c": "", "w": "R2R", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT017", "n": "Metadata outbound", "s": "", "t": "", "d": "out", "l": "OIC", "c": "", "w": "Foundation", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT304", "n": "EIB integration", "s": "", "t": "", "d": "out", "l": "EIB", "c": "", "w": "Foundation", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT828A", "n": "Observability integration support", "s": "", "t": "", "d": "internal", "l": "OIC", "c": "continuous", "w": "Foundation", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "INT828B", "n": "MySQL integration support", "s": "", "t": "", "d": "internal", "l": "OIC", "c": "continuous", "w": "Foundation", "g": "outbound-reconciliation-planning-reporting", "x": ""}, {"id": "BICC-PO", "n": "PO-line BICC extract to procurement warehouse", "s": "", "t": "", "d": "out", "l": "BICC", "c": "", "w": "P2P", "g": "outbound-reconciliation-planning-reporting", "x": "Has shipped blank files undetected"}, {"id": "fccs_integrations_pipeline", "n": "FCCS GL balances load DAG", "s": "ERP custom TB BIP report (ESS)", "t": "FCCS ERP GL PTD Balances via DLR_CloudERP_BIP", "d": "", "l": "Airflow", "c": "26th onward; paused during tie-out", "w": "R2R", "g": "epm-airflow", "x": ""}, {"id": "arcs_gaap_integrations_pipeline", "n": "ARCS GAAP load", "s": "", "t": "ARCS GL YTD Functional Balances", "d": "", "l": "Airflow", "c": "", "w": "R2R", "g": "epm-airflow", "x": ""}, {"id": "arcs_stat_integrations_pipeline", "n": "ARCS STAT load", "s": "", "t": "ARCS", "d": "", "l": "Airflow", "c": "", "w": "R2R", "g": "epm-airflow", "x": ""}, {"id": "epm_load_month_end_and_average_rates_to_fccs", "n": "Rates to FCCS", "s": "", "t": "", "d": "", "l": "Airflow", "c": "daily 17:00 UTC, 26th to 1st", "w": "R2R", "g": "epm-airflow", "x": ""}, {"id": "gaap_reval_upload_to_arcs", "n": "Revaluation data to ARCS", "s": "", "t": "", "d": "", "l": "Airflow", "c": "daily 06:00 PT", "w": "R2R", "g": "epm-airflow", "x": ""}];
+
+const LAYERS=[
+ {id:'L1',t:'Origination',s:'Layer 1'},
+ {id:'L2',t:'Integration lanes',s:'Layer 2'},
+ {id:'L3',t:'Oracle transactional',s:'Layer 3'},
+ {id:'L4',t:'Accounting engine',s:'Layer 4',narrow:1},
+ {id:'L5',t:'General Ledger',s:'Layer 5',narrow:1},
+ {id:'L6',t:'Close, reconcile, report',s:'Layer 6'}
+];
+const N=[
+ {id:'zip',l:'L1',t:'Zip',s:'intake & workflow',ext:1,ws:['P2P'],d:'Every purchase request starts here. Runs the review graph (risk, privacy, legal, BizTech, sustainability) and defaults COA segments. Advisory only: Oracle re-derives the account.',ints:['Zip req import (OIC)','INT826'],fm:['Spend category inactive in Oracle, so the requisition never arrives','Wrong entity or cost center found after the PO exists','INT826 user-entry errors: REQ number instead of PO'],ev:'CO:02 · DATA:int826 logs'},
+ {id:'apex',l:'L1',t:'Apex portal',s:'PO-supplier onboarding',ext:1,ws:['P2P'],d:'Supplier-facing onboarding for PO suppliers: questionnaires, risk, diversity, bank and tax detail. A PO supplier exists in Oracle only after Apex.',ints:['INT055A','INT055B/C'],fm:['Missing crosswalk row or lookup value fails the record','Bank account failures, historically LATAM'],ev:'USER · CO:INT055A spec'},
+ {id:'srr',l:'L1',t:'Supplier Registration Request',s:'Oracle · non-PO payees',ws:['P2P'],d:'Internal Redwood registration for ad hoc, one-time and Treasury payees. INT959 completes the supplier from the questionnaire.',ints:['INT959'],fm:['No address, so no payable site','Payment terms not matching an Oracle value','Non-selected payment methods end-dated'],ev:'USER · ORA26C procurement p.343'},
+ {id:'ramp',l:'L1',t:'Ramp',s:'card & reimbursement',ext:1,ws:['P2P','PLAT'],d:'Corporate card and out-of-pocket reimbursement. Also an Accounting Hub subledger (source FAH-Ramp).',ints:['FAH Ramp source'],fm:[],ev:'CO:03'},
+ {id:'sl',l:'L1',t:'SimpleLegal',s:'legal spend',ext:1,ws:['P2P'],d:'Legal invoices in, invoice status out. Supplier synchronisation is a known gap.',ints:['INT301A','INT301B'],fm:['Supplier data out of sync causes AP invoicing errors'],ev:'CO:02'},
+ {id:'brv',l:'L1',t:'Payments Platform · Event Enrichment',s:'platform events',ext:1,ws:['PLAT'],d:'Marketplace payment events, enriched by Event Enrichment, delivered via S3 and OIC. Payments Platform alone is about 2M transactions a day.',ints:['FAH daily load'],fm:['Missing attribute leaves events unaccounted'],ev:'CO:03'},
+ {id:'wd',l:'L1',t:'Workday · CloudPay',s:'HR & payroll',ext:1,ws:['R2R'],d:'Payroll journals, worker data and Workday Finance links to the Accounting Hub.',ints:['INT028/274','INT026H','INT931/931B','INT221','INT934','INT162','API157'],fm:[],ev:'CO:01'},
+ {id:'feeds',l:'L1',t:'ReconArt · Clearwater · Spacebase',s:'other feeders',ext:1,ws:['R2R'],d:'Cash reconciliation, investments and real-estate journals, pre-accounted into GL.',ints:['INT072','INT305','INT236','INT071A/B'],fm:['Duplicate journals from a feeder'],ev:'CO:01, 03'},
+
+ {id:'oic',l:'L2',t:'Oracle Integration Cloud',s:'INT### · monitored',ws:['P2P','R2R','PLAT'],d:'Transactional and near-real-time flows. Failures raise PROD | ERROR | INT### tickets in the implementation project automatically.',ints:['56 of 66 mapped flows'],fm:['401 credential errors','REST payload faults'],ev:'CO:01 §2 R4'},
+ {id:'airflow',l:'L2',t:'Airflow',s:'EPM loads',ws:['R2R'],d:'Period-driven bulk movement into FCCS and ARCS. Pausing a DAG during tie-out is a normal close step, not an incident.',ints:['fccs_integrations_pipeline','arcs_gaap / arcs_stat','rates to FCCS','reval to ARCS'],fm:['DAG left running during tie-out'],ev:'CO:03'},
+ {id:'fbdi',l:'L2',t:'FBDI · ADFDI · EIB',s:'bulk loads',ws:['R2R','P2P'],d:'Bulk loads. Failures appear as import-process errors inside Oracle, not as tickets.',ints:['INT992 balancing journals','INT210 EIB','PO bulk updates'],fm:['CVR rejections, even at zero balance'],ev:'CO:01'},
+ {id:'bicc',l:'L2',t:'BICC · BI Publisher',s:'extracts',ws:['R2R','P2P'],d:'Warehouse and downstream extracts. This lane fails silently: blank files have shipped for long periods before detection.',ints:['PO-line extract','journal detail','custom TB report (ESS)'],fm:['Blank or missing extract, no ticket'],ev:'CO:01 §7'},
+
+ {id:'sup',l:'L3',t:'Suppliers',s:'supplier master',ws:['P2P'],d:'Supplier profile, sites, bank accounts, payment methods, tax and 1099 attributes. Two creation paths feed it.',ints:['INT055A','INT959','INT055B/C'],fm:['Duplicates, missing parent-child'],ev:'CO:02 · USER'},
+ {id:'ssp',l:'L3',t:'Self-Service Procurement',s:'requisitions',ws:['P2P'],d:'Receives Zip requisitions, re-derives the charge account, runs *_VAL validations and CVRs. First point in SOX scope.',ints:['INT101','INT270'],fm:['CVR rejects a combination Zip accepted','Approver on leave stalls the chain'],ev:'CO:02'},
+ {id:'po',l:'L3',t:'Purchasing',s:'POs & receipts',ws:['P2P'],d:'Purchase orders, change orders and receipts. Receipt is the first accounting event (accrual). Charge accounts come from the Transaction Account Builder.',ints:['INT026F','PO FBDI'],fm:['Duplicate change-order notifications','Stale requester blocks payment'],ev:'CO:02 · ORA26C procurement p.648'},
+ {id:'ap',l:'L3',t:'Payables',s:'invoices & holds',ws:['P2P'],d:'Invoice matching, tolerances and holds. Tolerances are held per business unit in local currency and recalculated monthly.',ints:['INT301A','INT960','INT826','INT062A'],fm:['Supplier-level hold blocks every invoice','Non-PO over 5K hold, mean 35 days'],ev:'CO:02 · ORA26C payables p.92'},
+ {id:'pay',l:'L3',t:'Payments',s:'PPRs & files',ws:['P2P'],d:'Payment process requests per legal entity and bank account. Standard payments auto-approve in Kyriba because approval sits in Oracle.',ints:['INT955','INT955B'],fm:['Reprocessing without rejecting the original','Payment reason too long for the file'],ev:'CO:02 · ORA26C payables p.168'},
+ {id:'exp',l:'L3',t:'Expenses',s:'reimbursements',ws:['P2P'],d:'Oracle Expenses runs alongside Ramp. Approved reports become Payables invoices.',ints:['Process Expense Reimbursements'],fm:[],ev:'USER · ORA26C expenses p.41'},
+ {id:'fah',l:'L3',t:'Accounting Hub',s:'platform accounting',ws:['PLAT'],d:'Turns 10 to 12M daily events into about 40M lines and 3.5M GL lines in a 5 to 7 hour run. Succeeds about 99% of the time; the rest is throughput.',ints:['FAH daily load','INT992','INT162','API157','INT978'],fm:['Unaccounted events','Rules-engine throughput'],ev:'CO:03 §3.2'},
+ {id:'fa',l:'L3',t:'Fixed Assets',s:'40+ books',ws:['R2R'],d:'Additions arrive mostly as mass additions from Payables. Corporate and tax books run in parallel.',ints:['INT970'],fm:['Cost stranded in clearing when additions are held'],ev:'CO:03 §3.3'},
+ {id:'cm',l:'L3',t:'Cash Mgmt · Receivables',s:'bank & minimal AR',ws:['R2R','P2P'],d:'Bank statements and reconciliation; Receivables only for a small B2B and intercompany population.',ints:['INT819/820','INT234'],fm:['Missing bank statements'],ev:'CO:02 · USER'},
+
+ {id:'xla',l:'L4',t:'Subledger Accounting',s:'CORP_GAAP_SLAM',core:1,ws:['P2P','R2R','PLAT'],d:'One engine for every subledger and every Accounting Hub source: event classes, journal entry rule sets, journal line rules, account rules, mapping sets. One place to change policy and one place that can strand transactions.',ints:[],fm:['Accounting method left Incomplete after a rule change'],ev:'CO:01 · ORA26C SLA p.15–16'},
+
+ {id:'gl',l:'L5',t:'General Ledger',s:'GAAP primary · STAT/TAX secondary',core:1,ws:['P2P','R2R','PLAT'],d:'Corp_COA_Structure, nine segments. The only place completeness can be asserted. Receives derived journals from XLA and pre-accounted journals from 19+ feeders.',ints:['INT156 rates','INT992','INT267'],fm:['Import rejections on CVRs','Intercompany imbalance on 19500'],ev:'CO:03 · USER'},
+
+ {id:'fccs',l:'L6',t:'FCCS',s:'consolidation',ws:['R2R'],d:'Application CORPCONS: multi-GAAP, traditional balance sheet, CTA on balance sheet. Loads GL through a custom BIP trial balance registered as an ESS job.',ints:['fccs_integrations_pipeline','rates DAG'],fm:['Maintenance-window collision','Mapping exceptions (task FPC07)'],ev:'CO:03 · ORA26C FCCS p.51–54'},
+ {id:'arcs',l:'L6',t:'ARCS',s:'reconciliation',ws:['R2R'],d:'Reconciliation Compliance and Transaction Matching. Auto-certifies within ±5,000 USD or zero difference with zero activity.',ints:['arcs_gaap / arcs_stat','ReconArt balances'],fm:['Unmapped accounts every period'],ev:'CO:03 · ORA26C ARCS p.155, 254'},
+ {id:'wh',l:'L6',t:'Warehouse · Snowflake',s:'reporting',ws:['R2R','PLAT'],d:'Finance Warehouse, Snowflake and FAH fact tables. A second reporting platform with a standing reconciliation obligation to GL and no single owner.',ints:['INT239','BICC'],fm:['Oracle and warehouse disagree'],ev:'CO:03 §4'},
+ {id:'plan',l:'L6',t:'Planning · Anaplan · EPBCS',s:'planning',ext:1,ws:['R2R'],d:'Actuals and master data out to planning.',ints:['INT029','INT110AA–F'],fm:[],ev:'CO:01'},
+ {id:'ky',l:'L6',t:'Kyriba → banks',s:'payment factory',ext:1,ws:['P2P'],d:'Derives the bank payment code (DOMW domestic, INTW international), translates to bank format, transmits host-to-host, returns acknowledgements hourly. Source of truth for payment-code mapping.',ints:['INT955','INT955B','INT246'],fm:['Stuck in Draft with no Oracle signal','Bank rejects on supplier data','No ack: the bank has not received it'],ev:'CO:02 · USER'}
+];
+const E=[
+ ['zip','oic','oic'],['oic','ssp','oic'],['apex','sup','oic'],['srr','sup','oic'],['sup','ssp','int'],['ssp','po','int'],['po','ap','int'],['ap','pay','int'],['exp','ap','int'],['sl','oic','oic'],['oic','ap','oic'],
+ ['ramp','fah','oic'],['brv','fah','oic'],['wd','oic','oic'],['feeds','oic','oic'],['oic','gl','oic'],
+ ['pay','ky','oic'],['ky','pay','ret'],['ap','fa','int'],
+ ['po','xla','int'],['ap','xla','int'],['pay','xla','int'],['fah','xla','int'],['fa','xla','int'],['cm','xla','int'],
+ ['xla','gl','int'],['fbdi','gl','bulk'],
+ ['gl','airflow','airflow'],['airflow','fccs','airflow'],['airflow','arcs','airflow'],['gl','bicc','extract'],['bicc','wh','extract'],['gl','plan','oic'],['fah','wh','extract']
+];
+const COL={oic:'var(--oic)',airflow:'var(--airflow)',bulk:'var(--bulk)',extract:'var(--extract)',int:'var(--line)',ret:'var(--ext)'};
+let sel='xla', ws='all';
+
+const bands=document.getElementById('bands');
+LAYERS.forEach(L=>{
+  const b=document.createElement('div');b.className='band'+(L.narrow?' narrow':'');
+  b.innerHTML=`<div class="lab">${L.s}<b>${L.t}</b></div><div class="nodes"></div>`;
+  N.filter(n=>n.l===L.id).forEach(n=>{
+    const el=document.createElement('button');
+    el.className='node'+(n.ext?' ext':'')+(n.core?' core':'');el.id='n-'+n.id;el.dataset.id=n.id;
+    el.innerHTML=`${n.t}<small>${n.s}</small>`;
+    el.addEventListener('click',()=>{sel=n.id;render();});
+    b.querySelector('.nodes').appendChild(el);
+  });
+  bands.appendChild(b);
+});
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function render(){
+  N.forEach(n=>{
+    const el=document.getElementById('n-'+n.id);
+    el.classList.toggle('sel',n.id===sel);
+    el.classList.toggle('dim',ws!=='all'&&!n.ws.includes(ws));
+    el.setAttribute('aria-pressed',n.id===sel);
+  });
+  const n=N.find(x=>x.id===sel);
+  const nb=E.filter(e=>e[0]===sel||e[1]===sel).map(e=>{const o=N.find(x=>x.id===(e[0]===sel?e[1]:e[0]));return (e[0]===sel?'→ ':'← ')+o.t;});
+  document.getElementById('detail').innerHTML=`
+    <div class="eyebrow">${LAYERS.find(L=>L.id===n.l).s} · ${n.ext?'external system':'Oracle / platform'}</div>
+    <h3>${esc(n.t)}</h3><p>${esc(n.d)}</p>
+    <dl>
+      ${n.ints.length?`<div><dt>Integrations and objects</dt><dd>${n.ints.map(i=>`<span class="tag">${esc(i)}</span>`).join('')}</dd></div>`:''}
+      ${nb.length?`<div><dt>Connected to</dt><dd>${nb.map(i=>`<span class="tag">${esc(i)}</span>`).join('')}</dd></div>`:''}
+      ${n.fm.length?`<div><dt>Where it breaks</dt><dd>${n.fm.map(f=>`<div class="fm">${esc(f)}</div>`).join('')}</dd></div>`:''}
+      <div><dt>Evidence</dt><dd class="ev">${esc(n.ev)}</dd></div>
+    </dl>`;
+  drawEdges();
+}
+function drawEdges(){
+  const svg=document.getElementById('edges'),box=document.getElementById('diagram').getBoundingClientRect();
+  let out='';
+  E.forEach(([a,b,k])=>{
+    const A=document.getElementById('n-'+a),B=document.getElementById('n-'+b);if(!A||!B)return;
+    const ra=A.getBoundingClientRect(),rb=B.getBoundingClientRect();
+    const na=N.find(x=>x.id===a),nbb=N.find(x=>x.id===b);
+    const on=(a===sel||b===sel);
+    const hidden=ws!=='all'&&(!na.ws.includes(ws)||!nbb.ws.includes(ws));
+    let x1=ra.left+ra.width/2-box.left,y1=ra.top+ra.height/2-box.top,x2=rb.left+rb.width/2-box.left,y2=rb.top+rb.height/2-box.top;
+    if(Math.abs(y1-y2)>8){ if(y2>y1){y1=ra.bottom-box.top;y2=rb.top-box.top;} else {y1=ra.top-box.top;y2=rb.bottom-box.top;} }
+    else { if(x2>x1){x1=ra.right-box.left;x2=rb.left-box.left;} else {x1=ra.left-box.left;x2=rb.right-box.left;} }
+    const my=(y1+y2)/2;
+    const d=Math.abs(y1-y2)>8?`M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`:`M${x1},${y1} L${x2},${y2}`;
+    out+=`<path d="${d}" fill="none" stroke="${COL[k]}" stroke-width="${on?2.4:1.2}" stroke-opacity="${hidden?0.06:(on?1:0.35)}" ${k==='ret'?'stroke-dasharray="5 4"':''}/>`;
+  });
+  svg.setAttribute('viewBox',`0 0 ${box.width} ${box.height}`);svg.innerHTML=out;
+}
+document.querySelectorAll('#wsFilters .chip').forEach(c=>c.addEventListener('click',()=>{
+  ws=c.dataset.ws;document.querySelectorAll('#wsFilters .chip').forEach(x=>x.setAttribute('aria-pressed',x===c));render();
+}));
+new ResizeObserver(drawEdges).observe(document.getElementById('diagram'));
+render();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawEdges);
+
+// P2P chain
+const ST=[
+ ['01','Supplier onboarding','Apex + INT055A · SRR + INT959','none','Two creation paths into one supplier master','No address or unmatched terms fails creation'],
+ ['02','Intake','Zip','none','Review graph and COA defaulting','Inactive spend category: request never arrives'],
+ ['03','Requisition','Self-Service Procurement','none','Charge account re-derived; *_VAL rules and CVRs; first point in SOX scope','Approver on leave stalls approval'],
+ ['04','Purchase order','Purchasing','none','Change orders by Procurement Ops; FBDI for volume','Stale requester blocks invoice approval'],
+ ['05','Receipt','Purchasing','accrual','Third leg of the match; variable accrual via INT026F','Duplicate accrual journals'],
+ ['06','Invoice','Payables','liability','Matching, tolerances, holds; INT826 terms exceptions; INT960 non-PO over 5K','Supplier-level hold blocks all invoices'],
+ ['07','Payment','Payments','cash','PPR per entity and bank account; auto-approved in Kyriba; urgent payments released by Treasury','Reprocess without rejecting the original'],
+ ['08','Settlement','Kyriba → bank','none','Two code mappings; host-to-host; hourly acks via INT955 and INT955B','Stuck in Draft with no Oracle signal']
+];
+document.getElementById('chain').innerHTML=ST.map(s=>`<div class="stage"><span class="n">Stage ${s[0]}</span><h4>${s[1]}</h4><span class="sys">${s[2]}</span><span class="acct ${s[3]==='none'?'none':''}">${s[3]==='none'?'no accounting':s[3]+' via XLA'}</span><ul><li>${s[4]}</li><li><span style="color:var(--warn)">Breaks:</span> ${s[5]}</li></ul></div>`).join('');
+
+// timeline
+const TL=[
+ ['Hourly','INT955 Kyriba acknowledgements and rejections into Oracle; daily rejection summary to AP and Treasury','OIC',0],
+ ['Daily 00:00 UTC','INT992 detects intercompany imbalance on 19500 and posts balancing journals','FTG',0],
+ ['Daily ~01:00 ET','INT826 applies Zip-approved payment-terms exceptions','OIC',0],
+ ['Daily, 5–7 h','Platform accounting run: Event Enrichment → FAH → Create Accounting → GL → S3 facts','FTG',0],
+ ['Daily 06:00 PT','Revaluation data loaded to ARCS','FTG',0],
+ ['Day 1','Monthly invoice-tolerance recalculation from the corporate rate','FTG',0],
+ ['Day 4','ReconArt bank balances load to ARCS','Automated',0],
+ ['Day 6','ReconArt unmatched items load to ARCS, on request','On request',0],
+ ['Day 0–1 of cycle','ARCS unmapped-accounts cycle: export, business assigns preparer and reviewer, profiles created','FTG + business',0],
+ ['25th','Open FCCS periods and approval units; create SOX and close task templates','FTG',0],
+ ['26th → 1st','FCCS load DAG runs; month-end and average rates to FCCS daily 17:00 UTC','FTG',0],
+ ['After Opex close','Consolidation requests the FCCS load DAG be paused','Consolidation',1],
+ ['Post-pause','Ad hoc loads after tax and transfer-pricing entries','FTG',0],
+ ['Post-load','Consolidate and Translate','Consolidation',1],
+ ['After tie-out','Close periods and lock approval units','Consolidation → FTG',1],
+ ['Quarterly','User access reviews; transfer-pricing revisions; Oracle release uptake','FTG + business',0]
+];
+document.getElementById('timeline').innerHTML=TL.map(r=>`<div class="trow ${r[3]?'cons':''}"><span class="when">${r[0]}</span><span>${r[1]}</span><span class="who">${r[2]}</span></div>`).join('');
+
+// integrations
+const laneOf=l=>/Airflow/.test(l)?'Airflow':/EIB|FBDI/.test(l)&&!/OIC/.test(l)?'Bulk':/BICC/.test(l)?'Extract':'OIC';
+const laneCol={OIC:'var(--oic)',Airflow:'var(--airflow)',Bulk:'var(--bulk)',Extract:'var(--extract)'};
+const wsOf=w=>/Platform/i.test(w)?'Platform':/Foundation/i.test(w)?'Foundation':/P2P/.test(w)?'P2P':'R2R';
+function renderInts(){
+  const q=document.getElementById('q').value.trim().toLowerCase(),ln=document.getElementById('laneSel').value,w=document.getElementById('wsSel').value;
+  const rows=INTS.filter(i=>(!ln||laneOf(i.l)===ln)&&(!w||wsOf(i.w)===w)&&(!q||[i.id,i.n,i.s,i.t,i.x].join(' ').toLowerCase().includes(q)));
+  document.getElementById('tbody').innerHTML=rows.map(i=>`<tr><td class="id">${esc(i.id)}</td><td>${esc(i.n)}${i.x?`<div class="ev">${esc(i.x)}</div>`:''}</td><td>${esc(i.s||'—')} → ${esc(i.t||'—')}</td><td><span class="lane-pill" style="color:${laneCol[laneOf(i.l)]}">${esc(i.l)}</span></td><td>${esc(i.c||'—')}</td><td>${esc(i.w||'')}</td></tr>`).join('');
+  document.getElementById('count').textContent=rows.length+' of '+INTS.length;
+}
+['q','laneSel','wsSel'].forEach(id=>document.getElementById(id).addEventListener('input',renderInts));
+renderInts();
+
+// tabs
+const tabs=document.querySelectorAll('nav.tabs button');
+function show(t){tabs.forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  ['estate','p2p','onboard','close','ints'].forEach(k=>document.getElementById('tab-'+k).hidden=k!==t);
+  if(t==='estate')requestAnimationFrame(drawEdges);}
+tabs.forEach(b=>b.addEventListener('click',()=>{show(b.dataset.tab);try{history.replaceState(null,'','#'+b.dataset.tab)}catch(e){}}));
+const h=(location.hash||'').slice(1);if(['estate','p2p','onboard','close','ints'].includes(h))show(h);
+</script>
+</body></html>

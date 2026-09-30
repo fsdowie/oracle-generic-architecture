@@ -1,0 +1,83 @@
+# Integration register — Company Oracle estate
+# as_of: 2026-09-29 · completeness: strong sample, NOT a certified register [CO:01 §8]
+# lane: OIC | Airflow | FBDI | EIB | BICC | BIP | Internal
+# accounting_path: xla (derived) | import (pre-accounted) | none
+# evidence: CO:01/02/03 = ftg-oracle-architecture docs; USER / DATA as in README
+schema: {id: str, name: str, source: str, target: str, direction: in|out|internal|oracle-to-oracle, lane: str, cadence: str, workstream: str, stage: str, accounting_path: str, notes: str, evidence: str}
+
+groups:
+  gl-feeders:
+    - {id: INT026A, name: MultiPeriod Account to Oracle, source: tbd, target: Oracle GL, direction: in, lane: OIC, cadence: tbd, workstream: R2R, accounting_path: import, evidence: "CO:01,03"}
+    - {id: INT026B, name: Oracle to Oracle GL journals (with companion reconciliation report), source: Oracle, target: Oracle GL, direction: oracle-to-oracle, lane: OIC, cadence: tbd, workstream: R2R, stage: P2P-05, accounting_path: import, evidence: "CO:02,03"}
+    - {id: INT026J, name: Oracle to Oracle GL journals, source: Oracle, target: Oracle GL, direction: oracle-to-oracle, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
+    - {id: INT026F, name: Variable accrual, source: tbd, target: Oracle GL, direction: in, lane: OIC, cadence: periodic, workstream: P2P->R2R, stage: P2P-05, accounting_path: import, notes: "Known duplicate-journal failure", evidence: "CO:02,03"}
+    - {id: INT026H, name: Workday to Oracle GL - Canada, source: Workday, target: Oracle GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
+    - {id: INT028, name: Workday to Oracle GL, source: Workday, target: Oracle GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
+    - {id: INT274, name: Workday to Oracle GL, source: Workday, target: Oracle GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
+    - {id: INT072, name: ReconArt to Oracle GL, source: ReconArt, target: Oracle GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
+    - {id: INT221, name: CloudPay to Oracle GL, source: CloudPay, target: Oracle GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
+    - {id: INT236, name: Spacebase to Oracle GL, source: Spacebase, target: Oracle GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
+    - {id: INT246, name: Kyriba to Oracle GL, source: Kyriba, target: Oracle GL, direction: in, lane: OIC, cadence: scheduled, workstream: P2P->R2R, stage: P2P-08, accounting_path: import, evidence: "CO:01,02"}
+    - {id: INT305, name: Clearwater to Oracle GL journal, source: Clearwater, target: Oracle GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
+    - {id: INT824, name: Statistical journal entries to GL, source: tbd, target: Oracle GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
+    - {id: INT931, name: Workday payroll journals to Oracle GL (outbound leg), source: Workday, target: Oracle GL, direction: out, lane: OIC, workstream: R2R, notes: "Direction listed Out/In across 931/931B — confirm legs (Q-INT-3)", evidence: "CO:01"}
+    - {id: INT931B, name: Workday payroll journals to Oracle GL (inbound leg), source: Workday, target: Oracle GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
+    - {id: INT210, name: Workday to Oracle journals - EIB, source: Workday, target: Oracle GL, direction: out, lane: EIB, workstream: R2R, evidence: "CO:01"}
+    - {id: INT156, name: Exchange rates, source: tbd, target: Oracle GL daily rates, direction: in, lane: OIC, cadence: daily, workstream: Foundation, evidence: "CO:01"}
+
+  intercompany-and-platform:
+    - {id: INT992, name: FAH intercompany accounting - imbalance detect and balance, source: Oracle (REP026), target: Oracle GL (FBDI, source Boomerangs), direction: oracle-to-oracle, lane: OIC+FBDI, cadence: "daily 00:00 UTC + ad hoc", workstream: R2R, accounting_path: import, notes: "Detects imbalance on account 19500", evidence: "CO:01,03"}
+    - {id: INT977, name: Cash redenomination to GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
+    - {id: INT985, name: Brazil intercompany redenomination to GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
+    - {id: INT988, name: Global intercompany redenomination, direction: in, lane: OIC, workstream: R2R, accounting_path: import, notes: "Ledger amount mismatch threshold", evidence: "CO:01,03"}
+    - {id: INT162, name: Oracle FAH to Workday Finance, source: Oracle FAH, target: Workday Finance, direction: out, lane: OIC, workstream: Platform, evidence: "CO:01"}
+    - {id: API157, name: Workday Finance to Oracle FAH, source: Workday Finance, target: Oracle FAH, direction: in, lane: OIC, workstream: Platform, accounting_path: xla, evidence: "CO:01"}
+    - {id: INT978, name: Subsidiary brand accounted detail with reversal, direction: out, lane: OIC, workstream: Platform, evidence: "CO:01"}
+    - {id: FAH-LOAD, name: Event Enrichment-enriched events to FAH (daily platform run), source: Payments Platform/Event Enrichment/others, target: Oracle FAH, direction: in, lane: "S3 + OIC", cadence: "daily, 5-7h window", workstream: Platform, accounting_path: xla, notes: "Integration ID not documented (Q-INT-1)", evidence: "CO:03"}
+
+  procure-to-pay:
+    - {id: ZIP-REQ, name: Zip to Oracle requisition import, source: Zip, target: Oracle SSP, direction: in, lane: OIC, cadence: on approval, workstream: P2P, stage: "P2P-02->03", accounting_path: none, notes: "Carries defaulted COA segments; ID undocumented (Q-ZIP-1)", evidence: "CO:02"}
+    - {id: INT826, name: Zip approved payment-terms exceptions to Oracle, source: Zip, target: "Oracle supplier site / PO / invoice", direction: in, lane: OIC, cadence: "daily ~01:00 US Eastern", workstream: P2P, stage: P2P-06, accounting_path: none, notes: "Docs said 04:00 UTC; corrected. See INT826.md", evidence: "USER:2026-09-29; DATA:int826 logs"}
+    - {id: INT959, name: Supplier creation - completes supplier details from SRR questionnaire, source: Oracle Supplier Registration Request questionnaire, target: Oracle Suppliers (profile, sites, payment methods, tax), direction: oracle-to-oracle, lane: OIC, cadence: event, workstream: P2P, stage: P2P-01, accounting_path: none, notes: "Non-PO path; Apex not involved in this path (USER). Change FIN-24752 in flight. See INT959.md", evidence: "USER:2026-09-29; CO:FIN-24137"}
+    - {id: INT055A, name: "Apex Portal suppliers to Oracle - create/update, bidirectional (Scheduler + Main + Sync Supp Key ATP)", source: "Apex Portal (REST, SFTP attachments)", target: "Oracle Suppliers (REST + Address FBDI); feedback to Apex Batch Update / Log Event APIs", direction: in, lane: OIC, cadence: every 30 minutes, workstream: P2P, stage: P2P-01, accounting_path: none, notes: "PO suppliers; create vs update by ERP Unique ID; site/site-assignment via XXCO_ENTERPRISE_STRUCTURE crosswalk; see INT055A.md", evidence: "USER:2026-09-30; CO:INT055A-spec, INT055A-UT"}
+    - {id: INT055B, name: Oracle to Apex Portal supplier change outbound, source: Oracle Suppliers, target: Apex Portal, direction: out, lane: OIC, cadence: event, workstream: P2P, notes: "Return leg of the PO-supplier path (Apex remains in use for PO suppliers, USER 2026-09-30)", evidence: "CO:01,02"}
+    - {id: INT055C, name: Oracle to Apex Portal supplier change outbound (extended for new entities), source: Oracle Suppliers, target: Apex Portal, direction: out, lane: OIC, workstream: P2P, evidence: "CO:02"}
+    - {id: INT101, name: Oracle to Mulesoft requisition outbound, source: Oracle SSP, target: Mulesoft, direction: out, lane: OIC, cadence: event, workstream: P2P, stage: P2P-03, evidence: "CO:02"}
+    - {id: INT270, name: Requisition steps to Salesforce, source: Oracle SSP, target: Salesforce, direction: out, lane: OIC, cadence: event, workstream: P2P, stage: P2P-03, evidence: "CO:02"}
+    - {id: INT301A, name: SimpleLegal invoices inbound, source: SimpleLegal, target: Oracle Payables, direction: in, lane: OIC, cadence: scheduled, workstream: P2P, stage: P2P-06, accounting_path: xla, evidence: "CO:02"}
+    - {id: INT301B, name: Oracle invoice status to SimpleLegal, source: Oracle Payables, target: SimpleLegal, direction: out, lane: OIC, cadence: scheduled, workstream: P2P, stage: P2P-06, evidence: "CO:02"}
+    - {id: INT960, name: AP non-PO invoice above 5K extension, source: Oracle Payables, target: Oracle Payables (hold), direction: internal, lane: OIC, cadence: scheduled, workstream: P2P, stage: P2P-06, notes: "Cumulative amount per invoice line", evidence: "CO:02"}
+    - {id: INT062A, name: Generali to Oracle ad hoc payment, source: Generali, target: Oracle Payables, direction: in, lane: OIC, cadence: scheduled, workstream: P2P, stage: P2P-06, evidence: "CO:02"}
+    - {id: INT955, name: Kyriba payment acknowledgement to Oracle, source: Kyriba, target: Oracle Payments, direction: in, lane: OIC, cadence: hourly, workstream: P2P, stage: "P2P-08->06", notes: "Daily rejection summary email to AP and Treasury", evidence: "CO:01,02"}
+    - {id: INT955B, name: Kyriba bank rejections cancel Oracle bank transfers and payments, source: Kyriba, target: Oracle Payments/CM, direction: in, lane: OIC, cadence: event, workstream: P2P, stage: "P2P-08->07", evidence: "CO:01,02"}
+    - {id: INT234, name: Ad hoc bank transactions, target: Oracle Cash Management, direction: in, lane: OIC, cadence: scheduled, workstream: P2P, stage: P2P-08, evidence: "CO:02"}
+    - {id: INT819, name: Bank statements to Cash Management, target: Oracle Cash Management, direction: in, lane: OIC, cadence: daily, workstream: "P2P/R2R", evidence: "CO:02"}
+    - {id: INT820, name: Bank statements to Cash Management, target: Oracle Cash Management, direction: in, lane: OIC, cadence: daily, workstream: "P2P/R2R", evidence: "CO:02"}
+    - {id: INT934, name: Workday worker data outbound, source: Workday, target: Oracle, direction: out, lane: OIC, cadence: scheduled, workstream: P2P, notes: "Listed as Outbound; direction relative to Oracle unclear (Q-INT-3)", evidence: "CO:02"}
+    - {id: INT970, name: Asset updates integration, target: Oracle Fixed Assets, direction: in, lane: OIC, workstream: R2R, evidence: "CO:01,03"}
+
+  outbound-reconciliation-planning-reporting:
+    - {id: INT071A, name: Oracle to ReconArt - balances, source: Oracle GL, target: ReconArt, direction: out, lane: OIC, workstream: R2R, evidence: "CO:01"}
+    - {id: INT071B, name: Oracle to ReconArt - transactions, source: Oracle, target: ReconArt, direction: out, lane: OIC, workstream: R2R, evidence: "CO:01"}
+    - {id: INT091A, name: Trial balance export to Box, direction: out, lane: OIC, workstream: R2R, evidence: "CO:01"}
+    - {id: INT091B, name: Journal-line export to Box, direction: out, lane: OIC, workstream: R2R, evidence: "CO:01"}
+    - {id: INT029, name: Oracle to EPBCS actuals, direction: out, lane: OIC, workstream: R2R, evidence: "CO:01"}
+    - {id: INT110AA, name: Oracle to Anaplan - P&L, direction: out, lane: OIC, workstream: R2R, evidence: "CO:01"}
+    - {id: INT110AB, name: Oracle to Anaplan, direction: out, lane: OIC, workstream: R2R, evidence: "CO:01"}
+    - {id: INT110C, name: Oracle to Anaplan, direction: out, lane: OIC, workstream: R2R, evidence: "CO:01"}
+    - {id: INT110D, name: Oracle to Anaplan, direction: out, lane: OIC, workstream: R2R, evidence: "CO:01"}
+    - {id: INT110F, name: Oracle to Anaplan, direction: out, lane: OIC, workstream: R2R, notes: "AA/AB/C/D/F cover P&L, assets, cost centers, currency — exact mapping per suffix unknown", evidence: "CO:01"}
+    - {id: INT239, name: Oracle to Snowflake, direction: out, lane: OIC, workstream: R2R, evidence: "CO:01"}
+    - {id: INT267, name: Ledger account balance validation, direction: out, lane: OIC, workstream: R2R, evidence: "CO:01,03"}
+    - {id: INT017, name: Metadata outbound, direction: out, lane: OIC, workstream: Foundation, evidence: "CO:01"}
+    - {id: INT304, name: EIB integration, direction: out, lane: EIB, workstream: Foundation, evidence: "CO:01"}
+    - {id: INT828A, name: Observability integration support, direction: internal, lane: OIC, cadence: continuous, workstream: Foundation, evidence: "CO:01,02"}
+    - {id: INT828B, name: MySQL integration support, direction: internal, lane: OIC, cadence: continuous, workstream: Foundation, evidence: "CO:01,02"}
+    - {id: BICC-PO, name: PO-line BICC extract to procurement warehouse, direction: out, lane: BICC, workstream: P2P, notes: "Has shipped blank files undetected", evidence: "CO:02"}
+
+  epm-airflow:
+    - {id: fccs_integrations_pipeline, name: FCCS GL balances load DAG, source: "ERP custom TB BIP report (ESS)", target: "FCCS ERP GL PTD Balances via DLR_CloudERP_BIP", lane: Airflow, cadence: "26th onward; paused during tie-out", workstream: R2R, evidence: "CO:03"}
+    - {id: arcs_gaap_integrations_pipeline, name: ARCS GAAP load, target: "ARCS GL YTD Functional Balances", lane: Airflow, workstream: R2R, evidence: "CO:03"}
+    - {id: arcs_stat_integrations_pipeline, name: ARCS STAT load, target: ARCS, lane: Airflow, workstream: R2R, evidence: "CO:03"}
+    - {id: epm_load_month_end_and_average_rates_to_fccs, name: Rates to FCCS, lane: Airflow, cadence: "daily 17:00 UTC, 26th to 1st", workstream: R2R, evidence: "CO:03"}
+    - {id: gaap_reval_upload_to_arcs, name: Revaluation data to ARCS, lane: Airflow, cadence: "daily 06:00 PT", workstream: R2R, evidence: "CO:03"}

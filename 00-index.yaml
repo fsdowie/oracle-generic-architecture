@@ -1,0 +1,642 @@
+as_of: '2026-09-30'
+count: 157
+entities:
+- id: KP-PRINCIPLES
+  type: rules
+  file: 01-principles.md
+- id: KP-GLOSSARY
+  type: glossary
+  file: 02-glossary.md
+- id: KP-ESTATE
+  type: architecture-overview
+  file: 03-estate-layers.md
+- id: KP-README
+  type: index
+  name: Company Finance & Technology Architecture on Oracle — LLM Knowledge Pack
+  file: README.md
+- id: EXT-CATALOG
+  type: external-system-catalog
+  file: external-systems/catalog.md
+- id: EXT-KYRIBA
+  type: external-system
+  aliases:
+  - Kyriba
+  - payment factory
+  file: external-systems/kyriba.md
+- id: EXT-ZIP
+  type: external-system
+  aliases:
+  - Zip
+  - ZipHQ
+  - Zip intake
+  file: external-systems/zip.md
+- id: FND-COA
+  type: foundation
+  aliases:
+  - Corp_COA_Structure
+  - COA
+  - ledgers
+  - ledger sets
+  - CVR
+  - calendar
+  - exchange rates
+  file: foundation/chart-of-accounts-and-ledgers.md
+- id: GOV-FRAMEWORK
+  type: governance
+  name: Finance Systems Planning Framework — how change enters the architecture
+  file: governance/delivery-framework.md
+- id: INT-826
+  type: integration
+  name: Zip approved payment-terms exceptions to Oracle
+  file: integrations/INT826.md
+- id: INT-955
+  type: integration
+  name: Kyriba payment acknowledgement to Oracle (INT955) and bank-rejection cancellation (INT955B)
+  file: integrations/INT955.md
+- id: INT-959
+  type: integration
+  name: Supplier creation — completes supplier details from the Supplier Registration Request questionnaire
+  file: integrations/INT959.md
+- id: OPS-FM
+  type: failure-mode-catalog
+  file: operations/controls-and-failure-modes.md
+- id: OPS-RHYTHM
+  type: schedule
+  file: operations/operating-rhythm.md
+- id: OPS-PAYSTATUS
+  type: reference
+  file: operations/payment-status-reference.md
+- id: OPS-REPORTS
+  type: catalog
+  file: operations/reports-catalog.md
+- id: MOD-EPM
+  type: oracle-module
+  name: FCCS, ARCS (Reconciliation Compliance, Transaction Matching), EPM Data Management / Data Integration
+  file: oracle-modules/epm-fccs-arcs.md
+- id: MOD-EXP
+  type: oracle-module
+  name: Expenses
+  file: oracle-modules/expenses.md
+- id: MOD-FA
+  type: oracle-module
+  name: Fixed Assets
+  file: oracle-modules/fixed-assets.md
+- id: MOD-GL
+  type: oracle-module
+  name: General Ledger, Intercompany, Allocations
+  file: oracle-modules/general-ledger-and-intercompany.md
+- id: MOD-AP
+  type: oracle-module
+  name: Payables
+  file: oracle-modules/payables.md
+- id: MOD-PAY
+  type: oracle-module
+  name: Payments, Cash Management
+  file: oracle-modules/payments-and-cash.md
+- id: MOD-AR
+  type: oracle-module
+  name: Receivables
+  file: oracle-modules/receivables.md
+- id: MOD-XLA
+  type: oracle-module
+  name: Subledger Accounting (XLA), Accounting Hub (FAH/OAHC)
+  file: oracle-modules/subledger-accounting-and-fah.md
+- id: MOD-PROC
+  type: oracle-module
+  name: Suppliers, Self-Service Procurement, Purchasing
+  file: oracle-modules/suppliers-and-procurement.md
+- id: MOD-TAX
+  type: oracle-module
+  name: Oracle Fusion Tax (transaction + withholding), Payables 1099
+  file: oracle-modules/tax.md
+- id: PROC-FANOUT
+  type: process
+  name: Master data fan-out (new cost center, sub account, spend category, legal entity, approver)
+  file: processes/master-data-fanout.md
+- id: PROC-P2P
+  type: process
+  name: Procure to Pay — end to end
+  file: processes/p2p-end-to-end.md
+- id: PROC-PAYMENTS
+  type: process
+  name: Payment execution, settlement, returns, and standing up a new payment method
+  file: processes/payments-settlement-and-returns.md
+- id: PROC-PLATFORM
+  type: process
+  name: Platform accounting daily run (Accounting Hub)
+  file: processes/platform-accounting-daily-run.md
+- id: PROC-CLOSE
+  type: process
+  name: Record to Report — period close, consolidation, reconciliation, reopen
+  file: processes/r2r-close.md
+- id: PROC-ONBOARD
+  type: process
+  name: Supplier onboarding (Oracle Supplier Registration Request + INT959)
+  file: processes/supplier-onboarding.md
+- id: VAL-OPEN
+  type: open-questions
+  file: validation/open-questions.md
+- id: VAL-LOG
+  type: validation
+  file: validation/oracle-26c-validation-log.md
+- id: VAL-SOURCES
+  type: source-register
+  file: validation/source-register.md
+- id: INT026A
+  type: integration
+  name: MultiPeriod Account to Oracle
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT026B
+  type: integration
+  name: Oracle to Oracle GL journals (with companion reconciliation report)
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT026J
+  type: integration
+  name: Oracle to Oracle GL journals
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT026F
+  type: integration
+  name: Variable accrual
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT026H
+  type: integration
+  name: Workday to Oracle GL - Canada
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT028
+  type: integration
+  name: Workday to Oracle GL
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT274
+  type: integration
+  name: Workday to Oracle GL
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT072
+  type: integration
+  name: ReconArt to Oracle GL
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT221
+  type: integration
+  name: CloudPay to Oracle GL
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT236
+  type: integration
+  name: Spacebase to Oracle GL
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT246
+  type: integration
+  name: Kyriba to Oracle GL
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT305
+  type: integration
+  name: Clearwater to Oracle GL journal
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT824
+  type: integration
+  name: Statistical journal entries to GL
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT931
+  type: integration
+  name: Workday payroll journals to Oracle GL (outbound leg)
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT931B
+  type: integration
+  name: Workday payroll journals to Oracle GL (inbound leg)
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT210
+  type: integration
+  name: Workday to Oracle journals - EIB
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT156
+  type: integration
+  name: Exchange rates
+  group: gl-feeders
+  file: integrations/integration-register.yaml
+- id: INT992
+  type: integration
+  name: FAH intercompany accounting - imbalance detect and balance
+  group: intercompany-and-platform
+  file: integrations/integration-register.yaml
+- id: INT977
+  type: integration
+  name: Cash redenomination to GL
+  group: intercompany-and-platform
+  file: integrations/integration-register.yaml
+- id: INT985
+  type: integration
+  name: Brazil intercompany redenomination to GL
+  group: intercompany-and-platform
+  file: integrations/integration-register.yaml
+- id: INT988
+  type: integration
+  name: Global intercompany redenomination
+  group: intercompany-and-platform
+  file: integrations/integration-register.yaml
+- id: INT162
+  type: integration
+  name: Oracle FAH to Workday Finance
+  group: intercompany-and-platform
+  file: integrations/integration-register.yaml
+- id: API157
+  type: integration
+  name: Workday Finance to Oracle FAH
+  group: intercompany-and-platform
+  file: integrations/integration-register.yaml
+- id: INT978
+  type: integration
+  name: Subsidiary brand accounted detail with reversal
+  group: intercompany-and-platform
+  file: integrations/integration-register.yaml
+- id: FAH-LOAD
+  type: integration
+  name: Event Enrichment-enriched events to FAH (daily platform run)
+  group: intercompany-and-platform
+  file: integrations/integration-register.yaml
+- id: ZIP-REQ
+  type: integration
+  name: Zip to Oracle requisition import
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT826
+  type: integration
+  name: Zip approved payment-terms exceptions to Oracle
+  group: procure-to-pay
+  file: integrations/INT826.md
+- id: INT959
+  type: integration
+  name: Supplier creation - completes supplier details from SRR questionnaire
+  group: procure-to-pay
+  file: integrations/INT959.md
+- id: INT055B
+  type: integration
+  name: Oracle to Apex Portal supplier change outbound
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT055C
+  type: integration
+  name: Oracle to Apex Portal supplier change outbound (extended for new entities)
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT101
+  type: integration
+  name: Oracle to Mulesoft requisition outbound
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT270
+  type: integration
+  name: Requisition steps to Salesforce
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT301A
+  type: integration
+  name: SimpleLegal invoices inbound
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT301B
+  type: integration
+  name: Oracle invoice status to SimpleLegal
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT960
+  type: integration
+  name: AP non-PO invoice above 5K extension
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT062A
+  type: integration
+  name: Generali to Oracle ad hoc payment
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT955
+  type: integration
+  name: Kyriba payment acknowledgement to Oracle
+  group: procure-to-pay
+  file: integrations/INT955.md
+- id: INT955B
+  type: integration
+  name: Kyriba bank rejections cancel Oracle bank transfers and payments
+  group: procure-to-pay
+  file: integrations/INT955.md
+- id: INT234
+  type: integration
+  name: Ad hoc bank transactions
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT819
+  type: integration
+  name: Bank statements to Cash Management
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT820
+  type: integration
+  name: Bank statements to Cash Management
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT934
+  type: integration
+  name: Workday worker data outbound
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT970
+  type: integration
+  name: Asset updates integration
+  group: procure-to-pay
+  file: integrations/integration-register.yaml
+- id: INT071A
+  type: integration
+  name: Oracle to ReconArt - balances
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT071B
+  type: integration
+  name: Oracle to ReconArt - transactions
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT091A
+  type: integration
+  name: Trial balance export to Box
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT091B
+  type: integration
+  name: Journal-line export to Box
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT029
+  type: integration
+  name: Oracle to EPBCS actuals
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT110AA
+  type: integration
+  name: Oracle to Anaplan - P&L
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT110AB
+  type: integration
+  name: Oracle to Anaplan
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT110C
+  type: integration
+  name: Oracle to Anaplan
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT110D
+  type: integration
+  name: Oracle to Anaplan
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT110F
+  type: integration
+  name: Oracle to Anaplan
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT239
+  type: integration
+  name: Oracle to Snowflake
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT267
+  type: integration
+  name: Ledger account balance validation
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT017
+  type: integration
+  name: Metadata outbound
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT304
+  type: integration
+  name: EIB integration
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT828A
+  type: integration
+  name: Observability integration support
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: INT828B
+  type: integration
+  name: MySQL integration support
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: BICC-PO
+  type: integration
+  name: PO-line BICC extract to procurement warehouse
+  group: outbound-reconciliation-planning-reporting
+  file: integrations/integration-register.yaml
+- id: fccs_integrations_pipeline
+  type: integration
+  name: FCCS GL balances load DAG
+  group: epm-airflow
+  file: integrations/integration-register.yaml
+- id: arcs_gaap_integrations_pipeline
+  type: integration
+  name: ARCS GAAP load
+  group: epm-airflow
+  file: integrations/integration-register.yaml
+- id: arcs_stat_integrations_pipeline
+  type: integration
+  name: ARCS STAT load
+  group: epm-airflow
+  file: integrations/integration-register.yaml
+- id: epm_load_month_end_and_average_rates_to_fccs
+  type: integration
+  name: Rates to FCCS
+  group: epm-airflow
+  file: integrations/integration-register.yaml
+- id: gaap_reval_upload_to_arcs
+  type: integration
+  name: Revaluation data to ARCS
+  group: epm-airflow
+  file: integrations/integration-register.yaml
+- id: CORP_GAAP_SLAM
+  type: accounting-method
+  file: oracle-modules/subledger-accounting-and-fah.md
+- id: Corp_COA_Structure
+  type: chart-of-accounts
+  file: foundation/chart-of-accounts-and-ledgers.md
+- id: CORPCONS
+  type: fccs-application
+  file: oracle-modules/epm-fccs-arcs.md
+- id: DLR_CloudERP_BIP
+  type: epm-data-load-rule
+  file: oracle-modules/epm-fccs-arcs.md
+- id: Company CSL GAAP USD LS
+  type: ledger-set
+  file: foundation/chart-of-accounts-and-ledgers.md
+- id: CVR209
+  type: cross-validation-rule
+  file: foundation/chart-of-accounts-and-ledgers.md
+- id: CVR241
+  type: cross-validation-rule
+  file: foundation/chart-of-accounts-and-ledgers.md
+- id: '19500'
+  type: gl-account (intercompany imbalance)
+  file: oracle-modules/general-ledger-and-intercompany.md
+- id: '75000'
+  type: gl-account (locked to manual posting)
+  file: foundation/chart-of-accounts-and-ledgers.md
+- id: '14550'
+  type: gl-account (asset clearing, was 10490)
+  file: oracle-modules/fixed-assets.md
+- id: ORA_AP_BANK_ACK_RJCT
+  type: payables hold/status
+  file: oracle-modules/payables.md
+- id: LEGACY_ORACLE_TAX_PROFILE_MAPPING
+  type: lookup (INT959)
+  file: integrations/INT959.md
+- id: EXP_CAT_GL_ACCT
+  type: mapping-set
+  file: oracle-modules/subledger-accounting-and-fah.md
+- id: SA_AIA_BANK_ACCOUNT_MAP
+  type: mapping-set
+  file: oracle-modules/subledger-accounting-and-fah.md
+- id: FPC07
+  type: fccs-task
+  file: oracle-modules/epm-fccs-arcs.md
+- id: FPC08
+  type: fccs-task
+  file: oracle-modules/epm-fccs-arcs.md
+- id: Urgent Payment Tool
+  type: company-tool
+  file: oracle-modules/payments-and-cash.md
+- id: FIN-24137
+  type: jira-epic (Supplier Registration Enhancements)
+  file: processes/supplier-onboarding.md
+- id: FIN-25032
+  type: jira-story (SRR submission validations)
+  file: processes/supplier-onboarding.md
+- id: FIN-25021
+  type: jira-story (payment method default)
+  file: processes/supplier-onboarding.md
+- id: FIN-25268
+  type: jira-story (Tax Type ARD)
+  file: processes/supplier-onboarding.md
+- id: FIN-24752
+  type: jira (INT959 change)
+  file: integrations/INT959.md
+- id: FIN-24248
+  type: jira-epic (Unsuccessful/returned payments)
+  file: processes/payments-settlement-and-returns.md
+- id: FIN-24250
+  type: jira-story (returned payments design)
+  file: processes/payments-settlement-and-returns.md
+- id: FIN-24573
+  type: jira-story (payee name mapping)
+  file: processes/payments-settlement-and-returns.md
+- id: REP022
+  type: report
+  file: operations/reports-catalog.md
+- id: REP023
+  type: report
+  file: operations/reports-catalog.md
+- id: REP026
+  type: report
+  file: operations/reports-catalog.md
+- id: REP035-A
+  type: report
+  file: operations/reports-catalog.md
+- id: REP036
+  type: report
+  file: operations/reports-catalog.md
+- id: REP037-A
+  type: report
+  file: operations/reports-catalog.md
+- id: REP040-A
+  type: report
+  file: operations/reports-catalog.md
+- id: REP042-A
+  type: report
+  file: operations/reports-catalog.md
+- id: REP046-A
+  type: report
+  file: operations/reports-catalog.md
+- id: REP050
+  type: report
+  file: operations/reports-catalog.md
+- id: REP051-A
+  type: report
+  file: operations/reports-catalog.md
+- id: REP053
+  type: report
+  file: operations/reports-catalog.md
+- id: REP061-A
+  type: report
+  file: operations/reports-catalog.md
+- id: REP101
+  type: report
+  file: operations/reports-catalog.md
+- id: REP103-A/B/C/D
+  type: report
+  file: operations/reports-catalog.md
+- id: REP136
+  type: report
+  file: operations/reports-catalog.md
+- id: REP144
+  type: report
+  file: operations/reports-catalog.md
+- id: REP531
+  type: report
+  file: operations/reports-catalog.md
+- id: REP577
+  type: report
+  file: operations/reports-catalog.md
+- id: REP605
+  type: report
+  file: operations/reports-catalog.md
+- id: REP626
+  type: report
+  file: operations/reports-catalog.md
+- id: REP627
+  type: report
+  file: operations/reports-catalog.md
+- id: REP701
+  type: report
+  file: operations/reports-catalog.md
+- id: '*_VAL requisition validations'
+  type: validation-rules
+  file: oracle-modules/suppliers-and-procurement.md
+- id: INT055A
+  type: integration
+  name: INT055A Apex Portal suppliers to Oracle (create/update, bidirectional)
+  group: procure-to-pay
+  file: integrations/INT055A.md
+- id: Apex Portal
+  type: external-system
+  file: external-systems/catalog.md
+- id: INT-055A
+  type: integration
+  file: integrations/INT055A.md
+- id: XXCO_ENTERPRISE_STRUCTURE
+  type: atp-table (company-code crosswalk)
+  file: foundation/chart-of-accounts-and-ledgers.md
+- id: LEGACY_ORACLE_TAX_PROFILE_MAP
+  type: lookup (INT055A tax)
+  file: integrations/INT055A.md
+- id: CO_PAYMENT_BANK_COUNTRIES
+  type: lookup group 1-6 (bank derivation)
+  file: integrations/INT055A.md
+- id: CO_PAYMENT_METHODS
+  type: lookup (payment method)
+  file: integrations/INT055A.md
+- id: Global Proc CO BU
+  type: procurement business unit
+  file: foundation/chart-of-accounts-and-ledgers.md

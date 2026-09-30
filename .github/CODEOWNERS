@@ -1,0 +1,27 @@
+# Replace the @company/... placeholders with the real GitHub team handles before enabling branch protection.
+*                                              @company/ftg-leads
+/01-principles.md                              @company/ftg-leads
+/foundation/                                   @company/ftg-leads @company/ftg-rtr
+/governance/                                   @company/ftg-leads
+
+/processes/p2p-end-to-end.md                   @company/ftg-p2p @company/procurement-ops
+/processes/supplier-onboarding.md              @company/ftg-p2p @company/accounts-payable
+/oracle-modules/suppliers-and-procurement.md   @company/ftg-p2p @company/procurement-ops
+/oracle-modules/payables.md                    @company/ftg-p2p @company/accounts-payable
+/oracle-modules/expenses.md                    @company/ftg-p2p
+/external-systems/zip.md                       @company/ftg-p2p @company/procurement-ops
+
+/oracle-modules/payments-and-cash.md           @company/ftg-p2p @company/treasury
+/processes/payments-settlement-and-returns.md  @company/ftg-p2p @company/treasury
+/external-systems/kyriba.md                    @company/treasury
+/operations/payment-status-reference.md        @company/ftg-p2p @company/treasury
+
+/oracle-modules/general-ledger-and-intercompany.md @company/ftg-rtr @company/accounting
+/oracle-modules/fixed-assets.md                @company/ftg-rtr
+/oracle-modules/epm-fccs-arcs.md               @company/ftg-rtr @company/consolidation
+/processes/r2r-close.md                        @company/ftg-rtr @company/consolidation
+/oracle-modules/subledger-accounting-and-fah.md @company/ftg-platform-accounting
+/processes/platform-accounting-daily-run.md    @company/ftg-platform-accounting
+
+/oracle-modules/tax.md                         @company/tax @company/ftg-p2p
+/integrations/                                 @company/biztech-finance-integrations @company/ftg-leads
