@@ -20,6 +20,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check the browser key is the anon key
+        env:
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # config.js is public, so the key written into it must never grant more than anon.
+          if [ -z "$SUPABASE_ANON_KEY" ]; then echo "SUPABASE_ANON_KEY is empty"; exit 1; fi
+          if [ "$SUPABASE_ANON_KEY" = "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "SUPABASE_ANON_KEY is the same as SUPABASE_SERVICE_ROLE_KEY"; exit 1; fi
+          case "$SUPABASE_ANON_KEY" in
+            sb_publishable_*) echo "Publishable key: OK" ;;
+            sb_secret_*) echo "SUPABASE_ANON_KEY is a secret key"; exit 1 ;;
+            eyJ*)
+              p=$(echo "$SUPABASE_ANON_KEY" | cut -d. -f2 | tr '_-' '/+')
+              while [ $(( ${#p} % 4 )) -ne 0 ]; do p="$p="; done
+              role=$(echo "$p" | base64 -d | python3 -c 'import json,sys; print(json.load(sys.stdin).get("role",""))')
+              if [ "$role" != "anon" ]; then echo "SUPABASE_ANON_KEY has role '$role', expected 'anon'"; exit 1; fi
+              echo "JWT role anon: OK" ;;
+            *) echo "SUPABASE_ANON_KEY is not a recognised Supabase key"; exit 1 ;;
+          esac
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
