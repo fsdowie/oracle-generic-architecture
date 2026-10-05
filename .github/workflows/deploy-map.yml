@@ -69,6 +69,7 @@ jobs:
             "${auth[@]}" \
             -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
             -H "x-upsert: true" \
+            -H "cache-control: no-cache" \
             -H "Content-Type: application/json" \
             --data-binary @build/map.json)
           echo "Supabase responded $status"
