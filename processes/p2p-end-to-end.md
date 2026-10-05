@@ -31,16 +31,17 @@ Note: two onboarding paths — PO suppliers are onboarded Zip → Apex → Oracl
 ## Stage cards
 
 ## Accounting by stage (account types)
-Only stages 05–08 create accounting. Types, not account numbers; all through Subledger Accounting under `CORP_GAAP_SLAM`.
+Only stages 05–08 create accounting. Expense items accrue **at period end** `[USER:2026-10-06]`. Types, not account numbers; all through Subledger Accounting under `CORP_GAAP_SLAM`.
 | Stage | Event | Debit | Credit | Evidence |
 |---|---|---|---|---|
-| 05 Receipt | Receipt accrual (timing at receipt vs period end not confirmed, Q-PAY-7) | Expense, or Asset clearing for capital items | Accrual / uninvoiced receipts (liability) | `[CO:02 §4 Stage 05]` `[ORA26C:implementing-payables-invoice-to-pay p.36–37]` |
-| 06 Invoice | PO-matched invoice | Accrual / uninvoiced receipts (the invoice clears the accrual); tax | Liability (trade payables); withholding if withheld at validation | `[ORA26C:… p.31, 36]` `[CO:ACCRUALS-DOC]` |
+| 05 Receipt | Period-end accrual for receipts not yet invoiced (the receipt itself creates no accounting) | Expense, or Asset clearing for capital items | Accrual / uninvoiced receipts (liability) | `[USER:2026-10-06]` `[ORA26C:implementing-payables-invoice-to-pay p.37]` |
+| 05 Receipt | Reversal when the next period opens | Accrual / uninvoiced receipts (liability) | Expense, or Asset clearing | same |
+| 06 Invoice | PO-matched invoice | Expense (PO charge account) or Asset clearing; tax | Liability (trade payables); withholding if withheld at validation | `[ORA26C:… p.31, 36]` `[USER:2026-10-06]` |
 | 06 Invoice | Non-PO invoice | Expense or Asset clearing; tax | Liability | `[ORA26C:… p.36]` |
 | 07 Payment | Payment issued | Liability | Cash clearing (or Cash); discount | `[ORA26C:… p.31]` |
 | 08 Settlement | Payment cleared on statement | Cash clearing | Cash | `[ORA26C:… p.31, 342]`; applies only if payments are accounted at clearing time → Q-PAY-7 |
 
-⚠ `[CONFLICT]` The accruals note says both that the invoice clears the accrual (at-receipt behaviour) and that the accrual reverses in the next period, caught by the not-reversed alert (period-end behaviour) `[CO:ACCRUALS-DOC]`. A likely reading is that the reversal applies to the variable-accrual journals `[INFERRED]`; confirm under Q-PAY-7.
+Resolved: the accruals note described both an invoice clearing the accrual and a next-period reversal. With period-end accrual the reversal is the standard behaviour and the invoice books the expense itself `[USER:2026-10-06]` (R-19).
 
 ### 01 Supplier onboarding — see `supplier-onboarding.md`
 PO path: Zip → Apex portal → Oracle Suppliers via **INT055A** (every 30 min; see `integrations/INT055A.md`). Non-PO path: Oracle SRR + INT959. Accounting: none.
@@ -74,7 +75,7 @@ PO path: Zip → Apex portal → Oracle Suppliers via **INT055A** (every 30 min;
 `[CO:02 §4 Stage 04]`
 
 ### 05 Receipt & accrual
-First accounting event (accrual); third leg of 3-way match; INT026F variable accrual; INT026B; REP577 not-reversed alert. Failure: duplicate variable accruals; accrual not reversed. `[CO:02 §4 Stage 05]`
+Third leg of 3-way match; no accounting at receipt: uninvoiced receipts are accrued at period end and reversed next period `[USER:2026-10-06]`; INT026F variable accrual; INT026B; REP577 not-reversed alert. Failure: duplicate variable accruals; accrual not reversed. `[CO:02 §4 Stage 05]`
 
 ### 06 Invoice — Payables
 Intake via Jira AP desk, SimpleLegal (INT301A/B), Generali (INT062A), Oracle Expenses reimbursements. Matching + tolerances → holds (dominant workload; 23.7K holds/yr). INT960 non-PO >5K; INT826 terms exceptions. Failure: monthly tolerance recalculation (audit risk); INT826 hitting cancelled/paid invoices; prepaid GL validation errors; supplier-level hold blocks all unvalidated invoices. `[CO:02 §4 Stage 06]` → `oracle-modules/payables.md`

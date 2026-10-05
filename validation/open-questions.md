@@ -36,6 +36,7 @@ usage: "Agents must cite the Q-ID instead of guessing when an answer depends on 
 | R-16 (was Q-KY-3, partly) | How are bank-rejected payments cancelled? | **Manually voided** in Oracle `[USER:2026-10-05]` |
 | R-18 (was Q-KY-3) | What does INT955B do? | **Only updates the DFFs on the Oracle payment.** It does not cancel or void payments or bank transfers, despite its name and the Kyriba document `[USER:2026-10-05]` |
 | R-17 (was Q-PAY-4) | Do `CHECK` payments carry a bank ack? | **No.** `CHECK` payments are not electronic; whether the bank accepted them is tracked **manually** `[USER:2026-10-05]`. A blank ack on a `CHECK` payment is expected, not FM-PAY-05. (Kyriba still has an outsourced-check code `CHK-OS` and passes Positive Pay files through for in-house checks `[CO:KYRIBA-DOC]`.) |
+| R-19 (was Q-PAY-7 a–b) | Do expense items accrue at receipt or at period end? | **Period end** `[USER:2026-10-06]`. Receipts without invoices are accrued at period close and reversed when the next period opens; the receipt itself creates no accounting, and the invoice books the expense |
 | R-14 (was Q-PAY-3) | Does INT955 use Oracle's standard disbursement-acknowledgment processing? | No. INT955 writes custom DFFs (`ATTRIBUTE1/3/4/5`) on `AP_CHECKS_ALL` through REST `payablesPayments/{CheckId}`. The standard feature is a modernisation option (see INT955.md) |
 
 ## Open — priority 1 (affect how an agent answers core questions)
@@ -53,7 +54,7 @@ usage: "Agents must cite the Q-ID instead of guessing when an answer depends on 
 | Q-959-2 | Full INT959 field map (questionnaire → supplier attributes) | INT959.md |
 | Q-959-3 | Does INT959 also process supplier profile *change* requests? | INT959.md |
 | Q-APEX-1 | Are INT055B/C (Oracle → Apex supplier change) still the return leg to Apex? | catalog.md |
-| Q-PAY-7 | Still open after CO:ACCRUALS-DOC (5-Oct-2026), which confirms the accrual entry but states the timing is unconfirmed. (a) *Accrue Expense Items*: at receipt or at period end? Source of truth: Purchasing / Payables configuration workbooks (BR100). (b) Is the next-period reversal only for variable-accrual journals? (c) Are payments accounted at clearing time (Liability → Cash clearing, then Cash clearing → Cash on reconciliation) or straight to Cash? Not covered by any source | p2p-end-to-end.md, MOD-PROC |
+| Q-PAY-7 | Are payments accounted at clearing time (Liability → Cash clearing at payment, then Cash clearing → Cash on statement reconciliation) or straight to Cash at payment? (Accrual timing answered: R-19) | p2p-end-to-end.md |
 | Q-PAY-2 | Is Oracle payment approval (Review Proposed Payments stage) enabled, and for which PPR templates? | MOD-PAY |
 | Q-PAY-6 | Is the `payments-status-report` extract the REP627 output, or a different report? | payment-status-reference |
 | Q-AP-1 | Owner and exact procedure of the monthly invoice-tolerance recalculation | MOD-AP |

@@ -58,11 +58,11 @@ Oracle 26C: the **Transaction Account Builder (TAB)** derives default accounts f
 Configuration records: *Company Purchasing Configuration BR100 (production)*; setup *Manage Mapping Sets* / *Manage Transaction Account Definitions*. `[CO:02 §7]`
 
 ### Receipts and accrual
-Receipt is the first accounting event (accrual) and the third leg of three-way match; variable consumption uses `INT026F` variable accrual; reversals checked by `REP577`. `[CO:02 §4 Stage 05]` Oracle: period-end expense accruals are created for receipts without invoices and reversed when the next period opens. `[ORA26C:implementing-payables-invoice-to-pay p.37]`
-- **Mechanism:** the receipt debits expense and credits the accrual / uninvoiced-receipts liability through the same Subledger Accounting rule stack (`CORP_GAAP_SLAM`) that later accounts the invoice and payment; the invoice then clears the accrual. `[CO:ACCRUALS-DOC]`
+Receipt is the third leg of three-way match. **Expense items accrue at period end, not at receipt** `[USER:2026-10-06]`, so the receipt itself creates no accounting; variable consumption uses `INT026F` variable accrual; reversals checked by `REP577`. `[CO:02 §4 Stage 05]` Oracle: period-end expense accruals are created for receipts without invoices and reversed when the next period opens. `[ORA26C:implementing-payables-invoice-to-pay p.37]`
+- **Mechanism (period end):** at period close Oracle creates expense accruals for receipts without invoices: debit expense, credit the accrual / uninvoiced-receipts liability, through the same Subledger Accounting rule stack (`CORP_GAAP_SLAM`) that accounts the invoice and payment. The accrual **reverses when the next period opens**; the invoice then books the expense itself. `[USER:2026-10-06]` `[ORA26C:implementing-payables-invoice-to-pay p.37]` The accruals note's statement that "the invoice clears the accrual" describes at-receipt accounting and does not apply `[CO:ACCRUALS-DOC]` (superseded).
 - **Variable accrual:** where spend is consumption-based rather than receipt-based, the variable-accrual integration posts an estimate instead of a receipt accrual. `[CO:ACCRUALS-DOC]`
 - **Reports:** `REP077` Accrual Sync (accruals syncing), `REP536` Accrual FX Variation (FX revaluation on open accruals), `REP577` journal-not-reversed alert. `[CO:ACCRUALS-DOC]`
-- **Not confirmed:** whether expense items accrue *at receipt* or *at period end* (*Accrue Expense Items* on Manage Common Options for Payables and Procurement). The source says so explicitly; the answer is in the Purchasing / Payables configuration workbooks → Q-PAY-7.
+- **Setting:** *Accrue Expense Items* (Manage Common Options for Payables and Procurement) = **Period End** `[USER:2026-10-06]` (R-19). Oracle always accrues inventory items at receipt `[ORA26C:… p.37]`.
 
 ## Failure modes (module-local)
 See `operations/controls-and-failure-modes.md` codes FM-SUP-*, FM-SSP-*, FM-PO-*.
