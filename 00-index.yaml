@@ -1,5 +1,5 @@
 as_of: '2026-10-05'
-count: 162
+count: 164
 entities:
 - id: KP-PRINCIPLES
   type: rules
@@ -607,6 +607,9 @@ entities:
 - id: REP061-A
   type: report
   file: operations/reports-catalog.md
+- id: REP077
+  type: report
+  file: operations/reports-catalog.md
 - id: REP101
   type: report
   file: operations/reports-catalog.md
@@ -620,6 +623,9 @@ entities:
   type: report
   file: operations/reports-catalog.md
 - id: REP531
+  type: report
+  file: operations/reports-catalog.md
+- id: REP536
   type: report
   file: operations/reports-catalog.md
 - id: REP577

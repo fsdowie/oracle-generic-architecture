@@ -608,9 +608,9 @@
    "functions": [
     "Creates purchase orders from approved requisitions",
     "Handles change orders, mostly by Procurement Ops",
-    "Records receipts: the first accounting event (accrual)",
+    "Records receipts: the first accounting event (accrual), cleared later by the invoice",
     "Derives charge accounts through the Transaction Account Builder",
-    "Supports bulk updates for volume changes"
+    "Tracks open accruals with accrual sync and FX variation reports"
    ],
    "docs": [
     {
@@ -620,6 +620,10 @@
     {
      "label": "Procure to Pay, end to end",
      "path": "processes/p2p-end-to-end.md"
+    },
+    {
+     "label": "Reports catalogue",
+     "path": "operations/reports-catalog.md"
     }
    ]
   },
@@ -1339,10 +1343,10 @@
     "system": "Purchasing",
     "accounting": "accrual",
     "points": [
-     "Goods or services are received against the PO",
-     "Receipt is the third leg of the three-way match",
-     "Expense items are accrued when the receipt is created",
-     "Variable consumption is accrued through the variable-accrual interface; reversals are checked by an alert report"
+     "Goods or services are received against the PO: the third leg of the three-way match",
+     "The receipt accrues the expense through Subledger Accounting and posts to the General Ledger",
+     "Consumption-based spend is accrued by a variable-accrual interface instead of a receipt accrual",
+     "Accruals are tracked by an accrual sync report and an FX variation report; a not-reversed alert catches missed reversals"
     ],
     "entries": [
      {
@@ -1352,7 +1356,7 @@
        "Asset clearing (capital items)"
       ],
       "cr": [
-       "Receipt accrual (liability)"
+       "Accrual / uninvoiced receipts (liability)"
       ]
      }
     ]
@@ -1372,7 +1376,7 @@
      {
       "event": "PO-matched invoice",
       "dr": [
-       "Receipt accrual (clears the liability)",
+       "Accrual / uninvoiced receipts (the invoice clears it)",
        "Tax (recoverable or nonrecoverable)"
       ],
       "cr": [
@@ -1454,7 +1458,7 @@
     "text": "Either transmission failed or the file is still in flight. Check Kyriba file status first."
    }
   ],
-  "accounting_note": "Account types follow Oracle Payables defaults: invoice distributions debit expense and credit liability; payments credit cash, or cash clearing when payments are accounted at clearing time. Whether clearing accounting is enabled here is not documented (open question Q-PAY-7)."
+  "accounting_note": "Account types follow Oracle Payables defaults and the accruals note: the receipt debits expense and credits the accrual liability, and the invoice clears it. Still to confirm (Q-PAY-7): whether expense items accrue at receipt or at period end, and whether payments are accounted at clearing time (cash clearing) or straight to cash."
  },
  "onboarding": {
   "title": "Two paths into the supplier master",

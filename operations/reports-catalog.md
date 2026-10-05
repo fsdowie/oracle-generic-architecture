@@ -22,11 +22,13 @@ authoritative_source: Company Custom Report List; BI Publisher full catalogue [C
 | REP051-A | Trended balance sheet | FCCS | | same |
 | REP053 | Trended GAAP P&L | FCCS | | same |
 | REP061-A | Adjusted EBITDA trend | FCCS | | same |
+| REP077 | Accrual Sync report: operational view of accruals syncing | BIP | Purchasing / Payables | `[CO:ACCRUALS-DOC]` |
 | REP101 | Expense bridges | FCCS | | same |
 | REP103-A/B/C/D | Consolidated trial balance by entity / cost center / sub account / intercompany | BIP | GL | `[CO:03 §3.1]` |
 | REP136 | SOX report with cost-center roll-up | BIP | GL | same |
 | REP144 | Balance sheet detail | BIP | GL | same |
 | REP531 | GL balance report (reconciliation checks) | BIP | GL | same |
+| REP536 | Accrual FX Variation report: FX revaluation on open accruals | BIP | Purchasing / Payables | `[CO:ACCRUALS-DOC]` |
 | REP577 | Journal-not-reversed alert | BIP | GL | same |
 | REP605 | SOX report with cost-center roll-up | BIP | GL | same |
 | REP626 | Fixed Assets approvals | BIP | FA | `[CO:03 §3.3]` |
