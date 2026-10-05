@@ -20,7 +20,7 @@ groups:
     - {id: INT246, name: Kyriba to Oracle GL, source: Kyriba, target: Oracle GL, direction: in, lane: OIC, cadence: scheduled, workstream: P2P->R2R, stage: P2P-08, accounting_path: import, evidence: "CO:01,02"}
     - {id: INT305, name: Clearwater to Oracle GL journal, source: Clearwater, target: Oracle GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
     - {id: INT824, name: Statistical journal entries to GL, source: tbd, target: Oracle GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
-    - {id: INT931, name: Workday payroll journals to Oracle GL (outbound leg), source: Workday, target: Oracle GL, direction: out, lane: OIC, workstream: R2R, notes: "Direction listed Out/In across 931/931B — confirm legs (Q-INT-3)", evidence: "CO:01"}
+    - {id: INT931, name: Workday payroll journals to Oracle GL (outbound leg), source: Workday, target: Oracle GL, direction: out, lane: OIC, workstream: R2R, notes: "Direction listed Out for this leg and In for the inbound leg — confirm legs (Q-INT-3)", evidence: "CO:01"}
     - {id: INT931B, name: Workday payroll journals to Oracle GL (inbound leg), source: Workday, target: Oracle GL, direction: in, lane: OIC, workstream: R2R, accounting_path: import, evidence: "CO:01"}
     - {id: INT210, name: Workday to Oracle journals - EIB, source: Workday, target: Oracle GL, direction: out, lane: EIB, workstream: R2R, evidence: "CO:01"}
     - {id: INT156, name: Exchange rates, source: tbd, target: Oracle GL daily rates, direction: in, lane: OIC, cadence: daily, workstream: Foundation, evidence: "CO:01"}

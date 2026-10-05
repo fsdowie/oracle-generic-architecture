@@ -1,9 +1,9 @@
 {
- "_about": "Map model for site/public/index.html. Edited by hand; tools/build_map_data.py merges it with integrations/integration-register.yaml into build/map.json, which is uploaded to the private Supabase bucket. Never deploy this file.",
+ "_about": "Map model for site/public/index.html. Edited by hand; tools/build_map_data.py merges it with integrations/integration-register.yaml into build/map.json, which is uploaded to the private Supabase bucket. Never deploy this file. Node `integrations` are register IDs (shown by name) or free text; `docs` paths are pack files linked from docs_base. The build fails if an interface number would be shown.",
  "header": {
   "eyebrow": "Finance Technology Group · Current state · Oracle Fusion 26C",
-  "title": "Oracle Finance Estate Map",
-  "lede": "Many systems originate transactions, many Oracle modules record them, and everything narrows into one accounting engine and one ledger family. Select any system to see what it owns, how it connects and where it breaks.",
+  "title": "Travel Estate Map",
+  "lede": "Many systems originate transactions, many Oracle modules record them, and everything narrows into one accounting engine and one ledger family. Select any system to see what it does, how it connects and where to read more.",
   "facts": [
    {
     "value": "1",
@@ -72,17 +72,33 @@
    "workstreams": [
     "P2P"
    ],
-   "description": "Every purchase request starts here. Runs the review graph (risk, privacy, legal, BizTech, sustainability) and defaults COA segments. Advisory only: Oracle re-derives the account.",
+   "description": "Where every purchase request starts. Zip runs the review workflow and proposes accounting segments; Oracle takes the final decision.",
    "integrations": [
-    "Zip req import (OIC)",
+    "ZIP-REQ",
     "INT826"
    ],
-   "failure_modes": [
-    "Spend category inactive in Oracle, so the requisition never arrives",
-    "Wrong entity or cost center found after the PO exists",
-    "INT826 user-entry errors: REQ number instead of PO"
+   "evidence": "CO:02 · DATA:int826 logs",
+   "functions": [
+    "Captures each purchase request: spend category, legal entity and cost center",
+    "Routes it through conditional reviews: third-party risk, data privacy, legal, BizTech, sustainability",
+    "Proposes the accounting segments from lookup tables kept in step with Oracle",
+    "Sends approved requests to Oracle as requisitions",
+    "Handles payment-terms exception requests, which are applied in Oracle daily"
    ],
-   "evidence": "CO:02 · DATA:int826 logs"
+   "docs": [
+    {
+     "label": "Zip system file",
+     "path": "external-systems/zip.md"
+    },
+    {
+     "label": "Procure to Pay, end to end",
+     "path": "processes/p2p-end-to-end.md"
+    },
+    {
+     "label": "Zip payment-terms exceptions interface",
+     "path": "integrations/INT826.md"
+    }
+   ]
   },
   {
    "id": "apex",
@@ -94,16 +110,34 @@
    "workstreams": [
     "P2P"
    ],
-   "description": "Supplier-facing onboarding for PO suppliers: questionnaires, risk, diversity, bank and tax detail. A PO supplier exists in Oracle only after Apex.",
+   "description": "Supplier-facing onboarding portal for suppliers that will receive purchase orders.",
    "integrations": [
     "INT055A",
-    "INT055B/C"
+    "INT055B",
+    "INT055C"
    ],
-   "failure_modes": [
-    "Missing crosswalk row or lookup value fails the record",
-    "Bank account failures, historically LATAM"
+   "evidence": "USER · CO:INT055A spec",
+   "functions": [
+    "Collects supplier questionnaires, risk and diversity information",
+    "Captures bank and tax details from the supplier",
+    "Sends new and changed suppliers to Oracle every 30 minutes",
+    "Receives Oracle IDs back for each record, and errors into the supplier's event log",
+    "Receives supplier changes made in Oracle"
    ],
-   "evidence": "USER · CO:INT055A spec"
+   "docs": [
+    {
+     "label": "Apex suppliers to Oracle interface",
+     "path": "integrations/INT055A.md"
+    },
+    {
+     "label": "Supplier onboarding",
+     "path": "processes/supplier-onboarding.md"
+    },
+    {
+     "label": "Catalogue of satellite systems",
+     "path": "external-systems/catalog.md"
+    }
+   ]
   },
   {
    "id": "srr",
@@ -115,16 +149,31 @@
    "workstreams": [
     "P2P"
    ],
-   "description": "Internal Redwood registration for ad hoc, one-time and Treasury payees. INT959 completes the supplier from the questionnaire.",
+   "description": "Oracle's internal supplier registration, used for non-PO, ad hoc, one-time and Treasury payees.",
    "integrations": [
     "INT959"
    ],
-   "failure_modes": [
-    "No address, so no payable site",
-    "Payment terms not matching an Oracle value",
-    "Non-selected payment methods end-dated"
+   "evidence": "USER · ORA26C procurement p.343",
+   "functions": [
+    "Internal Redwood registration form and questionnaire",
+    "Separate approval task from external supplier registration",
+    "Creates the supplier in Oracle on approval",
+    "An interface then completes payment methods, tax flags and profile details from the questionnaire"
    ],
-   "evidence": "USER · ORA26C procurement p.343"
+   "docs": [
+    {
+     "label": "Supplier onboarding",
+     "path": "processes/supplier-onboarding.md"
+    },
+    {
+     "label": "Supplier completion interface",
+     "path": "integrations/INT959.md"
+    },
+    {
+     "label": "Suppliers, procurement and purchasing",
+     "path": "oracle-modules/suppliers-and-procurement.md"
+    }
+   ]
   },
   {
    "id": "ramp",
@@ -137,12 +186,30 @@
     "P2P",
     "PLAT"
    ],
-   "description": "Corporate card and out-of-pocket reimbursement. Also an Accounting Hub subledger (source FAH-Ramp).",
+   "description": "Corporate card and out-of-pocket reimbursement, accounted through the Accounting Hub.",
    "integrations": [
-    "FAH Ramp source"
+    "Accounting Hub source: Ramp"
    ],
-   "failure_modes": [],
-   "evidence": "CO:03"
+   "evidence": "CO:03",
+   "functions": [
+    "Issues corporate cards and handles out-of-pocket claims",
+    "Sends approved card expenses to the Accounting Hub as their own source",
+    "Expense category maps to the GL account through a mapping set"
+   ],
+   "docs": [
+    {
+     "label": "Expenses",
+     "path": "oracle-modules/expenses.md"
+    },
+    {
+     "label": "Subledger Accounting and Accounting Hub",
+     "path": "oracle-modules/subledger-accounting-and-fah.md"
+    },
+    {
+     "label": "Catalogue of satellite systems",
+     "path": "external-systems/catalog.md"
+    }
+   ]
   },
   {
    "id": "sl",
@@ -154,15 +221,27 @@
    "workstreams": [
     "P2P"
    ],
-   "description": "Legal invoices in, invoice status out. Supplier synchronisation is a known gap.",
+   "description": "Legal spend management and e-billing.",
    "integrations": [
     "INT301A",
     "INT301B"
    ],
-   "failure_modes": [
-    "Supplier data out of sync causes AP invoicing errors"
+   "evidence": "CO:02",
+   "functions": [
+    "Sends approved legal invoices into Payables",
+    "Receives invoice status back from Oracle",
+    "Flags legal suppliers at onboarding through a supplier field"
    ],
-   "evidence": "CO:02"
+   "docs": [
+    {
+     "label": "Catalogue of satellite systems",
+     "path": "external-systems/catalog.md"
+    },
+    {
+     "label": "Payables",
+     "path": "oracle-modules/payables.md"
+    }
+   ]
   },
   {
    "id": "brv",
@@ -174,14 +253,27 @@
    "workstreams": [
     "PLAT"
    ],
-   "description": "Marketplace payment events, enriched by Event Enrichment, delivered via S3 and OIC. Payments Platform alone is about 2M transactions a day.",
+   "description": "Marketplace payment events, enriched and delivered to the Accounting Hub every day.",
    "integrations": [
-    "FAH daily load"
+    "FAH-LOAD"
    ],
-   "failure_modes": [
-    "Missing attribute leaves events unaccounted"
+   "evidence": "CO:03",
+   "functions": [
+    "Emits marketplace payment events, about 2M transactions a day from the payments platform alone",
+    "Event Enrichment normalises and enriches each event",
+    "Delivers events through S3 and the integration layer to the Accounting Hub",
+    "Receives accounted fact tables back for reporting"
    ],
-   "evidence": "CO:03"
+   "docs": [
+    {
+     "label": "Platform accounting daily run",
+     "path": "processes/platform-accounting-daily-run.md"
+    },
+    {
+     "label": "Subledger Accounting and Accounting Hub",
+     "path": "oracle-modules/subledger-accounting-and-fah.md"
+    }
+   ]
   },
   {
    "id": "wd",
@@ -193,18 +285,39 @@
    "workstreams": [
     "R2R"
    ],
-   "description": "Payroll journals, worker data and Workday Finance links to the Accounting Hub.",
+   "description": "HR, payroll and Workday Finance, linked to Oracle in both directions.",
    "integrations": [
-    "INT028/274",
+    "INT028",
+    "INT274",
     "INT026H",
-    "INT931/931B",
+    "INT931",
+    "INT931B",
     "INT221",
     "INT934",
     "INT162",
     "API157"
    ],
-   "failure_modes": [],
-   "evidence": "CO:01"
+   "evidence": "CO:01",
+   "functions": [
+    "Sends payroll journals to the General Ledger",
+    "Provides worker data to Oracle",
+    "Exchanges accounting between Workday Finance and the Accounting Hub",
+    "CloudPay sends payroll journals for its countries"
+   ],
+   "docs": [
+    {
+     "label": "Catalogue of satellite systems",
+     "path": "external-systems/catalog.md"
+    },
+    {
+     "label": "General Ledger and intercompany",
+     "path": "oracle-modules/general-ledger-and-intercompany.md"
+    },
+    {
+     "label": "Integration register",
+     "path": "integrations/integration-register.yaml"
+    }
+   ]
   },
   {
    "id": "feeds",
@@ -216,23 +329,37 @@
    "workstreams": [
     "R2R"
    ],
-   "description": "Cash reconciliation, investments and real-estate journals, pre-accounted into GL.",
+   "description": "Other systems that send journals already accounted into the General Ledger.",
    "integrations": [
     "INT072",
+    "INT071A",
+    "INT071B",
     "INT305",
-    "INT236",
-    "INT071A/B"
+    "INT236"
    ],
-   "failure_modes": [
-    "Duplicate journals from a feeder"
+   "evidence": "CO:01, 03",
+   "functions": [
+    "ReconArt reconciles cash and sends adjustments to the GL",
+    "Oracle sends balances and transactions to ReconArt",
+    "Clearwater sends investment journals",
+    "Spacebase sends real-estate and lease journals"
    ],
-   "evidence": "CO:01, 03"
+   "docs": [
+    {
+     "label": "Catalogue of satellite systems",
+     "path": "external-systems/catalog.md"
+    },
+    {
+     "label": "Record to Report close",
+     "path": "processes/r2r-close.md"
+    }
+   ]
   },
   {
    "id": "oic",
    "layer": "L2",
    "title": "Oracle Integration Cloud",
-   "subtitle": "INT### · monitored",
+   "subtitle": "interfaces · monitored",
    "external": false,
    "core": false,
    "workstreams": [
@@ -240,15 +367,31 @@
     "R2R",
     "PLAT"
    ],
-   "description": "Transactional and near-real-time flows. Failures raise PROD | ERROR | INT### tickets in the implementation project automatically.",
+   "description": "The integration platform for transactional and near-real-time flows between Oracle and other systems.",
    "integrations": [
-    "56 of 66 mapped flows"
+    "{{oic_count}} of {{integration_count}} mapped flows"
    ],
-   "failure_modes": [
-    "401 credential errors",
-    "REST payload faults"
+   "evidence": "CO:01 §2 R4",
+   "functions": [
+    "Runs the scheduled and event-driven interfaces",
+    "Moves files through OCI Object Storage with common file-movement and logging services",
+    "Raises a monitoring ticket automatically when an interface errors",
+    "Keeps run metadata and notification lists in a shared database"
    ],
-   "evidence": "CO:01 §2 R4"
+   "docs": [
+    {
+     "label": "Integration register",
+     "path": "integrations/integration-register.yaml"
+    },
+    {
+     "label": "The estate in six layers",
+     "path": "03-estate-layers.md"
+    },
+    {
+     "label": "Operating rhythm",
+     "path": "operations/operating-rhythm.md"
+    }
+   ]
   },
   {
    "id": "airflow",
@@ -260,17 +403,36 @@
    "workstreams": [
     "R2R"
    ],
-   "description": "Period-driven bulk movement into FCCS and ARCS. Pausing a DAG during tie-out is a normal close step, not an incident.",
+   "description": "Scheduled bulk loads from Oracle into consolidation and reconciliation.",
    "integrations": [
     "fccs_integrations_pipeline",
-    "arcs_gaap / arcs_stat",
-    "rates to FCCS",
-    "reval to ARCS"
+    "arcs_gaap_integrations_pipeline",
+    "arcs_stat_integrations_pipeline",
+    "epm_load_month_end_and_average_rates_to_fccs",
+    "gaap_reval_upload_to_arcs"
    ],
-   "failure_modes": [
-    "DAG left running during tie-out"
+   "evidence": "CO:03",
+   "functions": [
+    "Loads GL balances into FCCS through a custom trial-balance report",
+    "Loads GAAP and statutory balances into ARCS",
+    "Loads month-end and average rates into FCCS",
+    "Loads revaluation data into ARCS daily",
+    "The FCCS load is paused during tie-out as a normal close step"
    ],
-   "evidence": "CO:03"
+   "docs": [
+    {
+     "label": "FCCS, ARCS and the EPM data path",
+     "path": "oracle-modules/epm-fccs-arcs.md"
+    },
+    {
+     "label": "Record to Report close",
+     "path": "processes/r2r-close.md"
+    },
+    {
+     "label": "Operating rhythm",
+     "path": "operations/operating-rhythm.md"
+    }
+   ]
   },
   {
    "id": "fbdi",
@@ -283,16 +445,33 @@
     "R2R",
     "P2P"
    ],
-   "description": "Bulk loads. Failures appear as import-process errors inside Oracle, not as tickets.",
+   "description": "Oracle's bulk-load tools: file-based data import, spreadsheet journals and Workday EIB.",
    "integrations": [
-    "INT992 balancing journals",
-    "INT210 EIB",
+    "INT992",
+    "INT210",
     "PO bulk updates"
    ],
-   "failure_modes": [
-    "CVR rejections, even at zero balance"
+   "evidence": "CO:01",
+   "functions": [
+    "Loads high volumes into Oracle through standard import processes",
+    "Posts intercompany balancing journals",
+    "Imports spreadsheet journals and bulk purchase-order updates",
+    "Results appear as import-process outcomes inside Oracle"
    ],
-   "evidence": "CO:01"
+   "docs": [
+    {
+     "label": "The estate in six layers",
+     "path": "03-estate-layers.md"
+    },
+    {
+     "label": "General Ledger and intercompany",
+     "path": "oracle-modules/general-ledger-and-intercompany.md"
+    },
+    {
+     "label": "Integration register",
+     "path": "integrations/integration-register.yaml"
+    }
+   ]
   },
   {
    "id": "bicc",
@@ -305,16 +484,27 @@
     "R2R",
     "P2P"
    ],
-   "description": "Warehouse and downstream extracts. This lane fails silently: blank files have shipped for long periods before detection.",
+   "description": "Extracts and reports that send Oracle data to downstream systems.",
    "integrations": [
-    "PO-line extract",
-    "journal detail",
-    "custom TB report (ESS)"
+    "BICC-PO",
+    "Custom trial-balance report"
    ],
-   "failure_modes": [
-    "Blank or missing extract, no ticket"
+   "evidence": "CO:01 §7",
+   "functions": [
+    "Bulk extracts to the warehouse (e.g. purchase-order lines, journal detail)",
+    "BI Publisher reports, including the custom trial balance used by EPM",
+    "Scheduled report jobs registered in Oracle"
    ],
-   "evidence": "CO:01 §7"
+   "docs": [
+    {
+     "label": "Reports catalogue",
+     "path": "operations/reports-catalog.md"
+    },
+    {
+     "label": "The estate in six layers",
+     "path": "03-estate-layers.md"
+    }
+   ]
   },
   {
    "id": "sup",
@@ -326,16 +516,39 @@
    "workstreams": [
     "P2P"
    ],
-   "description": "Supplier profile, sites, bank accounts, payment methods, tax and 1099 attributes. Two creation paths feed it.",
+   "description": "The supplier master: one record per supplier, fed by two creation paths.",
    "integrations": [
     "INT055A",
     "INT959",
-    "INT055B/C"
+    "INT055B",
+    "INT055C"
    ],
-   "failure_modes": [
-    "Duplicates, missing parent-child"
+   "evidence": "CO:02 · USER",
+   "functions": [
+    "Holds supplier profile, addresses, sites and site assignments",
+    "Holds bank accounts and payment methods",
+    "Holds tax registrations and 1099 attributes",
+    "Supplier type distinguishes regular, ad hoc and Treasury payees",
+    "Changes flow back to the Apex portal"
    ],
-   "evidence": "CO:02 · USER"
+   "docs": [
+    {
+     "label": "Suppliers, procurement and purchasing",
+     "path": "oracle-modules/suppliers-and-procurement.md"
+    },
+    {
+     "label": "Supplier onboarding",
+     "path": "processes/supplier-onboarding.md"
+    },
+    {
+     "label": "Apex suppliers to Oracle interface",
+     "path": "integrations/INT055A.md"
+    },
+    {
+     "label": "Supplier completion interface",
+     "path": "integrations/INT959.md"
+    }
+   ]
   },
   {
    "id": "ssp",
@@ -347,16 +560,34 @@
    "workstreams": [
     "P2P"
    ],
-   "description": "Receives Zip requisitions, re-derives the charge account, runs *_VAL validations and CVRs. First point in SOX scope.",
+   "description": "Requisitions in Oracle: the first point in SOX scope.",
    "integrations": [
+    "ZIP-REQ",
     "INT101",
     "INT270"
    ],
-   "failure_modes": [
-    "CVR rejects a combination Zip accepted",
-    "Approver on leave stalls the chain"
+   "evidence": "CO:02",
+   "functions": [
+    "Receives Zip-approved requisitions with proposed accounting",
+    "Re-derives the charge account from Oracle rules",
+    "Runs requisition validations and cross-validation rules at submit",
+    "Routes approval by cost center",
+    "Sends requisitions and steps to downstream systems"
    ],
-   "evidence": "CO:02"
+   "docs": [
+    {
+     "label": "Suppliers, procurement and purchasing",
+     "path": "oracle-modules/suppliers-and-procurement.md"
+    },
+    {
+     "label": "Procure to Pay, end to end",
+     "path": "processes/p2p-end-to-end.md"
+    },
+    {
+     "label": "Chart of accounts and ledgers",
+     "path": "foundation/chart-of-accounts-and-ledgers.md"
+    }
+   ]
   },
   {
    "id": "po",
@@ -368,16 +599,29 @@
    "workstreams": [
     "P2P"
    ],
-   "description": "Purchase orders, change orders and receipts. Receipt is the first accounting event (accrual). Charge accounts come from the Transaction Account Builder.",
+   "description": "Purchase orders, change orders and receipts.",
    "integrations": [
     "INT026F",
-    "PO FBDI"
+    "PO bulk updates"
    ],
-   "failure_modes": [
-    "Duplicate change-order notifications",
-    "Stale requester blocks payment"
+   "evidence": "CO:02 · ORA26C procurement p.648",
+   "functions": [
+    "Creates purchase orders from approved requisitions",
+    "Handles change orders, mostly by Procurement Ops",
+    "Records receipts: the first accounting event (accrual)",
+    "Derives charge accounts through the Transaction Account Builder",
+    "Supports bulk updates for volume changes"
    ],
-   "evidence": "CO:02 · ORA26C procurement p.648"
+   "docs": [
+    {
+     "label": "Suppliers, procurement and purchasing",
+     "path": "oracle-modules/suppliers-and-procurement.md"
+    },
+    {
+     "label": "Procure to Pay, end to end",
+     "path": "processes/p2p-end-to-end.md"
+    }
+   ]
   },
   {
    "id": "ap",
@@ -389,18 +633,35 @@
    "workstreams": [
     "P2P"
    ],
-   "description": "Invoice matching, tolerances and holds. Tolerances are held per business unit in local currency and recalculated monthly.",
+   "description": "Supplier invoices, matching and holds.",
    "integrations": [
     "INT301A",
+    "INT062A",
     "INT960",
-    "INT826",
-    "INT062A"
+    "INT826"
    ],
-   "failure_modes": [
-    "Supplier-level hold blocks every invoice",
-    "Non-PO over 5K hold, mean 35 days"
+   "evidence": "CO:02 · ORA26C payables p.92",
+   "functions": [
+    "Takes invoices from the AP desk, legal e-billing, ad hoc payment requests and Oracle Expenses",
+    "Matches invoices to POs and receipts within tolerances held per business unit",
+    "Places and releases holds",
+    "Applies Zip-approved payment-terms exceptions",
+    "Withholding tax and 1099 reporting"
    ],
-   "evidence": "CO:02 · ORA26C payables p.92"
+   "docs": [
+    {
+     "label": "Payables",
+     "path": "oracle-modules/payables.md"
+    },
+    {
+     "label": "Procure to Pay, end to end",
+     "path": "processes/p2p-end-to-end.md"
+    },
+    {
+     "label": "Zip payment-terms exceptions interface",
+     "path": "integrations/INT826.md"
+    }
+   ]
   },
   {
    "id": "pay",
@@ -412,16 +673,39 @@
    "workstreams": [
     "P2P"
    ],
-   "description": "Payment process requests per legal entity and bank account. Standard payments auto-approve in Kyriba because approval sits in Oracle.",
+   "description": "Payment runs per legal entity and bank account, sent to Kyriba for the banks.",
    "integrations": [
+    "KYR-PAYFILE",
+    "KYR-FUNDSCAP",
     "INT955",
     "INT955B"
    ],
-   "failure_modes": [
-    "Reprocessing without rejecting the original",
-    "Payment reason too long for the file"
+   "evidence": "CO:02 · ORA26C payables p.168",
+   "functions": [
+    "Selects validated invoices into payment process requests",
+    "Formats one payment file per bank and sends it to Kyriba over SFTP",
+    "Approval sits in Oracle, so standard payments auto-approve in Kyriba",
+    "Urgent and one-time payments go through the Urgent Payment Tool",
+    "Records bank acknowledgements on each payment"
    ],
-   "evidence": "CO:02 · ORA26C payables p.168"
+   "docs": [
+    {
+     "label": "Payments and Cash Management",
+     "path": "oracle-modules/payments-and-cash.md"
+    },
+    {
+     "label": "Payments, settlement and returns",
+     "path": "processes/payments-settlement-and-returns.md"
+    },
+    {
+     "label": "Oracle to Kyriba payment file",
+     "path": "integrations/kyriba-payment-file.md"
+    },
+    {
+     "label": "Payment status reference",
+     "path": "operations/payment-status-reference.md"
+    }
+   ]
   },
   {
    "id": "exp",
@@ -433,12 +717,26 @@
    "workstreams": [
     "P2P"
    ],
-   "description": "Oracle Expenses runs alongside Ramp. Approved reports become Payables invoices.",
+   "description": "Oracle Expenses, running alongside Ramp.",
    "integrations": [
     "Process Expense Reimbursements"
    ],
-   "failure_modes": [],
-   "evidence": "USER · ORA26C expenses p.41"
+   "evidence": "USER · ORA26C expenses p.41",
+   "functions": [
+    "Employees submit expense reports",
+    "Reports go through approval and audit",
+    "Approved reports become Payables invoices for reimbursement"
+   ],
+   "docs": [
+    {
+     "label": "Expenses",
+     "path": "oracle-modules/expenses.md"
+    },
+    {
+     "label": "Payables",
+     "path": "oracle-modules/payables.md"
+    }
+   ]
   },
   {
    "id": "fah",
@@ -450,19 +748,32 @@
    "workstreams": [
     "PLAT"
    ],
-   "description": "Turns 10 to 12M daily events into about 40M lines and 3.5M GL lines in a 5 to 7 hour run. Succeeds about 99% of the time; the rest is throughput.",
+   "description": "Platform accounting: turns high-volume business events into GL accounting every day.",
    "integrations": [
-    "FAH daily load",
+    "FAH-LOAD",
     "INT992",
     "INT162",
     "API157",
     "INT978"
    ],
-   "failure_modes": [
-    "Unaccounted events",
-    "Rules-engine throughput"
+   "evidence": "CO:03 §3.2",
+   "functions": [
+    "Receives 10 to 12M events a day from the payments platform, Ramp and other sources",
+    "Create Accounting produces about 40M journal lines in a 5 to 7 hour run",
+    "Posts summarised journals to the General Ledger",
+    "Returns accounted fact tables to S3 for reporting",
+    "Exchanges accounting with Workday Finance"
    ],
-   "evidence": "CO:03 §3.2"
+   "docs": [
+    {
+     "label": "Subledger Accounting and Accounting Hub",
+     "path": "oracle-modules/subledger-accounting-and-fah.md"
+    },
+    {
+     "label": "Platform accounting daily run",
+     "path": "processes/platform-accounting-daily-run.md"
+    }
+   ]
   },
   {
    "id": "fa",
@@ -474,14 +785,27 @@
    "workstreams": [
     "R2R"
    ],
-   "description": "Additions arrive mostly as mass additions from Payables. Corporate and tax books run in parallel.",
+   "description": "Fixed Assets across more than 40 corporate and tax books.",
    "integrations": [
     "INT970"
    ],
-   "failure_modes": [
-    "Cost stranded in clearing when additions are held"
+   "evidence": "CO:03 §3.3",
+   "functions": [
+    "Takes additions mostly as mass additions from Payables",
+    "Routes capitalised assets above a threshold for approval before posting",
+    "Depreciates by book; adjustments, transfers and retirements",
+    "Runs corporate and tax books in parallel"
    ],
-   "evidence": "CO:03 §3.3"
+   "docs": [
+    {
+     "label": "Fixed Assets",
+     "path": "oracle-modules/fixed-assets.md"
+    },
+    {
+     "label": "Record to Report close",
+     "path": "processes/r2r-close.md"
+    }
+   ]
   },
   {
    "id": "cm",
@@ -494,15 +818,33 @@
     "R2R",
     "P2P"
    ],
-   "description": "Bank statements and reconciliation; Receivables only for a small B2B and intercompany population.",
+   "description": "Bank statements, cash reconciliation, and Receivables for a small population.",
    "integrations": [
-    "INT819/820",
+    "INT819",
+    "INT820",
     "INT234"
    ],
-   "failure_modes": [
-    "Missing bank statements"
+   "evidence": "CO:02 · USER",
+   "functions": [
+    "Loads daily BAI2 bank statements retrieved by Kyriba",
+    "Reconciles payments to the statement (negotiable to cleared)",
+    "Loads ad hoc bank transactions",
+    "Receivables only for a small B2B, partner and intercompany population"
    ],
-   "evidence": "CO:02 · USER"
+   "docs": [
+    {
+     "label": "Payments and Cash Management",
+     "path": "oracle-modules/payments-and-cash.md"
+    },
+    {
+     "label": "Receivables",
+     "path": "oracle-modules/receivables.md"
+    },
+    {
+     "label": "Kyriba",
+     "path": "external-systems/kyriba.md"
+    }
+   ]
   },
   {
    "id": "xla",
@@ -516,12 +858,29 @@
     "R2R",
     "PLAT"
    ],
-   "description": "One engine for every subledger and every Accounting Hub source: event classes, journal entry rule sets, journal line rules, account rules, mapping sets. One place to change policy and one place that can strand transactions.",
+   "description": "One accounting engine for every subledger and every Accounting Hub source.",
    "integrations": [],
-   "failure_modes": [
-    "Accounting method left Incomplete after a rule change"
+   "evidence": "CO:01 · ORA26C SLA p.15–16",
+   "functions": [
+    "Applies one accounting method across all sources",
+    "Rule stack: event classes, journal entry rule sets, journal line rules, account rules, mapping sets",
+    "Creates accounting for receipts, invoices, payments and platform events",
+    "One place to change accounting policy"
    ],
-   "evidence": "CO:01 · ORA26C SLA p.15–16"
+   "docs": [
+    {
+     "label": "Subledger Accounting and Accounting Hub",
+     "path": "oracle-modules/subledger-accounting-and-fah.md"
+    },
+    {
+     "label": "Chart of accounts and ledgers",
+     "path": "foundation/chart-of-accounts-and-ledgers.md"
+    },
+    {
+     "label": "Architecture principles",
+     "path": "01-principles.md"
+    }
+   ]
   },
   {
    "id": "gl",
@@ -535,17 +894,34 @@
     "R2R",
     "PLAT"
    ],
-   "description": "Corp_COA_Structure, nine segments. The only place completeness can be asserted. Receives derived journals from XLA and pre-accounted journals from 19+ feeders.",
+   "description": "The system of record for balances.",
    "integrations": [
-    "INT156 rates",
+    "INT156",
     "INT992",
     "INT267"
    ],
-   "failure_modes": [
-    "Import rejections on CVRs",
-    "Intercompany imbalance on 19500"
+   "evidence": "CO:03 · USER",
+   "functions": [
+    "Nine-segment chart of accounts; GAAP primary ledger with STAT and TAX secondary ledgers",
+    "Receives derived journals from Subledger Accounting and pre-accounted journals from 19+ feeders",
+    "Manual and statutory journals, allocations and transfer pricing",
+    "Revaluation, translation and period open and close",
+    "Daily rates and intercompany balancing"
    ],
-   "evidence": "CO:03 · USER"
+   "docs": [
+    {
+     "label": "General Ledger and intercompany",
+     "path": "oracle-modules/general-ledger-and-intercompany.md"
+    },
+    {
+     "label": "Chart of accounts and ledgers",
+     "path": "foundation/chart-of-accounts-and-ledgers.md"
+    },
+    {
+     "label": "Record to Report close",
+     "path": "processes/r2r-close.md"
+    }
+   ]
   },
   {
    "id": "fccs",
@@ -557,16 +933,29 @@
    "workstreams": [
     "R2R"
    ],
-   "description": "Application CORPCONS: multi-GAAP, traditional balance sheet, CTA on balance sheet. Loads GL through a custom BIP trial balance registered as an ESS job.",
+   "description": "Consolidation in Oracle FCCS.",
    "integrations": [
     "fccs_integrations_pipeline",
-    "rates DAG"
+    "epm_load_month_end_and_average_rates_to_fccs"
    ],
-   "failure_modes": [
-    "Maintenance-window collision",
-    "Mapping exceptions (task FPC07)"
+   "evidence": "CO:03 · ORA26C FCCS p.51–54",
+   "functions": [
+    "Multi-GAAP, multi-currency consolidation application",
+    "Loads GL balances through a custom trial-balance report",
+    "Consolidate and Translate run by the Consolidation team",
+    "Close checklist in Task Manager",
+    "Financial reports with bursting"
    ],
-   "evidence": "CO:03 · ORA26C FCCS p.51–54"
+   "docs": [
+    {
+     "label": "FCCS, ARCS and the EPM data path",
+     "path": "oracle-modules/epm-fccs-arcs.md"
+    },
+    {
+     "label": "Record to Report close",
+     "path": "processes/r2r-close.md"
+    }
+   ]
   },
   {
    "id": "arcs",
@@ -578,15 +967,30 @@
    "workstreams": [
     "R2R"
    ],
-   "description": "Reconciliation Compliance and Transaction Matching. Auto-certifies within ±5,000 USD or zero difference with zero activity.",
+   "description": "Account reconciliation in Oracle ARCS.",
    "integrations": [
-    "arcs_gaap / arcs_stat",
-    "ReconArt balances"
+    "arcs_gaap_integrations_pipeline",
+    "arcs_stat_integrations_pipeline",
+    "gaap_reval_upload_to_arcs",
+    "ReconArt bank balances"
    ],
-   "failure_modes": [
-    "Unmapped accounts every period"
+   "evidence": "CO:03 · ORA26C ARCS p.155, 254",
+   "functions": [
+    "Reconciliation Compliance: certification workflow per account",
+    "Transaction Matching: item-level matching",
+    "Auto-certifies within a tolerance, or zero difference with zero activity",
+    "Receives bank balances from ReconArt"
    ],
-   "evidence": "CO:03 · ORA26C ARCS p.155, 254"
+   "docs": [
+    {
+     "label": "FCCS, ARCS and the EPM data path",
+     "path": "oracle-modules/epm-fccs-arcs.md"
+    },
+    {
+     "label": "Record to Report close",
+     "path": "processes/r2r-close.md"
+    }
+   ]
   },
   {
    "id": "wh",
@@ -599,15 +1003,27 @@
     "R2R",
     "PLAT"
    ],
-   "description": "Finance Warehouse, Snowflake and FAH fact tables. A second reporting platform with a standing reconciliation obligation to GL and no single owner.",
+   "description": "The Finance Warehouse and Snowflake: a second reporting platform alongside Oracle.",
    "integrations": [
     "INT239",
-    "BICC"
+    "BICC-PO"
    ],
-   "failure_modes": [
-    "Oracle and warehouse disagree"
+   "evidence": "CO:03 §4",
+   "functions": [
+    "Receives Oracle extracts and Accounting Hub fact tables",
+    "Feeds analytics and BI tools",
+    "Reconciles to the General Ledger"
    ],
-   "evidence": "CO:03 §4"
+   "docs": [
+    {
+     "label": "Reports catalogue",
+     "path": "operations/reports-catalog.md"
+    },
+    {
+     "label": "The estate in six layers",
+     "path": "03-estate-layers.md"
+    }
+   ]
   },
   {
    "id": "plan",
@@ -619,13 +1035,30 @@
    "workstreams": [
     "R2R"
    ],
-   "description": "Actuals and master data out to planning.",
+   "description": "Planning in Anaplan and EPBCS.",
    "integrations": [
     "INT029",
-    "INT110AA–F"
+    "INT110AA",
+    "INT110AB",
+    "INT110C",
+    "INT110D",
+    "INT110F"
    ],
-   "failure_modes": [],
-   "evidence": "CO:01"
+   "evidence": "CO:01",
+   "functions": [
+    "Receives actuals from Oracle",
+    "Receives master data for planning models"
+   ],
+   "docs": [
+    {
+     "label": "FCCS, ARCS and the EPM data path",
+     "path": "oracle-modules/epm-fccs-arcs.md"
+    },
+    {
+     "label": "Integration register",
+     "path": "integrations/integration-register.yaml"
+    }
+   ]
   },
   {
    "id": "ky",
@@ -637,18 +1070,42 @@
    "workstreams": [
     "P2P"
    ],
-   "description": "Derives the bank payment code (DOMW domestic, INTW international), translates to bank format, transmits host-to-host, returns acknowledgements hourly. Source of truth for payment-code mapping.",
+   "description": "The payment factory: the single connection between Oracle and every bank.",
    "integrations": [
+    "KYR-PAYFILE",
     "INT955",
     "INT955B",
-    "INT246"
+    "INT819",
+    "INT820",
+    "INT246",
+    "KYR-POSPAY"
    ],
-   "failure_modes": [
-    "Stuck in Draft with no Oracle signal",
-    "Bank rejects on supplier data",
-    "No ack: the bank has not received it"
+   "evidence": "CO:02 · USER",
+   "functions": [
+    "Turns Oracle's payment file into each bank's own format and payment code",
+    "Transmits payments host-to-host; FTG never deals with banks directly",
+    "Returns bank acknowledgements and rejections to Oracle hourly",
+    "Retrieves daily bank statements for Cash Management",
+    "Passes Positive Pay files through for in-house checks"
    ],
-   "evidence": "CO:02 · USER"
+   "docs": [
+    {
+     "label": "Kyriba",
+     "path": "external-systems/kyriba.md"
+    },
+    {
+     "label": "Kyriba acknowledgement interfaces",
+     "path": "integrations/INT955.md"
+    },
+    {
+     "label": "Oracle to Kyriba payment file",
+     "path": "integrations/kyriba-payment-file.md"
+    },
+    {
+     "label": "Payments, settlement and returns",
+     "path": "processes/payments-settlement-and-returns.md"
+    }
+   ]
   }
  ],
  "edges": [
@@ -826,12 +1283,12 @@
  "default_node": "xla",
  "p2p": {
   "title": "Procure to Pay: eight stages",
-  "lede": "Zip orchestrates, Oracle decides. The first four stages move a commitment without touching the ledger. Receipt, invoice and payment each create accounting through Subledger Accounting under CORP_GAAP_SLAM. Bank outcomes return hourly and can cancel a payment Oracle already considers made.",
+  "lede": "Zip orchestrates, Oracle decides. The first four stages move a commitment without touching the ledger. Receipt, invoice and payment each create accounting through Subledger Accounting under CORP_GAAP_SLAM. Bank outcomes return hourly; a rejected payment is voided manually.",
   "stages": [
    {
     "n": "01",
     "title": "Supplier onboarding",
-    "system": "Apex + INT055A · SRR + INT959",
+    "system": "Apex + supplier interface · Oracle registration + completion interface",
     "accounting": "none",
     "what": "Two creation paths into one supplier master",
     "breaks": "No address or unmatched terms fails creation"
@@ -865,7 +1322,7 @@
     "title": "Receipt",
     "system": "Purchasing",
     "accounting": "accrual",
-    "what": "Third leg of the match; variable accrual via INT026F",
+    "what": "Third leg of the match; variable accrual interface",
     "breaks": "Duplicate accrual journals"
    },
    {
@@ -873,7 +1330,7 @@
     "title": "Invoice",
     "system": "Payables",
     "accounting": "liability",
-    "what": "Matching, tolerances, holds; INT826 terms exceptions; INT960 non-PO over 5K",
+    "what": "Matching, tolerances, holds; Zip payment-terms exceptions; non-PO over 5K hold",
     "breaks": "Supplier-level hold blocks all invoices"
    },
    {
@@ -889,7 +1346,7 @@
     "title": "Settlement",
     "system": "Kyriba → bank",
     "accounting": "none",
-    "what": "Two code mappings; host-to-host; hourly acks via INT955 and INT955B",
+    "what": "Two code mappings; host-to-host; hourly acknowledgements and rejections back to Oracle",
     "breaks": "Stuck in Draft with no Oracle signal"
    }
   ],
@@ -910,11 +1367,11 @@
  },
  "onboarding": {
   "title": "Two paths into the supplier master",
-  "lede": "PO suppliers are onboarded through Apex and arrive in Oracle through INT055A. Non-PO, ad hoc and Treasury payees are created in Oracle through the Supplier Registration Request and completed by INT959. Both land in the same supplier master.",
+  "lede": "PO suppliers are onboarded through Apex and arrive in Oracle through the Apex supplier interface. Non-PO, ad hoc and Treasury payees are created in Oracle through the Supplier Registration Request and completed by an interface. Both land in the same supplier master.",
   "lanes": [
    {
     "title": "PO suppliers",
-    "route": "Zip → Apex → INT055A → Oracle",
+    "route": "Zip → Apex → INT · Apex suppliers to Oracle → Oracle",
     "steps": [
      {
       "label": "Zip",
@@ -927,7 +1384,7 @@
       "kind": "ext"
      },
      {
-      "label": "INT055A · every 30 min",
+      "label": "INT · Apex suppliers to Oracle · every 30 min",
       "text": "Create or update by ERP Unique ID; banks and branches first; sites per company code from the enterprise-structure crosswalk",
       "kind": "int"
      },
@@ -945,7 +1402,7 @@
    },
    {
     "title": "Non-PO, ad hoc and Treasury payees",
-    "route": "Oracle SRR → INT959",
+    "route": "Oracle SRR → INT · Supplier completion",
     "steps": [
      {
       "label": "Supplier Registration Request",
@@ -963,7 +1420,7 @@
       "kind": ""
      },
      {
-      "label": "INT959",
+      "label": "INT · Supplier completion",
       "text": "Completes profile, payment methods and tax flags from the questionnaire",
       "kind": "int"
      }
@@ -973,7 +1430,7 @@
   "notes": [
    {
     "title": "Crosswalk dependency.",
-    "text": "A new legal entity needs a row in the company-code crosswalk, or INT055A cannot create a supplier site for it."
+    "text": "A new legal entity needs a row in the company-code crosswalk, or the Apex supplier interface cannot create a supplier site for it."
    },
    {
     "title": "In flight on the SRR path.",
@@ -981,7 +1438,7 @@
    },
    {
     "title": "Return legs.",
-    "text": "INT055B and INT055C send Oracle-side supplier changes back to Apex."
+    "text": "Two return interfaces send Oracle-side supplier changes back to Apex."
    }
   ]
  },
@@ -991,19 +1448,19 @@
   "timeline": [
    {
     "when": "Hourly",
-    "what": "INT955 Kyriba acknowledgements and rejections into Oracle; daily rejection summary to AP and Treasury",
+    "what": "Kyriba acknowledgements and rejections into Oracle; daily rejection summary to AP and Treasury",
     "owner": "OIC",
     "consolidation_team": false
    },
    {
     "when": "Daily 00:00 UTC",
-    "what": "INT992 detects intercompany imbalance on 19500 and posts balancing journals",
+    "what": "The intercompany balancing interface detects intercompany imbalance on 19500 and posts balancing journals",
     "owner": "FTG",
     "consolidation_team": false
    },
    {
     "when": "Daily ~01:00 ET",
-    "what": "INT826 applies Zip-approved payment-terms exceptions",
+    "what": "The Zip payment-terms interface applies Zip-approved payment-terms exceptions",
     "owner": "OIC",
     "consolidation_team": false
    },
@@ -1091,5 +1548,6 @@
   "title": "Integration register",
   "lede": "A strong sample assembled from production monitoring names and design documents, not a certified register. The lane a flow sits in tells you who operates it and where a failure surfaces."
  },
- "footer": "Source: this repository (anonymised review copy), validated against Oracle 26C implementation guides. Current state as of 30 September 2026. In-flight work is labelled as such and is not shown as architecture."
+ "footer": "Source: this repository (anonymised review copy), validated against Oracle 26C implementation guides. Current state as of 30 September 2026. In-flight work is labelled as such and is not shown as architecture.",
+ "docs_base": "https://github.com/fsdowie/oracle-generic-architecture/blob/main/"
 }
