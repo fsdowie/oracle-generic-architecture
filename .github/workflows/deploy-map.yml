@@ -58,9 +58,15 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
+          # New sb_secret_ keys are not JWTs: send them in the apikey header only.
+          auth=()
+          case "$SUPABASE_SERVICE_ROLE_KEY" in
+            sb_*) ;;
+            *) auth=(-H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY") ;;
+          esac
           status=$(curl -sS -o /tmp/upload.txt -w "%{http_code}" -X POST \
             "$SUPABASE_URL/storage/v1/object/estate-map/map.json" \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "${auth[@]}" \
             -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
             -H "x-upsert: true" \
             -H "Content-Type: application/json" \
