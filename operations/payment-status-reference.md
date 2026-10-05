@@ -44,7 +44,7 @@ Relationship to REP627 is `[INFERRED]` (same subject, parameters "to check again
 | Accepted but never cleared (3rd party) | `ACCP`/`ACPT` | ≠ EMPLOYEE / Interco | > 5 days |
 | Accepted but never cleared (employee) | `ACCP`/`ACPT` | = EMPLOYEE | > 5 days |
 
-The ">2 days, blank ack" rows match FM-PAY-05: the bank hasn't received the payment. The ">5 days, accepted, not cleared" rows point to statement reconciliation (FM-CM-01) or a return.
+The ">2 days, blank ack" rows match FM-PAY-05: the bank hasn't received the payment. Exclude the `CHECK` method from those rows, because checks never get an ack `[USER:2026-10-05]`. The ">5 days, accepted, not cleared" rows point to statement reconciliation (FM-CM-01) or a return.
 
 ## Bank rejection taxonomy (Jun–Jul 2026 sample, 17 payments) `[DATA]`
 | Family | Example bank message | Bank / LE | Fix owner |
@@ -62,4 +62,4 @@ The ">2 days, blank ack" rows match FM-PAY-05: the bank hasn't received the paym
 **Pattern:** rejections are dominated by **supplier master data quality** (bank, tax ID, name/address characters), concentrated in Bank B Brazil (8 of 17). `[DATA]` `[INFERRED]`
 
 ## No-ack sample (Jul 2026, 40 payments) — meaning: bank has NOT received these payments `[USER:2026-09-30]`
-38 `NEGOTIABLE` + 2 `VOIDED` with blank ack fields: 21 Bank B BR (TED/Boleto), 9 Bank A USD (CHECK, incl. political contributions), 6 Bank B MX, 2 Bank A Payments Inc (CHECK), 1 Bank D SAR, 1 Bank E ZAR. A blank ack means the bank has not received the payment — either a transmission issue or still being sent. Triage: confirm file status in Kyriba, then transmission to bank. Whether CHECK payments are expected to carry an ack is still Q-PAY-4.
+38 `NEGOTIABLE` + 2 `VOIDED` with blank ack fields: 21 Bank B BR (TED/Boleto), 9 Bank A USD (CHECK, incl. political contributions), 6 Bank B MX, 2 Bank A Payments Inc (CHECK), 1 Bank D SAR, 1 Bank E ZAR. **The 11 `CHECK` payments are expected to have no ack:** checks are not electronic, so whether the bank accepted them is tracked manually `[USER:2026-10-05]`. For the other **29** (all electronic), a blank ack means the bank has not received the payment, either through a transmission issue or because it's still being sent. Triage those: confirm the file status in Kyriba, then the transmission to the bank.

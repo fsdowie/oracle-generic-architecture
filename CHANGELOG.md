@@ -8,7 +8,7 @@
 - Register: KYR-PAYFILE, KYR-FUNDSCAP, KYR-POSPAY added; INT955/955B/234/819/820 enriched.
 - Failure modes FM-PAY-08…10 (file or batch rejected, so no payment acks); payment-level monitoring criteria in `operations/payment-status-reference.md`.
 - Open questions: Q-PAY-4 partly answered; superseded source statements (26B, IWI, ACCP) recorded.
-- FTG analyst answers 5-Oct-2026: payment files go over SFTP run by a managed-service provider (R-15); bank-rejected payments are voided manually, not by INT955B (R-16). Q-KY-3 narrowed to INT955B's remaining scope.
+- FTG analyst answers 5-Oct-2026: payment files go over SFTP run by a managed-service provider (R-15); bank-rejected payments are voided manually, not by INT955B (R-16). Q-KY-3 narrowed to INT955B's remaining scope. `CHECK` payments are not electronic and carry no ack; acceptance is tracked manually (R-17, closes Q-PAY-4). FM-PAY-05 and the no-ack sample now exclude checks.
 
 ## 0.2.0 — 2026-09-30
 - Estate map moved to private hosting: login page on Vercel (`site/public/`), map data in a private Supabase Storage bucket readable only by allow-listed users (`supabase/setup.sql`).

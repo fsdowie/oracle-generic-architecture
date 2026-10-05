@@ -30,7 +30,7 @@ Payment process requests (PPRs), payment documents, payment files, payment statu
    - **Outsourced checks** use Kyriba code `CHK-OS`, so the bank prints them.
    - **In-house checks** are printed by Company. Kyriba only passes their **Positive Pay** files through to two US banks (SFTP + PGP).
 
-   `CHECK` PPRs (e.g. political contributions, US tax authorities) show no acknowledgement status `[DATA:payments (negotiable and voided) with no ACK status.xlsx]`. Which route those runs take, and so whether an ack is expected at all, is still Q-PAY-4.
+   `CHECK` PPRs (e.g. political contributions, US tax authorities) show no acknowledgement status `[DATA:payments (negotiable and voided) with no ACK status.xlsx]`. That is expected: **`CHECK` payments are not electronic, so no bank ack comes back, and acceptance is tracked manually** `[USER:2026-10-05]` (R-17).
 4. **Treasury PPRs** — `TRS …` naming, supplier type `TREASURY`. `[DATA]`
 5. **Intercompany settlement**: intercompany PPR templates `[CO:03 §3.4]`. Intercompany payment methods set the disbursement flexfield *Intercompany = Yes* (`ATTRIBUTE1`), and Kyriba treats those payments as Treasury payments. `[CO:KYRIBA-DOC §10.1]`
 6. **Funds capture / AR refunds** (SEPA, EFT) use their own setup: e-Text template `TMS_Kyriba_Payment_Format_SEPA.rtf`, a funds-capture process profile and a customer transmission configuration. `[CO:KYRIBA-DOC §14]`
