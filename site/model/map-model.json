@@ -1290,64 +1290,56 @@
     "title": "Supplier onboarding",
     "system": "Apex + supplier interface · Oracle registration + completion interface",
     "accounting": "none",
-    "what": "Two creation paths into one supplier master",
-    "breaks": "No address or unmatched terms fails creation"
+    "what": "Two creation paths into one supplier master"
    },
    {
     "n": "02",
     "title": "Intake",
     "system": "Zip",
     "accounting": "none",
-    "what": "Review graph and COA defaulting",
-    "breaks": "Inactive spend category: request never arrives"
+    "what": "Review graph and COA defaulting"
    },
    {
     "n": "03",
     "title": "Requisition",
     "system": "Self-Service Procurement",
     "accounting": "none",
-    "what": "Charge account re-derived; *_VAL rules and CVRs; first point in SOX scope",
-    "breaks": "Approver on leave stalls approval"
+    "what": "Charge account re-derived; *_VAL rules and CVRs; first point in SOX scope"
    },
    {
     "n": "04",
     "title": "Purchase order",
     "system": "Purchasing",
     "accounting": "none",
-    "what": "Change orders by Procurement Ops; FBDI for volume",
-    "breaks": "Stale requester blocks invoice approval"
+    "what": "Change orders by Procurement Ops; FBDI for volume"
    },
    {
     "n": "05",
     "title": "Receipt",
     "system": "Purchasing",
     "accounting": "accrual",
-    "what": "Third leg of the match; variable accrual interface",
-    "breaks": "Duplicate accrual journals"
+    "what": "Third leg of the match; variable accrual interface"
    },
    {
     "n": "06",
     "title": "Invoice",
     "system": "Payables",
     "accounting": "liability",
-    "what": "Matching, tolerances, holds; Zip payment-terms exceptions; non-PO over 5K hold",
-    "breaks": "Supplier-level hold blocks all invoices"
+    "what": "Matching, tolerances, holds; Zip payment-terms exceptions; non-PO over 5K hold"
    },
    {
     "n": "07",
     "title": "Payment",
     "system": "Payments",
     "accounting": "cash",
-    "what": "PPR per entity and bank account; auto-approved in Kyriba; urgent payments released by Treasury",
-    "breaks": "Reprocess without rejecting the original"
+    "what": "PPR per entity and bank account; auto-approved in Kyriba; urgent payments released by Treasury"
    },
    {
     "n": "08",
     "title": "Settlement",
     "system": "Kyriba → bank",
     "accounting": "none",
-    "what": "Two code mappings; host-to-host; hourly acknowledgements and rejections back to Oracle",
-    "breaks": "Stuck in Draft with no Oracle signal"
+    "what": "Two code mappings; host-to-host; hourly acknowledgements and rejections back to Oracle"
    }
   ],
   "notes": [

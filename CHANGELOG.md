@@ -1,7 +1,7 @@
 # Changelog
 
 ## 0.3.0 — 2026-10-05
-- Estate map renamed **Travel Estate Map** and made generic: interfaces are shown by name (`INT · <name>`), never by number; clicking a node shows what it does (bullets), its interfaces, its connections and links to the pack documents. "Where it breaks" and evidence tags are no longer shown on the map.
+- Estate map renamed **Travel Estate Map** and made generic: interfaces are shown by name (`INT · <name>`), never by number; clicking a node shows what it does (bullets), its interfaces, its connections and links to the pack documents. "Where it breaks", the Procure-to-Pay "Breaks" lines and evidence tags are no longer shown on the map.
 - `tools/build_map_data.py` turns register IDs into names, builds document links from `docs_base`, and fails the build if an interface number would be shown.
 - New source CO:KYRIBA-DOC (Kyriba functional & technical documentation, Oct 2026).
 - New `integrations/kyriba-payment-file.md`: native Oracle → Kyriba payment file and funds-capture file, setup chain, transmission configuration, TR/IN field mapping, country rules.

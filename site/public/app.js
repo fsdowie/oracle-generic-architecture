@@ -93,7 +93,7 @@
     // p2p
     const p = model.p2p;
     $("p2pTitle").textContent = p.title; $("p2pLede").textContent = p.lede;
-    $("chain").innerHTML = p.stages.map((s) => `<div class="stage"><span class="n">Stage ${esc(s.n)}</span><h4>${esc(s.title)}</h4><span class="sys">${esc(s.system)}</span><span class="acct ${s.accounting === "none" ? "none" : ""}">${s.accounting === "none" ? "no accounting" : esc(s.accounting) + " via XLA"}</span><ul><li>${esc(s.what)}</li><li><span style="color:var(--warn)">Breaks:</span> ${esc(s.breaks)}</li></ul></div>`).join("");
+    $("chain").innerHTML = p.stages.map((s) => `<div class="stage"><span class="n">Stage ${esc(s.n)}</span><h4>${esc(s.title)}</h4><span class="sys">${esc(s.system)}</span><span class="acct ${s.accounting === "none" ? "none" : ""}">${s.accounting === "none" ? "no accounting" : esc(s.accounting) + " via XLA"}</span><ul><li>${esc(s.what)}</li></ul></div>`).join("");
     $("p2pNotes").innerHTML = notes(p.notes);
 
     // onboarding
