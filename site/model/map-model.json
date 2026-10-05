@@ -831,7 +831,7 @@
    "evidence": "CO:02 · USER",
    "functions": [
     "Loads daily BAI2 bank statements retrieved by Kyriba",
-    "Reconciles payments to the statement (negotiable to cleared)",
+    "Reconciles payments to the statement (Negotiable to Cleared); a status change only, with no journal entry",
     "Loads ad hoc bank transactions",
     "Receivables only for a small B2B, partner and intercompany population"
    ],
@@ -1287,7 +1287,7 @@
  "default_node": "xla",
  "p2p": {
   "title": "Procure to Pay: eight stages",
-  "lede": "Zip orchestrates, Oracle decides. The first four stages move a commitment without touching the ledger. Receipts not yet invoiced are accrued at period end; invoice and payment create accounting through Subledger Accounting under CORP_GAAP_SLAM. Bank outcomes return hourly; a rejected payment is voided manually.",
+  "lede": "Zip orchestrates, Oracle decides. The first four stages move a commitment without touching the ledger. Receipts not yet invoiced are accrued at period end; invoice and payment create accounting through Subledger Accounting under CORP_GAAP_SLAM. Settlement changes status only: bank outcomes return hourly and a rejected payment is voided manually.",
   "stages": [
    {
     "n": "01",
@@ -1416,16 +1416,16 @@
      "Validated invoices selected into a payment process request per legal entity and bank account",
      "One payment file per bank sent to Kyriba over SFTP; standard payments auto-approve in Kyriba",
      "Urgent and one-time payments go through the Urgent Payment Tool and are released by Treasury",
-     "Payment is recorded in Oracle as Negotiable"
+     "Accounting is booked once, at issue, straight to Cash, in the primary and STAT secondary ledgers"
     ],
     "entries": [
      {
-      "event": "Payment",
+      "event": "Payment issued (single step)",
       "dr": [
        "Liability (trade payables)"
       ],
       "cr": [
-       "Cash clearing (or Cash)",
+       "Cash (bank account)",
        "Discount taken, if any"
       ]
      }
@@ -1435,23 +1435,12 @@
     "n": "08",
     "title": "Settlement",
     "system": "Kyriba → bank",
-    "accounting": "clearing",
+    "accounting": "none",
     "points": [
      "Kyriba maps the payment to the bank's code and format and transmits host-to-host",
      "Bank acknowledgements return hourly and are recorded on the Oracle payment",
      "Rejected payments are voided manually in Oracle",
-     "Daily bank statements reconcile each payment from Negotiable to Cleared"
-    ],
-    "entries": [
-     {
-      "event": "Payment cleared (statement reconciled)",
-      "dr": [
-       "Cash clearing"
-      ],
-      "cr": [
-       "Cash (bank account)"
-      ]
-     }
+     "Daily bank statements reconcile each payment from Negotiable to Cleared: a status change only, no journal entry"
     ]
    }
   ],
@@ -1469,7 +1458,7 @@
     "text": "Either transmission failed or the file is still in flight. Check Kyriba file status first."
    }
   ],
-  "accounting_note": "Account types follow Oracle Payables defaults. Expense items accrue at period end: receipts without invoices are accrued at close and reversed when the next period opens, and the invoice books the expense. Still to confirm (Q-PAY-7): whether payments are accounted at clearing time (cash clearing) or straight to cash."
+  "accounting_note": "Expense items accrue at period end: receipts without invoices are accrued at close and reversed when the next period opens, and the invoice books the expense. Payments are accounted once, at issue, straight to Cash; there is no cash clearing account, so bank acknowledgement and statement reconciliation create no journal entry. Entries post to the primary ledger and its STAT secondary ledger."
  },
  "onboarding": {
   "title": "Two paths into the supplier master",

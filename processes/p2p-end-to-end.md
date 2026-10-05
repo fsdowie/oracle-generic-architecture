@@ -31,15 +31,17 @@ Note: two onboarding paths — PO suppliers are onboarded Zip → Apex → Oracl
 ## Stage cards
 
 ## Accounting by stage (account types)
-Only stages 05–08 create accounting. Expense items accrue **at period end** `[USER:2026-10-06]`. Types, not account numbers; all through Subledger Accounting under `CORP_GAAP_SLAM`.
+Only stages 05–07 create accounting; settlement (08) does not. Expense items accrue **at period end** `[USER:2026-10-06]`. Types, not account numbers; all through Subledger Accounting under `CORP_GAAP_SLAM`.
 | Stage | Event | Debit | Credit | Evidence |
 |---|---|---|---|---|
 | 05 Receipt | Period-end accrual for receipts not yet invoiced (the receipt itself creates no accounting) | Expense, or Asset clearing for capital items | Accrual / uninvoiced receipts (liability) | `[USER:2026-10-06]` `[ORA26C:implementing-payables-invoice-to-pay p.37]` |
 | 05 Receipt | Reversal when the next period opens | Accrual / uninvoiced receipts (liability) | Expense, or Asset clearing | same |
 | 06 Invoice | PO-matched invoice | Expense (PO charge account) or Asset clearing; tax | Liability (trade payables); withholding if withheld at validation | `[ORA26C:… p.31, 36]` `[USER:2026-10-06]` |
 | 06 Invoice | Non-PO invoice | Expense or Asset clearing; tax | Liability | `[ORA26C:… p.36]` |
-| 07 Payment | Payment issued | Liability | Cash clearing (or Cash); discount | `[ORA26C:… p.31]` |
-| 08 Settlement | Payment cleared on statement | Cash clearing | Cash | `[ORA26C:… p.31, 342]`; applies only if payments are accounted at clearing time → Q-PAY-7 |
+| 07 Payment | Payment issued (Create Accounting on the *Payment Created* event at PPR time). Single step: no cash clearing account | Liability (trade payables) | **Cash**; discount, if any | `[USER:2026-10-06]` `[DATA:XLA trace of one cleared payment, 6-Oct-2026]` `[ORA26C:… p.31]` |
+| 08 Settlement | Bank acknowledgement and statement reconciliation (payment → `CLEARED`) | — | — | **No journal entry**: reconciliation is matching and status only; no *Payment Clearing* event is raised `[USER:2026-10-06]` `[DATA:XLA trace of one cleared payment, 6-Oct-2026]` |
+
+Payment entries post in parallel to the primary ledger and its STAT secondary ledger (seen in the trace as a primary and a STAT secondary ledger each with the same balanced entry; not a duplicate) `[USER:2026-10-06]` `[DATA:XLA trace of one cleared payment, 6-Oct-2026]`.
 
 Resolved: the accruals note described both an invoice clearing the accrual and a next-period reversal. With period-end accrual the reversal is the standard behaviour and the invoice books the expense itself `[USER:2026-10-06]` (R-19).
 
