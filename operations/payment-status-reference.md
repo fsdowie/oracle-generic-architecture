@@ -28,7 +28,7 @@ Relationship to REP627 is `[INFERRED]` (same subject, parameters "to check again
 
 ## Status semantics
 - `NEGOTIABLE` = issued and not voided/cleared (Oracle; checks remain negotiable until escheat window). `[ORA26C:implementing-payables-invoice-to-pay p.37]`
-- `VOIDED` after `RJCT` = INT955B cancellation path. `[CO:02]` `[DATA]`
+- `VOIDED` after `RJCT` = the payment was **voided manually** after the bank rejected it `[USER:2026-10-05]` `[DATA]`.
 - Rejected ≠ returned: RJCT arrives on ack; RETURNED happens after bank acceptance (tracked manually). `[CO:FIN-24248]`
 - **Ack fields** are the `AP_CHECKS_ALL` DFFs that INT955 writes: `ATTRIBUTE1` Kyriba batch ID, `ATTRIBUTE3` placeholder reason (Kyriba emails the real reason separately), `ATTRIBUTE4` status `ACPT`/`RJCT`, `ATTRIBUTE5` ack date. The monitoring deck spells accepted as `ACCP`; the DFF value set (`ACPT`) is authoritative. `[CO:KYRIBA-DOC §5.2, §11.8]`
 - **Kyriba batch status:** Draft → Remitted → Acknowledged. Draft = configuration missing (FM-PAY-01). Remitted for too long = file or batch failure (FM-PAY-08…10). `[CO:KYRIBA-DOC §4.2, §13.1]`

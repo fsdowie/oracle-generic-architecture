@@ -25,10 +25,10 @@ Kyriba does four jobs:
 ## Flows with Oracle `[CO:KYRIBA-DOC §1.1, App. A]`
 | Flow | Direction | Mechanism | Cadence | Stage |
 |---|---|---|---|---|
-| Outbound payment file (disbursements) | Oracle → Kyriba | Native Oracle Payments e-Text + transmission configuration, no INT number (`integrations/kyriba-payment-file.md`) | On PPR | 07→08 |
+| Outbound payment file (disbursements) | Oracle → Kyriba | Native Oracle Payments e-Text, sent over **SFTP** (run by a managed-service provider; sandbox + production servers) `[USER:2026-10-05]`; no INT number (`integrations/kyriba-payment-file.md`) | On PPR | 07→08 |
 | Funds capture / AR refunds (SEPA, EFT) | Oracle → Kyriba | Native, separate SEPA template and funds-capture profile | On PPR | 07→08 |
 | Payment acknowledgements | Kyriba → Oracle | OIC `INT955` | Hourly | 08→06 |
-| Bank rejections cancel transfers/payments | Kyriba → Oracle | OIC `INT955B` | Event | 08→07 |
+| Bank rejections | Kyriba → Oracle | OIC `INT955B`. **Rejected payments are voided manually** `[USER:2026-10-05]`; INT955B's automatic scope is Q-KY-3 | Event | 08→07 |
 | BAI2 bank statements | Kyriba → Oracle CM | OIC `INT819` / `INT820` | Daily | 08 |
 | Ad hoc bank transactions | Kyriba → Oracle CM | OIC `INT234` | Scheduled | 08 |
 | Kyriba entries to GL | Kyriba → Oracle GL | OIC `INT246` | Scheduled | 08 |

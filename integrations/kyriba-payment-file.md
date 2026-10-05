@@ -3,7 +3,7 @@ id: INT-KYR-PAYFILE
 type: integration
 name: Outbound payment file, Oracle Payments → Kyriba (native, no INT number), plus funds-capture / AR-refund file
 source: Oracle Payments (PPR → payment file)
-target: Kyriba (CaaS-ERP import / SFTP)
+target: Kyriba (SFTP via a managed-service provider)
 lane: Native Oracle Payments (BI Publisher e-Text + Transmission Configuration)
 cadence: on PPR completion
 as_of: 2026-10-05
@@ -42,7 +42,7 @@ These are Oracle-standard setup objects, but no 26C Payments guide was supplied,
 | Send / receive content type | `multipart/form-data` / `application/json` |
 | Authentication | A dedicated Kyriba API user and password, issued by Kyriba Support (not recorded here) |
 
-⚠ The same source says the project **moved to SFTP during implementation**. It doesn't say which protocol carries production files today → Q-KY-2. Kyriba's SFTP doesn't support new folder structures or archiving logic, so files are told apart by **file name** only. `[CO:KYRIBA-DOC §10.1.1 note]`
+**Production uses SFTP, not the HTTP upload.** The SFTP is run by a third-party managed-service provider, and its server is configured in Oracle. There are two: a **sandbox** server used by DEV and the **production** server. `[USER:2026-10-05]` (resolves Q-KY-2). The HTTP settings above are the Kyriba setup guide's default, kept for reference. Kyriba's SFTP doesn't support new folder structures or archiving logic, so files are told apart by **file name** only. `[CO:KYRIBA-DOC §10.1.1 note]`
 
 ## 3. File structure `[CO:KYRIBA-DOC §10.2]`
 A **pipe-delimited** flat file with three record types:

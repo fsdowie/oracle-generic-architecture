@@ -71,7 +71,7 @@ Intake via Jira AP desk, SimpleLegal (INT301A/B), Generali (INT062A), Oracle Exp
 PPR against template per LE + bank account → file to Kyriba. Standard auto-approved in Kyriba; urgent/one-time via Urgent Payment Tool, released manually by Treasury. Failure: wrong GL account for entity; re-processing requires rejecting the original first; urgent desk failures; void/method changes manual. `[CO:02 §4 Stage 07]`
 
 ### 08 Settlement — Kyriba → bank → Oracle
-Two mappings in Kyriba; H2H transmission; INT955 hourly acks; INT955B rejections void Oracle payments; INT246 Kyriba → GL; INT819/820 statements. Failure: **stuck in Draft** (silent); file not integrated (field length, e.g. payment reason); bank rejects (BIC vs ABA, branch/routing/convenio); account not H2H-enabled; missing statements. `[CO:02 §4 Stage 08]` → `payments-settlement-and-returns.md`
+Two mappings in Kyriba; H2H transmission; INT955 hourly acks; rejected payments voided manually (INT955B scope: Q-KY-3); INT246 Kyriba → GL; INT819/820 statements. Failure: **stuck in Draft** (silent); file not integrated (field length, e.g. payment reason); bank rejects (BIC vs ABA, branch/routing/convenio); account not H2H-enabled; missing statements. `[CO:02 §4 Stage 08]` → `payments-settlement-and-returns.md`
 
 ## Cross-cutting processes
 - **Invoice tolerance maintenance** (monthly, FTG). `[CO:02 §5]`

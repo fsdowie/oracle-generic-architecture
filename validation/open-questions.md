@@ -29,9 +29,11 @@ usage: "Agents must cite the Q-ID instead of guessing when an answer depends on 
 | R-13 (was Q-055A-1) | INT055A field map and trigger | Answered by the INT055A Lean Spec + unit test (see `integrations/INT055A.md`) |
 | R-11 (was Q-PAY-5) | Payments with no ack | The bank has not received them — transmission issue or still being sent; actionable |
 
-## Resolved from sources 5 Oct 2026 `[CO:KYRIBA-DOC]`
+## Resolved 5 Oct 2026 `[CO:KYRIBA-DOC]` `[USER:2026-10-05]`
 | ID | Question | Answer |
 |---|---|---|
+| R-15 (was Q-KY-2) | Production transmission of the outbound payment file | **SFTP**, run by a third-party managed-service provider; server configured in Oracle; one sandbox (DEV) and one production server `[USER:2026-10-05]` |
+| R-16 (was Q-KY-3, partly) | How are bank-rejected payments cancelled? | **Manually voided** in Oracle `[USER:2026-10-05]` |
 | R-14 (was Q-PAY-3) | Does INT955 use Oracle's standard disbursement-acknowledgment processing? | No. INT955 writes custom DFFs (`ATTRIBUTE1/3/4/5`) on `AP_CHECKS_ALL` through REST `payablesPayments/{CheckId}`. The standard feature is a modernisation option (see INT955.md) |
 
 ## Open — priority 1 (affect how an agent answers core questions)
@@ -51,8 +53,7 @@ usage: "Agents must cite the Q-ID instead of guessing when an answer depends on 
 | Q-APEX-1 | Are INT055B/C (Oracle → Apex supplier change) still the return leg to Apex? | catalog.md |
 | Q-PAY-2 | Is Oracle payment approval (Review Proposed Payments stage) enabled, and for which PPR templates? | MOD-PAY |
 | Q-PAY-4 | Partly answered: outsourced checks go to Kyriba as `CHK-OS`; in-house checks are printed by Company, with Positive Pay passed through Kyriba `[CO:KYRIBA-DOC]`. Still open: which route do the `CHECK` PPRs with blank acks (political contributions, tax authorities) take, and should they carry an ack? | MOD-PAY |
-| Q-KY-2 | Production transmission of the outbound payment file: HTTP multipart upload to Kyriba CaaS-ERP (setup guide) or SFTP ("moved to SFTP during implementation")? | kyriba-payment-file.md |
-| Q-KY-3 | INT955B design: how does it cancel (void payment vs cancel bank transfer), and is it fed by the same Kyriba file as INT955? No design document among the sources | INT955.md |
+| Q-KY-3 | Narrowed by R-16: rejected payments are voided manually. Does INT955B automate anything today (e.g. cancelling bank transfers), or is the whole rejection response manual? Is it fed by the same Kyriba file as INT955? | INT955.md |
 | Q-PAY-6 | Is the `payments-status-report` extract the REP627 output, or a different report? | payment-status-reference |
 | Q-AP-1 | Owner and exact procedure of the monthly invoice-tolerance recalculation | MOD-AP |
 | Q-AP-2 | Invoice approval rules (who approves non-PO invoices; thresholds) | MOD-AP |
