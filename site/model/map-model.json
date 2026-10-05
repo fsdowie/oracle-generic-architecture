@@ -608,7 +608,7 @@
    "functions": [
     "Creates purchase orders from approved requisitions",
     "Handles change orders, mostly by Procurement Ops",
-    "Records receipts: the first accounting event (accrual), cleared later by the invoice",
+    "Records receipts; uninvoiced receipts are accrued at period end and reversed next period",
     "Derives charge accounts through the Transaction Account Builder",
     "Tracks open accruals with accrual sync and FX variation reports"
    ],
@@ -1287,7 +1287,7 @@
  "default_node": "xla",
  "p2p": {
   "title": "Procure to Pay: eight stages",
-  "lede": "Zip orchestrates, Oracle decides. The first four stages move a commitment without touching the ledger. Receipt, invoice and payment each create accounting through Subledger Accounting under CORP_GAAP_SLAM. Bank outcomes return hourly; a rejected payment is voided manually.",
+  "lede": "Zip orchestrates, Oracle decides. The first four stages move a commitment without touching the ledger. Receipts not yet invoiced are accrued at period end; invoice and payment create accounting through Subledger Accounting under CORP_GAAP_SLAM. Bank outcomes return hourly; a rejected payment is voided manually.",
   "stages": [
    {
     "n": "01",
@@ -1341,22 +1341,33 @@
     "n": "05",
     "title": "Receipt",
     "system": "Purchasing",
-    "accounting": "accrual",
+    "accounting": "period-end accrual",
     "points": [
      "Goods or services are received against the PO: the third leg of the three-way match",
-     "The receipt accrues the expense through Subledger Accounting and posts to the General Ledger",
-     "Consumption-based spend is accrued by a variable-accrual interface instead of a receipt accrual",
-     "Accruals are tracked by an accrual sync report and an FX variation report; a not-reversed alert catches missed reversals"
+     "The receipt itself creates no accounting: expense items accrue at period end",
+     "At period close, receipts without invoices are accrued; the accrual reverses when the next period opens",
+     "Consumption-based spend is accrued by a variable-accrual interface; a not-reversed alert catches missed reversals",
+     "Accrual sync and FX variation reports track open accruals"
     ],
     "entries": [
      {
-      "event": "Receipt (accrual)",
+      "event": "Period end: receipts not yet invoiced",
       "dr": [
        "Expense",
        "Asset clearing (capital items)"
       ],
       "cr": [
        "Accrual / uninvoiced receipts (liability)"
+      ]
+     },
+     {
+      "event": "Next period opens: reversal",
+      "dr": [
+       "Accrual / uninvoiced receipts (liability)"
+      ],
+      "cr": [
+       "Expense",
+       "Asset clearing (capital items)"
       ]
      }
     ]
@@ -1376,7 +1387,7 @@
      {
       "event": "PO-matched invoice",
       "dr": [
-       "Accrual / uninvoiced receipts (the invoice clears it)",
+       "Expense (PO charge account) or Asset clearing",
        "Tax (recoverable or nonrecoverable)"
       ],
       "cr": [
@@ -1458,7 +1469,7 @@
     "text": "Either transmission failed or the file is still in flight. Check Kyriba file status first."
    }
   ],
-  "accounting_note": "Account types follow Oracle Payables defaults and the accruals note: the receipt debits expense and credits the accrual liability, and the invoice clears it. Still to confirm (Q-PAY-7): whether expense items accrue at receipt or at period end, and whether payments are accounted at clearing time (cash clearing) or straight to cash."
+  "accounting_note": "Account types follow Oracle Payables defaults. Expense items accrue at period end: receipts without invoices are accrued at close and reversed when the next period opens, and the invoice books the expense. Still to confirm (Q-PAY-7): whether payments are accounted at clearing time (cash clearing) or straight to cash."
  },
  "onboarding": {
   "title": "Two paths into the supplier master",
@@ -1569,6 +1580,12 @@
     "when": "Daily 06:00 PT",
     "what": "Revaluation data loaded to ARCS",
     "owner": "FTG",
+    "consolidation_team": false
+   },
+   {
+    "when": "Period end",
+    "what": "Expense accruals created for receipts without invoices; reversed when the next period opens",
+    "owner": "Oracle (period close)",
     "consolidation_team": false
    },
    {

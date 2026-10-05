@@ -26,7 +26,7 @@ Verdicts: **CONFIRMED** (guide supports) · **REFINED** (supported, but Company 
 | V11 | Payment approval lives in Oracle (02) | CONFIRMED (capability) | PPR stops at Review Proposed Payments when payment approval enabled PAY p.204–206 | Whether Company enables Oracle payment approval: Q-PAY-2 |
 | V12 | Payment-method defaulting at supplier site (02, FIN-24137) | CONFIRMED | PAY p.99, 207, 210 | as stated |
 | V13 | Track as Asset → FA mass additions (03) | CONFIRMED | PAY p.137, 154 | as stated |
-| V14 | Accrual at receipt, reversed next period (02) | CONFIRMED | PAY p.37 | as stated |
+| V14 | Accrual at receipt, reversed next period (02) | CORRECTED | PAY p.37 | Oracle's two options are At Receipt (no reversal; invoice clears) or Period End (reversed next period). Company uses **Period End** `[USER:2026-10-06]` |
 | V15 | Separate internal vs external supplier registration approvals | CONFIRMED | PROC p.343 | as stated |
 | V16 | Registration attribute requiredness via VB Studio business rules (FIN-25032) | CONFIRMED | PROC p.733 | as stated |
 | V17 | Questionnaire dropdown rendering / step order / mandatory attachments not supported for internal SRR (FIN-24137/25032) | UNVERIFIED | No guide text found either way | Oracle Support D5; stated "as of 26C" |
