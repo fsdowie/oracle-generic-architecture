@@ -4,8 +4,8 @@ type: process
 name: Payment execution, settlement, returns, and standing up a new payment method
 owner_business: Treasury, AP, GL
 owner_systems: FTG, Kyriba/the payment-factory consultant, BizTech Integrations
-as_of: 2026-09-29
-links: [MOD-PAY, EXT-KYRIBA, INT-955, OPS-PAYSTATUS]
+as_of: 2026-10-05
+links: [MOD-PAY, EXT-KYRIBA, INT-955, INT-KYR-PAYFILE, OPS-PAYSTATUS]
 ---
 
 # Payments: Execution, Settlement, Returns
@@ -14,8 +14,8 @@ links: [MOD-PAY, EXT-KYRIBA, INT-955, OPS-PAYSTATUS]
 1. Validated invoices selected into a **PPR** using a template per LE + bank account (`AP_PAYMENT_TEMPLATES`). `[ORA26C:implementing-payables-invoice-to-pay p.168]`
 2. Payment process profile builds the file (ISO where applicable). `[ORA26C:… p.193]`
 3. Approval control sits in Oracle; Kyriba auto-approves standard AP payments. `[CO:02 §4 Stage 07]`
-4. Kyriba maps codes (Oracle code → Kyriba code; code × bank × issuing country → bank file), transmits H2H.
-5. INT955 (hourly) returns acks; INT955B voids Oracle payments on rejection; daily rejection email to AP + Treasury.
+4. Oracle sends the file to Kyriba through the native e-Text format and transmission configuration (`integrations/kyriba-payment-file.md`). Kyriba maps the codes (Oracle code → Kyriba code; code × bank × issuing country → bank file) and transmits H2H. The file reaches the bank about **5 minutes** after leaving Oracle. `[CO:KYRIBA-DOC §4.2]`
+5. INT955 (hourly) returns acks; daily rejection email to AP + Treasury. A rejected payment is **voided manually** in Oracle `[USER:2026-10-05]` INT955B only records the rejection on the payment DFFs.
 6. INT246 posts Kyriba accounting to GL; INT819/820 statements into Cash Management; ReconArt reconciles.
 
 ## B. Status checking (canonical method)
@@ -43,4 +43,4 @@ Use BI Publisher **REP627 Company Pending Payments Status** — path `/Shared Fo
 10. Sign-off: Treasury + Oracle engineer + original requester.
 
 ## Failure modes
-FM-PAY-01 stuck in Draft (Kyriba code × bank × country missing; silent) · FM-PAY-02 file not integrated (field length, e.g. payment reason) · FM-PAY-03 bank rejects (BIC vs ABA, branch/routing/convenio, tax ID, name) · FM-PAY-04 account not H2H-enabled · FM-PAY-05 missing statements · FM-PAY-06 reprocess without rejecting original → duplicate risk · FM-PAY-07 wrong GL cash account for LE.
+FM-PAY-01 stuck in Draft (Kyriba code × bank × country missing; silent) · FM-PAY-02 file not integrated (field length, e.g. payment reason) · FM-PAY-03 bank rejects (BIC vs ABA, branch/routing/convenio, tax ID, name) · FM-PAY-04 account not H2H-enabled · FM-PAY-05 missing statements · FM-PAY-06 reprocess without rejecting original → duplicate risk · FM-PAY-07 wrong GL cash account for LE · FM-PAY-08…10 file or batch rejected by Kyriba or the bank, so no payment-level acks.

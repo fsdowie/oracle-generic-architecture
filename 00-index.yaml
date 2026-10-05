@@ -1,5 +1,5 @@
-as_of: '2026-09-30'
-count: 157
+as_of: '2026-10-05'
+count: 162
 entities:
 - id: KP-PRINCIPLES
   type: rules
@@ -51,7 +51,7 @@ entities:
   file: integrations/INT826.md
 - id: INT-955
   type: integration
-  name: Kyriba payment acknowledgement to Oracle (INT955) and bank-rejection cancellation (INT955B)
+  name: Kyriba payment acknowledgement to Oracle (INT955) and bank-rejection DFF update (INT955B)
   file: integrations/INT955.md
 - id: INT-959
   type: integration
@@ -329,8 +329,34 @@ entities:
   file: integrations/INT955.md
 - id: INT955B
   type: integration
-  name: Kyriba bank rejections cancel Oracle bank transfers and payments
+  name: Kyriba bank rejections to Oracle payment DFFs (no automatic cancel; payments voided manually)
   group: procure-to-pay
+  file: integrations/INT955.md
+- id: INT-KYR-PAYFILE
+  type: integration
+  name: Outbound payment file Oracle to Kyriba (native) and funds-capture file
+  aliases:
+  - Kyriba payment file
+  - TMS_Kyriba_Payment_Format
+  - e-Text payment template
+  file: integrations/kyriba-payment-file.md
+- id: KYR-PAYFILE
+  type: integration
+  name: Outbound payment file Oracle to Kyriba (native, no INT number)
+  group: procure-to-pay
+  file: integrations/kyriba-payment-file.md
+- id: KYR-FUNDSCAP
+  type: integration
+  name: Funds capture / AR refunds file Oracle to Kyriba
+  group: procure-to-pay
+  file: integrations/kyriba-payment-file.md
+- id: KYR-POSPAY
+  type: integration
+  name: Positive Pay pass-through for in-house checks
+  group: procure-to-pay
+  file: external-systems/kyriba.md
+- id: INT955 GET CHECK ID REPORT
+  type: bip-report (INT955 check_id derivation)
   file: integrations/INT955.md
 - id: INT234
   type: integration

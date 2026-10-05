@@ -89,3 +89,7 @@ as_of: 2026-09-29
 | Company code | Workday/Apex `CO<nnn>` → Oracle LE code via `XXCO_ENTERPRISE_STRUCTURE` | `CO100`→`1100` |
 | Supplier type | `SUPPLIER`, `ADHOC`, `TREASURY` | |
 | Ack date | `DDMMYYYY` | `02062026` |
+| Kyriba payment file | `Kyriba_Payment_File_<DATE><TIME>.txt` / `Kyriba_Direct_Debit_Payment_File_…` | |
+| Positive Pay file | `<CO>_<BANK>_POSPAY_YYMMDD_hhmmss.pgp` | |
+| Bank-transfer record (INT955/955B) | Checkrun Name starts `30`, length 15 | |
+| Debit Account token (payment file) | `<entity><bank><ccy><seq>` = internal account's Alternate Bank Account Name | |

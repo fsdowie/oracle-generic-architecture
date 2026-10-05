@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Oracle Finance Estate Map</title>
+<title>Travel Estate Map</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -77,7 +77,13 @@ aside.detail dl{margin:0;display:grid;gap:8px}
 aside.detail dt{font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 aside.detail dd{margin:0}
 .tag{display:inline-block;font:12px var(--f-mono);background:var(--soft);border-radius:4px;padding:1px 6px;margin:2px 4px 2px 0;white-space:nowrap}
-.fm{border-left:3px solid var(--warn);padding-left:8px;margin:4px 0}
+aside.detail ul{margin:2px 0 0;padding-left:18px}
+aside.detail li{margin:2px 0}
+aside.detail ul.ifs{list-style:none;padding-left:0}
+aside.detail ul.ifs li{font:12.5px/1.4 var(--f-mono);border-left:3px solid var(--accent-soft);padding-left:8px;margin:4px 0}
+aside.detail ul.docs{list-style:none;padding-left:0}
+aside.detail ul.docs a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+aside.detail ul.docs a::after{content:" ↗";font-size:12px}
 .ev{font:11px var(--f-mono);color:var(--muted)}
 
 /* p2p chain */
@@ -151,7 +157,7 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
 <main id="gate" class="gate wrap" hidden>
   <form class="card" id="loginForm" novalidate>
     <div class="eyebrow">Private · review copy</div>
-    <h1>Estate Map</h1>
+    <h1>Travel Estate Map</h1>
     <p>Sign in with the account you were given.</p>
     <label for="email">Email</label>
     <input id="email" type="email" autocomplete="username" required>
@@ -234,12 +240,12 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
   <h2 id="inTitle"></h2><p class="lede" id="inLede"></p>
   <div class="tools">
     <label class="eyebrow" for="q" style="align-self:center">Search</label>
-    <input id="q" type="search" placeholder="ID, system or flow, e.g. Kyriba or INT959">
+    <input id="q" type="search" placeholder="System or flow, e.g. Kyriba or supplier">
     <select id="laneSel" aria-label="Lane"><option value="">All lanes</option><option>OIC</option><option>Airflow</option><option>Bulk</option><option>Extract</option></select>
     <select id="wsSel" aria-label="Workstream"><option value="">All workstreams</option><option>P2P</option><option>R2R</option><option>Platform</option><option>Foundation</option></select>
     <span class="count" id="count"></span>
   </div>
-  <div class="tablewrap"><table><thead><tr><th>ID</th><th>Flow</th><th>Source → Target</th><th>Lane</th><th>Cadence</th><th>Workstream</th></tr></thead><tbody id="tbody"></tbody></table></div>
+  <div class="tablewrap"><table><thead><tr><th>Interface</th><th>Source → Target</th><th>Lane</th><th>Cadence</th><th>Workstream</th></tr></thead><tbody id="tbody"></tbody></table></div>
 </section>
 
 <footer id="footer"></footer>

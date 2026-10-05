@@ -2,7 +2,7 @@
 id: VAL-SOURCES
 type: source-register
 root: "C:\\Users\\fsdow\\Claude\\oracle\\company\\Claude Cowork - Company\\Claude Cowork"
-as_of: 2026-09-29
+as_of: 2026-10-05
 ---
 
 # Source Register
@@ -25,6 +25,7 @@ as_of: 2026-09-29
 | CO:INT826_error_analysis.html | int826-log-analysis/int826-log-analysis/INT826_error_analysis.html | 30-May-2026 | User-entry anomaly analysis |
 | CO:INT055A-spec | the implementation project INT055A Supplier Creation and Update Inbound OIC Integration Lean Specification (PDF, 80 pp; the SI partner TFD v2.1 May-2023, changes to Apr-2025+) | 2022–2025 | INT055A design, mappings, crosswalk, bank/tax lookups, 1099/CNPJ/diversity changes |
 | CO:INT055A-UT | Unit Testing – INT055A Apex Suppliers To Oracle Inbound (PDF, 4 pp) | 18-Jul-2025 (UAT) | Runtime evidence: Main + Sync Supp Key, OCI files, notification |
+| CO:KYRIBA-DOC | Kyriba at Company — Functional & Technical Documentation (PDF, 23 pp; FTG, current state) | Oct-2026 | Oracle ↔ Kyriba flows, native payment-file setup and TR/IN field mapping, INT955 technical design (DFFs, check-id derivation, errors, reprocessing), file/batch rejection cases, monitoring criteria, bank-account identifiers, Positive Pay, funds capture. A compiled document: its sources are the INT955 TFD v1.3, the Kyriba Oracle Cloud Setup Guide, the Kyriba File Format spec, the implementation Q&A log, the payments-status deck and exception use cases. Release (26B) and `IWI` examples are superseded by USER answers |
 | ORA26C:* | 26c guides/*.pdf (11 guides) | Release 26C | Oracle-standard behaviour (see validation log) |
 | USER | Build-session answers | 29-Sep-2026 | Corrections R-01…R-07 |
 
@@ -32,3 +33,5 @@ as_of: 2026-09-29
 - `_portable/memory/*` and `jk-tone` skill — reviewer-tone guidance; only the content-bar rules were used, in `governance/`.
 - `finance-systems-planning-framework.md` — empty file (0 bytes).
 - `.claude/settings.local.json` — tool configuration only.
+- From CO:KYRIBA-DOC: environment hostnames, the Kyriba endpoint URL and API user, alert mailbox addresses, bank names and person names (CONTRIBUTING rule 6 and the anonymisation). Bank names are not mapped to the Bank A–E letters.
+- INT055A Lean Specification and unit-test PDFs re-supplied 4-Oct-2026: same versions as CO:INT055A-spec / CO:INT055A-UT, so nothing new.

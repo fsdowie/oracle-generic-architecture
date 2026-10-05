@@ -93,7 +93,7 @@
     // p2p
     const p = model.p2p;
     $("p2pTitle").textContent = p.title; $("p2pLede").textContent = p.lede;
-    $("chain").innerHTML = p.stages.map((s) => `<div class="stage"><span class="n">Stage ${esc(s.n)}</span><h4>${esc(s.title)}</h4><span class="sys">${esc(s.system)}</span><span class="acct ${s.accounting === "none" ? "none" : ""}">${s.accounting === "none" ? "no accounting" : esc(s.accounting) + " via XLA"}</span><ul><li>${esc(s.what)}</li><li><span style="color:var(--warn)">Breaks:</span> ${esc(s.breaks)}</li></ul></div>`).join("");
+    $("chain").innerHTML = p.stages.map((s) => `<div class="stage"><span class="n">Stage ${esc(s.n)}</span><h4>${esc(s.title)}</h4><span class="sys">${esc(s.system)}</span><span class="acct ${s.accounting === "none" ? "none" : ""}">${s.accounting === "none" ? "no accounting" : esc(s.accounting) + " via XLA"}</span><ul><li>${esc(s.what)}</li></ul></div>`).join("");
     $("p2pNotes").innerHTML = notes(p.notes);
 
     // onboarding
@@ -126,14 +126,18 @@
       return (e.from === sel ? "→ " : "← ") + o.title;
     });
     const tags = (a) => a.map((i) => `<span class="tag">${esc(i)}</span>`).join("");
+    const list = (a, cls) => `<ul class="${cls}">${a.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`;
+    const fns = n.functions || [], ifs = n.integrations || [], docs = n.docs || [];
+    const docLinks = docs.filter((d) => /^https:\/\//.test(d.url))
+      .map((d) => `<li><a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">${esc(d.label)}</a></li>`).join("");
     $("detail").innerHTML = `
       <div class="eyebrow">${esc(layer.label)} · ${n.external ? "external system" : "Oracle / platform"}</div>
       <h3>${esc(n.title)}</h3><p>${esc(n.description)}</p>
       <dl>
-        ${n.integrations.length ? `<div><dt>Integrations and objects</dt><dd>${tags(n.integrations)}</dd></div>` : ""}
+        ${fns.length ? `<div><dt>What it does</dt><dd>${list(fns, "fn")}</dd></div>` : ""}
+        ${ifs.length ? `<div><dt>Interfaces</dt><dd>${list(ifs, "ifs")}</dd></div>` : ""}
         ${nb.length ? `<div><dt>Connected to</dt><dd>${tags(nb)}</dd></div>` : ""}
-        ${n.failure_modes.length ? `<div><dt>Where it breaks</dt><dd>${n.failure_modes.map((f) => `<div class="fm">${esc(f)}</div>`).join("")}</dd></div>` : ""}
-        <div><dt>Evidence</dt><dd class="ev">${esc(n.evidence)}</dd></div>
+        ${docLinks ? `<div><dt>Documents</dt><dd><ul class="docs">${docLinks}</ul></dd></div>` : ""}
       </dl>`;
     drawEdges();
   }
@@ -177,7 +181,7 @@
     const q = $("q").value.trim().toLowerCase(), ln = $("laneSel").value, w = $("wsSel").value;
     const rows = rows0.filter((i) => (!ln || laneOf(i.lane) === ln) && (!w || wsOf(i.workstream) === w) &&
       (!q || [i.id, i.name, i.source, i.target, i.notes].join(" ").toLowerCase().includes(q)));
-    $("tbody").innerHTML = rows.map((i) => `<tr><td class="id">${esc(i.id)}</td><td>${esc(i.name)}${i.notes ? `<div class="ev">${esc(i.notes)}</div>` : ""}</td><td>${esc(i.source || "—")} → ${esc(i.target || "—")}</td><td><span class="lane-pill" style="color:${laneCol[laneOf(i.lane)]}">${esc(i.lane)}</span></td><td>${esc(i.cadence || "—")}</td><td>${esc(i.workstream)}</td></tr>`).join("");
+    $("tbody").innerHTML = rows.map((i) => `<tr><td>${esc(i.label || i.name)}${i.notes ? `<div class="ev">${esc(i.notes)}</div>` : ""}</td><td>${esc(i.source || "—")} → ${esc(i.target || "—")}</td><td><span class="lane-pill" style="color:${laneCol[laneOf(i.lane)]}">${esc(i.lane)}</span></td><td>${esc(i.cadence || "—")}</td><td>${esc(i.workstream)}</td></tr>`).join("");
     $("count").textContent = rows.length + " of " + rows0.length;
   }
   ["q", "laneSel", "wsSel"].forEach((id) => $(id).addEventListener("input", renderInts));
