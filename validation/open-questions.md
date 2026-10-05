@@ -53,6 +53,7 @@ usage: "Agents must cite the Q-ID instead of guessing when an answer depends on 
 | Q-959-2 | Full INT959 field map (questionnaire → supplier attributes) | INT959.md |
 | Q-959-3 | Does INT959 also process supplier profile *change* requests? | INT959.md |
 | Q-APEX-1 | Are INT055B/C (Oracle → Apex supplier change) still the return leg to Apex? | catalog.md |
+| Q-PAY-7 | Are payments accounted at clearing time (Liability → Cash clearing at payment, Cash clearing → Cash at reconciliation), or straight to Cash at payment? Also confirm expense items accrue at receipt, not at period end | p2p-end-to-end.md |
 | Q-PAY-2 | Is Oracle payment approval (Review Proposed Payments stage) enabled, and for which PPR templates? | MOD-PAY |
 | Q-PAY-6 | Is the `payments-status-report` extract the REP627 output, or a different report? | payment-status-reference |
 | Q-AP-1 | Owner and exact procedure of the monthly invoice-tolerance recalculation | MOD-AP |

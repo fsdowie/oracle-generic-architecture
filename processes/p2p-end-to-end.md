@@ -30,6 +30,16 @@ Note: two onboarding paths — PO suppliers are onboarded Zip → Apex → Oracl
 
 ## Stage cards
 
+## Accounting by stage (account types)
+Only stages 05–08 create accounting. Types, not account numbers; all through Subledger Accounting under `CORP_GAAP_SLAM`.
+| Stage | Event | Debit | Credit | Evidence |
+|---|---|---|---|---|
+| 05 Receipt | Receipt accrual (expense items accrued at receipt) | Expense, or Asset clearing for capital items | Receipt accrual (liability) | `[CO:02 §4 Stage 05]` `[ORA26C:implementing-payables-invoice-to-pay p.36–37]` |
+| 06 Invoice | PO-matched invoice | Receipt accrual; tax | Liability (trade payables); withholding if withheld at validation | `[ORA26C:… p.31, 36]` `[INFERRED]` for the accrual clearing |
+| 06 Invoice | Non-PO invoice | Expense or Asset clearing; tax | Liability | `[ORA26C:… p.36]` |
+| 07 Payment | Payment issued | Liability | Cash clearing (or Cash); discount | `[ORA26C:… p.31]` |
+| 08 Settlement | Payment cleared on statement | Cash clearing | Cash | `[ORA26C:… p.31, 342]`; applies only if payments are accounted at clearing time → Q-PAY-7 |
+
 ### 01 Supplier onboarding — see `supplier-onboarding.md`
 PO path: Zip → Apex portal → Oracle Suppliers via **INT055A** (every 30 min; see `integrations/INT055A.md`). Non-PO path: Oracle SRR + INT959. Accounting: none.
 

@@ -93,8 +93,9 @@
     // p2p
     const p = model.p2p;
     $("p2pTitle").textContent = p.title; $("p2pLede").textContent = p.lede;
-    $("chain").innerHTML = p.stages.map((s) => `<div class="stage"><span class="n">Stage ${esc(s.n)}</span><h4>${esc(s.title)}</h4><span class="sys">${esc(s.system)}</span><span class="acct ${s.accounting === "none" ? "none" : ""}">${s.accounting === "none" ? "no accounting" : esc(s.accounting) + " via XLA"}</span><ul><li>${esc(s.what)}</li></ul></div>`).join("");
-    $("p2pNotes").innerHTML = notes(p.notes);
+    const je = (e) => `<div class="je"><div class="je-ev">${esc(e.event)}</div><div class="je-row"><b>Dr</b><span>${e.dr.map(esc).join("<br>")}</span></div><div class="je-row"><b>Cr</b><span>${e.cr.map(esc).join("<br>")}</span></div></div>`;
+    $("chain").innerHTML = p.stages.map((s) => `<div class="stage"><span class="n">Stage ${esc(s.n)}</span><h4>${esc(s.title)}</h4><span class="sys">${esc(s.system)}</span><span class="acct ${s.accounting === "none" ? "none" : ""}">${s.accounting === "none" ? "no accounting" : esc(s.accounting) + " via XLA"}</span><ul>${(s.points || [s.what]).filter(Boolean).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>${(s.entries || []).map(je).join("")}</div>`).join("");
+    $("p2pNotes").innerHTML = (p.accounting_note ? `<div class="note"><b>Account types.</b> ${esc(p.accounting_note)}</div>` : "") + notes(p.notes);
 
     // onboarding
     const o = model.onboarding;
