@@ -46,5 +46,5 @@ using (bucket_id = 'estate-map' and public.is_map_viewer());
 
 -- 5. Add yourself (replace with the email of the user you create in Auth).
 insert into public.map_viewers (email, note)
-values ('you@example.com', 'owner')
+values ('fsdowie@yahoo.com', 'owner')
 on conflict (email) do nothing;
