@@ -51,7 +51,7 @@ entities:
   file: integrations/INT826.md
 - id: INT-955
   type: integration
-  name: Kyriba payment acknowledgement to Oracle (INT955) and bank-rejection cancellation (INT955B)
+  name: Kyriba payment acknowledgement to Oracle (INT955) and bank-rejection DFF update (INT955B)
   file: integrations/INT955.md
 - id: INT-959
   type: integration
@@ -329,7 +329,7 @@ entities:
   file: integrations/INT955.md
 - id: INT955B
   type: integration
-  name: Kyriba bank rejections cancel Oracle bank transfers and payments
+  name: Kyriba bank rejections to Oracle payment DFFs (no automatic cancel; payments voided manually)
   group: procure-to-pay
   file: integrations/INT955.md
 - id: INT-KYR-PAYFILE

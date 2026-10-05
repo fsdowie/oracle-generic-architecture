@@ -34,6 +34,7 @@ usage: "Agents must cite the Q-ID instead of guessing when an answer depends on 
 |---|---|---|
 | R-15 (was Q-KY-2) | Production transmission of the outbound payment file | **SFTP**, run by a third-party managed-service provider; server configured in Oracle; one sandbox (DEV) and one production server `[USER:2026-10-05]` |
 | R-16 (was Q-KY-3, partly) | How are bank-rejected payments cancelled? | **Manually voided** in Oracle `[USER:2026-10-05]` |
+| R-18 (was Q-KY-3) | What does INT955B do? | **Only updates the DFFs on the Oracle payment.** It does not cancel or void payments or bank transfers, despite its name and the Kyriba document `[USER:2026-10-05]` |
 | R-17 (was Q-PAY-4) | Do `CHECK` payments carry a bank ack? | **No.** `CHECK` payments are not electronic; whether the bank accepted them is tracked **manually** `[USER:2026-10-05]`. A blank ack on a `CHECK` payment is expected, not FM-PAY-05. (Kyriba still has an outsourced-check code `CHK-OS` and passes Positive Pay files through for in-house checks `[CO:KYRIBA-DOC]`.) |
 | R-14 (was Q-PAY-3) | Does INT955 use Oracle's standard disbursement-acknowledgment processing? | No. INT955 writes custom DFFs (`ATTRIBUTE1/3/4/5`) on `AP_CHECKS_ALL` through REST `payablesPayments/{CheckId}`. The standard feature is a modernisation option (see INT955.md) |
 
@@ -53,7 +54,6 @@ usage: "Agents must cite the Q-ID instead of guessing when an answer depends on 
 | Q-959-3 | Does INT959 also process supplier profile *change* requests? | INT959.md |
 | Q-APEX-1 | Are INT055B/C (Oracle → Apex supplier change) still the return leg to Apex? | catalog.md |
 | Q-PAY-2 | Is Oracle payment approval (Review Proposed Payments stage) enabled, and for which PPR templates? | MOD-PAY |
-| Q-KY-3 | Narrowed by R-16: rejected payments are voided manually. Does INT955B automate anything today (e.g. cancelling bank transfers), or is the whole rejection response manual? Is it fed by the same Kyriba file as INT955? | INT955.md |
 | Q-PAY-6 | Is the `payments-status-report` extract the REP627 output, or a different report? | payment-status-reference |
 | Q-AP-1 | Owner and exact procedure of the monthly invoice-tolerance recalculation | MOD-AP |
 | Q-AP-2 | Invoice approval rules (who approves non-PO invoices; thresholds) | MOD-AP |

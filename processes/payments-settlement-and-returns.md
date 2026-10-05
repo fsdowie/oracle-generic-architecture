@@ -15,7 +15,7 @@ links: [MOD-PAY, EXT-KYRIBA, INT-955, INT-KYR-PAYFILE, OPS-PAYSTATUS]
 2. Payment process profile builds the file (ISO where applicable). `[ORA26C:… p.193]`
 3. Approval control sits in Oracle; Kyriba auto-approves standard AP payments. `[CO:02 §4 Stage 07]`
 4. Oracle sends the file to Kyriba through the native e-Text format and transmission configuration (`integrations/kyriba-payment-file.md`). Kyriba maps the codes (Oracle code → Kyriba code; code × bank × issuing country → bank file) and transmits H2H. The file reaches the bank about **5 minutes** after leaving Oracle. `[CO:KYRIBA-DOC §4.2]`
-5. INT955 (hourly) returns acks; daily rejection email to AP + Treasury. A rejected payment is **voided manually** in Oracle `[USER:2026-10-05]` (INT955B's automatic scope: Q-KY-3).
+5. INT955 (hourly) returns acks; daily rejection email to AP + Treasury. A rejected payment is **voided manually** in Oracle `[USER:2026-10-05]` INT955B only records the rejection on the payment DFFs.
 6. INT246 posts Kyriba accounting to GL; INT819/820 statements into Cash Management; ReconArt reconciles.
 
 ## B. Status checking (canonical method)
