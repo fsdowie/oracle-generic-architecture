@@ -1448,14 +1448,6 @@
    {
     "title": "Spend category → code combination.",
     "text": "Zip proposes segments through three chained lookups. Oracle re-derives the charge account, applies requisition validations and cross-validation rules, and stores the result. A mis-posting has two possible homes: compare what Zip sent with what Oracle stored."
-   },
-   {
-    "title": "Holds are the Payables workload.",
-    "text": "23,722 holds on 15,309 invoices in 12 months; 52% self-clear within an hour; median release 6.3 days, mean 17 days."
-   },
-   {
-    "title": "No acknowledgement means the bank does not have the payment.",
-    "text": "Either transmission failed or the file is still in flight. Check Kyriba file status first."
    }
   ],
   "accounting_note": "Expense items accrue at period end: receipts without invoices are accrued at close and reversed when the next period opens, and the invoice books the expense. Payments are accounted once, at issue, straight to Cash; there is no cash clearing account, so bank acknowledgement and statement reconciliation create no journal entry. Entries post to the primary ledger and its STAT secondary ledger."
