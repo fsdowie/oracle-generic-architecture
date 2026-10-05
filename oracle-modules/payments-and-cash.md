@@ -40,6 +40,9 @@ The whole Oracle → Kyriba setup chain (formats, payment methods, transmission 
 ### Payee name mapping (bank file)
 Oracle sends Supplier Name as Name 1 and Bank Account Name as Name 2 (only when different). Bank A formats accept one name (India, Japan, Korea, Thailand non-US accounts); Bank B no second name; Bank C two names but only one populated. Proposal FIN-24573: swap so Bank Account Name → Name 1. Supplier Type is not exposed as a tag in the payment XML. `[CO:FIN-24573 draft]` *Change in flight.*
 
+### Payment accounting
+**Single step at payment issue** `[USER:2026-10-06]` `[DATA:XLA trace of one cleared payment, 6-Oct-2026]`: the PPR raises a *Payment Created* event and Create Accounting books Liability (Dr) / Cash (Cr), mirrored to the primary and STAT secondary ledgers. Bank accounts have **no cash clearing account**, so neither the bank acknowledgement nor statement reconciliation creates accounting; reconciliation only sets the payment to `CLEARED`. Oracle would raise a *Payment Clearing* event only if a cash clearing account and clearing-based accounting were configured `[ORA26C:implementing-payables-invoice-to-pay p.31, 342]`.
+
 ## Cash Management
 - Bank accounts and external identifiers; statements import `INT819` / `INT820`; ad hoc bank transactions `INT234`. `[CO:02 §2]`
 - `INT819`/`INT820` load the **BAI2** statements Kyriba retrieves, once a day. Statement reconciliation moves a payment from `NEGOTIABLE` to `CLEARED` and is how returns are identified. Lookup extract `FN_LOOKUP_VL_Extract_Report_csv_INT819_INT820` supports their configuration. `[CO:KYRIBA-DOC §7, §12.2]`

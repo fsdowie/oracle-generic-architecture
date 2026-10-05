@@ -5,6 +5,7 @@
 - Procure-to-Pay cards: at least three process bullets each, and debit/credit account types for the accounting stages (receipt, invoice, payment, settlement). New "Accounting by stage" table in `processes/p2p-end-to-end.md`; Q-PAY-7 added.
 - New source CO:ACCRUALS-DOC: receipt-accrual mechanism, variable accrual, reports REP077 and REP536. Q-PAY-7 stays open (the source says the accrual timing is unconfirmed and does not cover payment clearing); a `[CONFLICT]` on accrual reversal is recorded.
 - FTG answer 6-Oct-2026: expense items accrue at **period end** (R-19). The receipt creates no accounting; uninvoiced receipts are accrued at close and reversed next period; the invoice books the expense. Conflict resolved; Q-PAY-7 narrowed to payment clearing. Map Receipt and Invoice cards, Purchasing node and close timeline updated.
+- FTG answer + XLA trace 6-Oct-2026: payments are accounted in one step at issue (Liability / Cash); no cash clearing account; reconciliation creates no journal entry (R-20, closes Q-PAY-7). Map: Payment card credits Cash; Settlement card shows no accounting.
 - `tools/build_map_data.py` turns register IDs into names, builds document links from `docs_base`, and fails the build if an interface number would be shown.
 - New source CO:KYRIBA-DOC (Kyriba functional & technical documentation, Oct 2026).
 - New `integrations/kyriba-payment-file.md`: native Oracle → Kyriba payment file and funds-capture file, setup chain, transmission configuration, TR/IN field mapping, country rules.
