@@ -1290,56 +1290,154 @@
     "title": "Supplier onboarding",
     "system": "Apex + supplier interface · Oracle registration + completion interface",
     "accounting": "none",
-    "what": "Two creation paths into one supplier master"
+    "points": [
+     "PO suppliers: the supplier completes questionnaires, risk, bank and tax details in the Apex portal",
+     "An interface creates or updates the Oracle supplier every 30 minutes: profile, addresses, sites, bank accounts, tax",
+     "Non-PO, ad hoc and Treasury payees: internal Oracle registration request, approved, then completed by an interface",
+     "Sites are created per company code from the enterprise-structure crosswalk"
+    ]
    },
    {
     "n": "02",
     "title": "Intake",
     "system": "Zip",
     "accounting": "none",
-    "what": "Review graph and COA defaulting"
+    "points": [
+     "Requester submits the purchase request in Zip: spend category, legal entity, cost center",
+     "Conditional reviews: third-party risk, data privacy, legal, BizTech, sustainability",
+     "Zip proposes the accounting segments from lookup tables kept in step with Oracle",
+     "Approved request is sent to Oracle as a requisition"
+    ]
    },
    {
     "n": "03",
     "title": "Requisition",
     "system": "Self-Service Procurement",
     "accounting": "none",
-    "what": "Charge account re-derived; *_VAL rules and CVRs; first point in SOX scope"
+    "points": [
+     "Requisition arrives in Self-Service Procurement with the proposed accounting",
+     "Oracle re-derives the charge account; requisition validations and cross-validation rules run at submit",
+     "Approval routed by cost center",
+     "First point in SOX scope"
+    ]
    },
    {
     "n": "04",
     "title": "Purchase order",
     "system": "Purchasing",
     "accounting": "none",
-    "what": "Change orders by Procurement Ops; FBDI for volume"
+    "points": [
+     "Approved requisition becomes a purchase order; buyer review in Oracle",
+     "Change orders handled by Procurement Ops",
+     "Bulk updates loaded by file import for volume changes",
+     "No accounting at PO approval"
+    ]
    },
    {
     "n": "05",
     "title": "Receipt",
     "system": "Purchasing",
     "accounting": "accrual",
-    "what": "Third leg of the match; variable accrual interface"
+    "points": [
+     "Goods or services are received against the PO",
+     "Receipt is the third leg of the three-way match",
+     "Expense items are accrued when the receipt is created",
+     "Variable consumption is accrued through the variable-accrual interface; reversals are checked by an alert report"
+    ],
+    "entries": [
+     {
+      "event": "Receipt (accrual)",
+      "dr": [
+       "Expense",
+       "Asset clearing (capital items)"
+      ],
+      "cr": [
+       "Receipt accrual (liability)"
+      ]
+     }
+    ]
    },
    {
     "n": "06",
     "title": "Invoice",
     "system": "Payables",
     "accounting": "liability",
-    "what": "Matching, tolerances, holds; Zip payment-terms exceptions; non-PO over 5K hold"
+    "points": [
+     "Invoices arrive from the AP desk, legal e-billing, ad hoc payment requests and Oracle Expenses",
+     "Matched to PO and receipt within tolerances held per business unit; exceptions go on hold",
+     "Zip-approved payment-terms exceptions applied; non-PO invoices over 5K held for review",
+     "Validated invoices become payable"
+    ],
+    "entries": [
+     {
+      "event": "PO-matched invoice",
+      "dr": [
+       "Receipt accrual (clears the liability)",
+       "Tax (recoverable or nonrecoverable)"
+      ],
+      "cr": [
+       "Liability (trade payables)",
+       "Withholding tax (liability), if withheld at validation"
+      ]
+     },
+     {
+      "event": "Non-PO invoice",
+      "dr": [
+       "Expense or Asset clearing",
+       "Tax"
+      ],
+      "cr": [
+       "Liability (trade payables)"
+      ]
+     }
+    ]
    },
    {
     "n": "07",
     "title": "Payment",
     "system": "Payments",
     "accounting": "cash",
-    "what": "PPR per entity and bank account; auto-approved in Kyriba; urgent payments released by Treasury"
+    "points": [
+     "Validated invoices selected into a payment process request per legal entity and bank account",
+     "One payment file per bank sent to Kyriba over SFTP; standard payments auto-approve in Kyriba",
+     "Urgent and one-time payments go through the Urgent Payment Tool and are released by Treasury",
+     "Payment is recorded in Oracle as Negotiable"
+    ],
+    "entries": [
+     {
+      "event": "Payment",
+      "dr": [
+       "Liability (trade payables)"
+      ],
+      "cr": [
+       "Cash clearing (or Cash)",
+       "Discount taken, if any"
+      ]
+     }
+    ]
    },
    {
     "n": "08",
     "title": "Settlement",
     "system": "Kyriba → bank",
-    "accounting": "none",
-    "what": "Two code mappings; host-to-host; hourly acknowledgements and rejections back to Oracle"
+    "accounting": "clearing",
+    "points": [
+     "Kyriba maps the payment to the bank's code and format and transmits host-to-host",
+     "Bank acknowledgements return hourly and are recorded on the Oracle payment",
+     "Rejected payments are voided manually in Oracle",
+     "Daily bank statements reconcile each payment from Negotiable to Cleared"
+    ],
+    "entries": [
+     {
+      "event": "Payment cleared (statement reconciled)",
+      "dr": [
+       "Cash clearing"
+      ],
+      "cr": [
+       "Cash (bank account)"
+      ]
+     }
+    ]
    }
   ],
   "notes": [
@@ -1355,7 +1453,8 @@
     "title": "No acknowledgement means the bank does not have the payment.",
     "text": "Either transmission failed or the file is still in flight. Check Kyriba file status first."
    }
-  ]
+  ],
+  "accounting_note": "Account types follow Oracle Payables defaults: invoice distributions debit expense and credit liability; payments credit cash, or cash clearing when payments are accounted at clearing time. Whether clearing accounting is enabled here is not documented (open question Q-PAY-7)."
  },
  "onboarding": {
   "title": "Two paths into the supplier master",
