@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 — 2026-10-05
+- New source CO:KYRIBA-DOC (Kyriba functional & technical documentation, Oct 2026).
+- New `integrations/kyriba-payment-file.md`: native Oracle → Kyriba payment file and funds-capture file, setup chain, transmission configuration, TR/IN field mapping, country rules.
+- `integrations/INT955.md`: technical design (DFF columns, check-id derivation, bank-transfer rule, objects, errors, reprocessing). Q-PAY-3 resolved (R-14).
+- `external-systems/kyriba.md` rewritten: flows table, payment types, Positive Pay, funds capture, status progression, bank-account identifiers, monitoring channels.
+- Register: KYR-PAYFILE, KYR-FUNDSCAP, KYR-POSPAY added; INT955/955B/234/819/820 enriched.
+- Failure modes FM-PAY-08…10 (file or batch rejected, so no payment acks); payment-level monitoring criteria in `operations/payment-status-reference.md`.
+- Open questions: Q-PAY-4 partly answered; new Q-KY-2, Q-KY-3; superseded source statements (26B, IWI, ACCP) recorded.
+
 ## 0.2.0 — 2026-09-30
 - Estate map moved to private hosting: login page on Vercel (`site/public/`), map data in a private Supabase Storage bucket readable only by allow-listed users (`supabase/setup.sql`).
 - Map content separated into `site/model/map-model.json`; `tools/build_map_data.py` merges it with the integration register.

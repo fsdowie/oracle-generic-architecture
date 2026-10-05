@@ -1,7 +1,7 @@
 ---
 id: VAL-OPEN
 type: open-questions
-as_of: 2026-09-29
+as_of: 2026-10-05
 owner_to_answer: FTG analyst (unless noted)
 usage: "Agents must cite the Q-ID instead of guessing when an answer depends on one of these."
 ---
@@ -29,13 +29,17 @@ usage: "Agents must cite the Q-ID instead of guessing when an answer depends on 
 | R-13 (was Q-055A-1) | INT055A field map and trigger | Answered by the INT055A Lean Spec + unit test (see `integrations/INT055A.md`) |
 | R-11 (was Q-PAY-5) | Payments with no ack | The bank has not received them — transmission issue or still being sent; actionable |
 
+## Resolved from sources 5 Oct 2026 `[CO:KYRIBA-DOC]`
+| ID | Question | Answer |
+|---|---|---|
+| R-14 (was Q-PAY-3) | Does INT955 use Oracle's standard disbursement-acknowledgment processing? | No. INT955 writes custom DFFs (`ATTRIBUTE1/3/4/5`) on `AP_CHECKS_ALL` through REST `payablesPayments/{CheckId}`. The standard feature is a modernisation option (see INT955.md) |
+
 ## Open — priority 1 (affect how an agent answers core questions)
 | ID | Question | Why it matters | Where |
 |---|---|---|---|
 | Q-ZIP-1 | Integration ID and field map of the Zip → Oracle requisition import | Integration mapping doc; diagnostics | zip.md |
 | Q-TAB-1 | Is category → charge account derived by **Transaction Account Builder** (TAD/mapping sets) in Oracle? Name of the TAD and mapping sets (incl. France set) | GL mapping defect triage | MOD-PROC |
 | Q-SSP-1 | The `*_VAL` rules (e.g. `REQ_SINGLE_SUPP_VAL`, `BU_SPEND_CATEGORY_VAL`) block requisition submit in Oracle. How are they built — VB Studio Redwood rules, Groovy/object validations, OIC pre-check? Who owns the *RQ/PO validations inventory*? | Where to change a rule; 26C quarterly regression risk | MOD-PROC |
-| Q-PAY-3 | (Low priority) Does Oracle process INT955 acks via its standard disbursement-acknowledgment feature, or does INT955 update payment status directly? | Only matters for modernisation | INT955.md |
 
 ## Open — priority 2
 | ID | Question | Where |
@@ -46,7 +50,9 @@ usage: "Agents must cite the Q-ID instead of guessing when an answer depends on 
 | Q-959-3 | Does INT959 also process supplier profile *change* requests? | INT959.md |
 | Q-APEX-1 | Are INT055B/C (Oracle → Apex supplier change) still the return leg to Apex? | catalog.md |
 | Q-PAY-2 | Is Oracle payment approval (Review Proposed Payments stage) enabled, and for which PPR templates? | MOD-PAY |
-| Q-PAY-4 | Do CHECK payments route through Kyriba (printing) or another channel? | MOD-PAY |
+| Q-PAY-4 | Partly answered: outsourced checks go to Kyriba as `CHK-OS`; in-house checks are printed by Company, with Positive Pay passed through Kyriba `[CO:KYRIBA-DOC]`. Still open: which route do the `CHECK` PPRs with blank acks (political contributions, tax authorities) take, and should they carry an ack? | MOD-PAY |
+| Q-KY-2 | Production transmission of the outbound payment file: HTTP multipart upload to Kyriba CaaS-ERP (setup guide) or SFTP ("moved to SFTP during implementation")? | kyriba-payment-file.md |
+| Q-KY-3 | INT955B design: how does it cancel (void payment vs cancel bank transfer), and is it fed by the same Kyriba file as INT955? No design document among the sources | INT955.md |
 | Q-PAY-6 | Is the `payments-status-report` extract the REP627 output, or a different report? | payment-status-reference |
 | Q-AP-1 | Owner and exact procedure of the monthly invoice-tolerance recalculation | MOD-AP |
 | Q-AP-2 | Invoice approval rules (who approves non-PO invoices; thresholds) | MOD-AP |
@@ -73,3 +79,10 @@ These stay documented as caveats in `integrations/INT055A.md`; agents should fla
 | Q-055A-4 | What does the Mulesoft REST API connection do in INT055A? | INT055A.md |
 | Q-055A-5 | Error-notification recipients: supplier-team alias vs integrations alias vs FTG integration list? | INT055A.md |
 | Q-055A-6 | Are `LEGACY_ORACLE_TAX_PROFILE_MAP` (INT055A) and `LEGACY_ORACLE_TAX_PROFILE_MAPPING` (INT959 tickets) the same lookup? If yes, ER.4 consumer trace must include INT055A | INT055A.md, INT959.md |
+
+## Superseded statements in sources (no action; recorded so agents don't repeat them)
+| Source | Says | Pack position |
+|---|---|---|
+| CO:KYRIBA-DOC §9.1 | Oracle Fusion on release **26B** | **26C** in production (R-02, USER) |
+| CO:KYRIBA-DOC §4.3, App. B | International Kyriba code `IWI` ("DOMW vs IWI") | `INTW` (R-10, USER) |
+| CO:KYRIBA-DOC §13.2 | Accepted ack value `ACCP` | DFF value set is `ACPT`/`RJCT`; treat `ACCP` as the same meaning |

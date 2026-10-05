@@ -30,6 +30,21 @@ Relationship to REP627 is `[INFERRED]` (same subject, parameters "to check again
 - `NEGOTIABLE` = issued and not voided/cleared (Oracle; checks remain negotiable until escheat window). `[ORA26C:implementing-payables-invoice-to-pay p.37]`
 - `VOIDED` after `RJCT` = INT955B cancellation path. `[CO:02]` `[DATA]`
 - Rejected ≠ returned: RJCT arrives on ack; RETURNED happens after bank acceptance (tracked manually). `[CO:FIN-24248]`
+- **Ack fields** are the `AP_CHECKS_ALL` DFFs that INT955 writes: `ATTRIBUTE1` Kyriba batch ID, `ATTRIBUTE3` placeholder reason (Kyriba emails the real reason separately), `ATTRIBUTE4` status `ACPT`/`RJCT`, `ATTRIBUTE5` ack date. The monitoring deck spells accepted as `ACCP`; the DFF value set (`ACPT`) is authoritative. `[CO:KYRIBA-DOC §5.2, §11.8]`
+- **Kyriba batch status:** Draft → Remitted → Acknowledged. Draft = configuration missing (FM-PAY-01). Remitted for too long = file or batch failure (FM-PAY-08…10). `[CO:KYRIBA-DOC §4.2, §13.1]`
+
+## Exception-monitoring criteria (payment level) `[CO:KYRIBA-DOC §13.2]`
+"3rd party" excludes supplier types `EMPLOYEE` and intercompany. All criteria apply to `NEGOTIABLE` payments.
+| Use case | Ack fields | Supplier type | Age since creation |
+|---|---|---|---|
+| Held by Kyriba, not transmitted (3rd party) | blank | ≠ EMPLOYEE / Interco | > 2 days |
+| Held by Kyriba, not transmitted (employee) | blank | = EMPLOYEE | > 2 days |
+| Rejected by bank (3rd party) | `RJCT` | ≠ EMPLOYEE / Interco | — |
+| Rejected by bank (employee) | `RJCT` | = EMPLOYEE | — |
+| Accepted but never cleared (3rd party) | `ACCP`/`ACPT` | ≠ EMPLOYEE / Interco | > 5 days |
+| Accepted but never cleared (employee) | `ACCP`/`ACPT` | = EMPLOYEE | > 5 days |
+
+The ">2 days, blank ack" rows match FM-PAY-05: the bank hasn't received the payment. The ">5 days, accepted, not cleared" rows point to statement reconciliation (FM-CM-01) or a return.
 
 ## Bank rejection taxonomy (Jun–Jul 2026 sample, 17 payments) `[DATA]`
 | Family | Example bank message | Bank / LE | Fix owner |
