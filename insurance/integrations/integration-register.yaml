@@ -1,0 +1,29 @@
+# Integration register — Insurer Oracle estate (state as of 2023; not the current state)
+# Source: finance-technology notebook 2020–2023 [CO:INS-NB]. Interfaces are known by name; no production numbers.
+schema: {id: str, name: str, source: str, target: str, direction: in|out|internal, lane: str, cadence: str, workstream: str, notes: str, evidence: str}
+
+groups:
+  journals-into-gl:
+    - {id: INS-POLICY-GL, name: Policy administration daily premium commission and claims journals to GL, source: Exceed (via insurance data mart in ADW), target: Oracle GL, direction: in, lane: Financial Integrator + FBDI, cadence: daily (1–2 days in arrears), workstream: R2R, notes: "Journal categories Premium, Loss, Claims; back-load chain reruns a missed load date", evidence: "CO:INS-NB p.315, 337, 796"}
+    - {id: INS-ADP-GL, name: Payroll journal to GL, source: ADP, target: Oracle GL, direction: in, lane: SFTP + OIC, cadence: per pay period, workstream: R2R, notes: "Target design; legacy was a manual upload", evidence: "CO:INS-NB p.339–341"}
+    - {id: INS-CLEARWATER-GL, name: Investment accounting journals to GL, source: Clearwater, target: Oracle GL, direction: in, lane: OIC, cadence: planned, workstream: R2R, notes: "Planned at go-live", evidence: "CO:INS-NB p.331"}
+    - {id: INS-BUDGET-GL, name: Planning budgets and statistical journals to GL budget balances, source: EPM Planning, target: Oracle GL, direction: in, lane: EPM Data Management, cadence: per budget cycle, workstream: R2R, evidence: "CO:INS-NB p.424–426, 499"}
+  procure-to-pay:
+    - {id: INS-ACH, name: ACH payment file and control totals to the bank, source: Oracle Payments, target: Bank A, direction: out, lane: Native Payments (SFTP), cadence: per payment run, workstream: P2P, evidence: "CO:INS-NB p.165, 334"}
+    - {id: INS-POSPAY, name: Positive Pay file for printed checks, source: Oracle Payments, target: Bank A, direction: out, lane: Native Payments (SFTP), cadence: per check run, workstream: P2P, evidence: "CO:INS-NB p.165"}
+    - {id: INS-BAI2, name: Bank statements (BAI2) to Cash Management, source: Bank A, target: Oracle Cash Management, direction: in, lane: SFTP, cadence: daily, workstream: P2P, evidence: "CO:INS-NB p.166, 333"}
+    - {id: INS-CARD, name: Corporate card transactions to Expenses, source: Visa, target: Oracle Expenses, direction: in, lane: Native (file), cadence: daily, workstream: P2P, evidence: "CO:INS-NB p.169, 332"}
+    - {id: INS-EXP-HCM, name: Expenses integration with HCM, source: Oracle HCM, target: Oracle Expenses / Payables, direction: internal, lane: Native, cadence: on change, workstream: P2P, evidence: "CO:INS-NB p.331, 342"}
+    - {id: INS-SUPP-CLASS, name: Supplier business classification update, source: BI Publisher supplier extract, target: Oracle Suppliers (REST), direction: internal, lane: OIC, cadence: scheduled, workstream: P2P, notes: "Read suppliers, map, update through the Suppliers REST API", evidence: "CO:INS-NB p.192–218"}
+    - {id: INS-DATAFOX, name: Supplier enrichment, source: Oracle DataFox, target: Oracle Suppliers, direction: in, lane: Native, cadence: scheduled, workstream: P2P, evidence: "CO:INS-NB p.95–113"}
+    - {id: INS-SQM-APEX, name: Supplier qualification questions maintenance app, source: APEX on ADW, target: Supplier Qualification (REST), direction: internal, lane: REST, cadence: on demand, workstream: P2P, evidence: "CO:INS-NB p.171–174"}
+    - {id: INS-IMAGING, name: Invoice imaging (email and OCR) to Payables, source: Supplier email, target: Oracle Payables, direction: in, lane: Native, cadence: continuous, workstream: P2P, evidence: "CO:INS-NB p.519–535"}
+  data-and-reporting:
+    - {id: INS-BIP-ADW, name: Fusion BI Publisher report to ADW table, source: Oracle Fusion (BI Publisher), target: ADW, direction: out, lane: OIC, cadence: scheduled, workstream: DATA, notes: "Invoke report web service, stage file, insert rows", evidence: "CO:INS-NB p.283–312"}
+    - {id: INS-ERP-BULK, name: ERP bulk data extract to object storage or FTP, source: Oracle Fusion (ESS extract), target: Object storage / FTP, direction: out, lane: OIC, cadence: scheduled, workstream: DATA, evidence: "CO:INS-NB p.224–274"}
+    - {id: INS-AP-IMAGING-ADW, name: Payables imaging audit data to ADW, source: Oracle Payables, target: ADW, direction: out, lane: OneCloud, cadence: daily, workstream: DATA, evidence: "CO:INS-NB p.759–768"}
+    - {id: INS-GL-PLANNING, name: GL actuals to Planning, source: Oracle GL, target: EPM Planning, direction: out, lane: EPM Data Management, cadence: daily and month end, workstream: DATA, evidence: "CO:INS-NB p.499"}
+    - {id: INS-PLANNING-ESSBASE, name: Planning financials to the OAC Essbase reporting cube, source: EPM Planning, target: OAC Essbase, direction: internal, lane: OneCloud, cadence: daily, workstream: DATA, evidence: "CO:INS-NB p.682, 689"}
+    - {id: INS-ADW-ESSBASE, name: Operational metrics to the OAC financials cube, source: ADW, target: OAC Essbase, direction: internal, lane: OneCloud, cadence: monthly, workstream: DATA, evidence: "CO:INS-NB p.499"}
+    - {id: INS-EPM-BACKUP, name: EPM and Essbase backup copies, source: EPM / OAC Essbase, target: On-premise backup, direction: out, lane: OneCloud, cadence: daily, workstream: DATA, evidence: "CO:INS-NB p.682"}
+    - {id: INS-HCM-AD, name: Worker extract for directory and single sign-on, source: Oracle HCM, target: Active Directory, direction: out, lane: SFTP, cadence: daily changes and weekly full, workstream: DATA, evidence: "CO:INS-NB p.562"}

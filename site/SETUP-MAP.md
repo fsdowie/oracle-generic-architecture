@@ -83,3 +83,11 @@ python tools\build_map_data.py
 npx serve site\public
 ```
 `config.js` and `build/` are git-ignored.
+
+## Several maps (Travel, Insurance)
+- Each map has its own model and register: Travel uses `site/model/map-model.json` + `integrations/integration-register.yaml`; Insurance uses `insurance/site/map-model.json` + `insurance/integrations/integration-register.yaml`.
+- `python tools/build_map_data.py --map all` builds `build/<map>/map.json`; the workflow uploads each to `estate-map/<map>/map.json`, and `config.js` lists the maps.
+- After sign-in the page offers a map picker with the maps the viewer may read.
+- Access is per map: `public.map_viewers.maps` lists map ids (`'{*}'` = all). Existing projects run `supabase/migrations/002-per-map-access.sql` once.
+- Give someone one map: `insert into public.map_viewers (email, note, maps) values ('person@example.com', 'reviewer', '{insurance}');`
+- Add a new map: create its model and register, add it to `MAPS` in `tools/build_map_data.py`, to the upload loop and `config.js` in `.github/workflows/deploy-map.yml`.

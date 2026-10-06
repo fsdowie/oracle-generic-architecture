@@ -29,7 +29,8 @@ errors, warnings, ids = [], [], {}
 def err(f, m): errors.append(f"{f}: {m}")
 def warn(f, m): warnings.append(f"{f}: {m}")
 
-md = [f for f in glob.glob("**/*.md", recursive=True)
+md = [f.replace(os.sep, "/") for f in glob.glob("**/*.md", recursive=True)]
+md = [f for f in md
       if f not in META and not f.startswith((".github/", "site/", "tools/"))]
 fm = {}
 for f in md:
@@ -61,7 +62,7 @@ for f, (d, t) in fm.items():
     if f.startswith("oracle-modules/") and "ORA26C" not in t and "evidence_gap" not in d:
         warn(f, "no ORA26C citation and no evidence_gap declared")
 
-for y in ["00-index.yaml", "integrations/integration-register.yaml"]:
+for y in ["00-index.yaml", "integrations/integration-register.yaml", "insurance/integrations/integration-register.yaml"]:
     try:
         data = yaml.safe_load(open(y, encoding="utf-8"))
     except Exception as e:

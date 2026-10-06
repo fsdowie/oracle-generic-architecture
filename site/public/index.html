@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Travel Estate Map</title>
+<title>Estate Maps</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..800&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -85,6 +85,9 @@ aside.detail ul.docs{list-style:none;padding-left:0}
 aside.detail ul.docs a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
 aside.detail ul.docs a::after{content:" ↗";font-size:12px}
 .ev{font:11px var(--f-mono);color:var(--muted)}
+.mappick{display:flex;align-items:center;gap:6px}
+.mappick select{font:inherit;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--fg)}
+#wsChips{display:contents}
 
 /* p2p chain */
 .chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
@@ -161,7 +164,7 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
 <main id="gate" class="gate wrap" hidden>
   <form class="card" id="loginForm" novalidate>
     <div class="eyebrow">Private · review copy</div>
-    <h1>Travel Estate Map</h1>
+    <h1>Estate Maps</h1>
     <p>Sign in with the account you were given.</p>
     <label for="email">Email</label>
     <input id="email" type="email" autocomplete="username" required>
@@ -180,7 +183,7 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
     <p class="sub" id="hLede"></p>
   </div>
   <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-end">
-    <div class="userbar"><span id="who"></span><button id="signOut" type="button">Sign out</button></div>
+    <div class="userbar"><label class="mappick" id="mapPick" hidden><span class="eyebrow">Map</span><select id="mapSel" aria-label="Choose a map"></select></label><span id="who"></span><button id="signOut" type="button">Sign out</button></div>
     <div class="facts" id="facts"></div>
   </div>
 </header>
@@ -189,6 +192,7 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
   <button role="tab" aria-selected="true" data-tab="estate">Estate</button>
   <button role="tab" aria-selected="false" data-tab="p2p">Procure to Pay</button>
   <button role="tab" aria-selected="false" data-tab="r2r">Record to Report</button>
+  <button role="tab" aria-selected="false" data-tab="fnd" hidden>Foundation &amp; controls</button>
   <button role="tab" aria-selected="false" data-tab="onboard">Supplier onboarding</button>
   <button role="tab" aria-selected="false" data-tab="close">Close rhythm</button>
   <button role="tab" aria-selected="false" data-tab="ints">Integrations</button>
@@ -199,23 +203,13 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
     <div>
       <div class="filters" id="wsFilters">
         <span class="eyebrow">Workstream</span>
-        <button class="chip" aria-pressed="true" data-ws="all">All</button>
-        <button class="chip" aria-pressed="false" data-ws="P2P">Procure to Pay</button>
-        <button class="chip" aria-pressed="false" data-ws="R2R">Record to Report</button>
-        <button class="chip" aria-pressed="false" data-ws="PLAT">Platform accounting</button>
+        <span id="wsChips"></span>
       </div>
       <div class="diagram" id="diagram">
         <svg class="edges" id="edges" aria-hidden="true"></svg>
         <div id="bands"></div>
       </div>
-      <div class="legend">
-        <span><i style="border-color:var(--oic)"></i>OIC integration</span>
-        <span><i style="border-color:var(--airflow)"></i>Airflow DAG</span>
-        <span><i style="border-color:var(--bulk)"></i>FBDI / EIB bulk</span>
-        <span><i style="border-color:var(--extract)"></i>BICC / BIP extract</span>
-        <span class="dash"><i style="border-color:var(--ext)"></i>return path / internal</span>
-        <span>Dashed box = external system</span>
-      </div>
+      <div class="legend" id="legend"></div>
     </div>
     <aside class="detail" id="detail" aria-live="polite"></aside>
   </div>
@@ -233,6 +227,13 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
   <h2 id="r2rTitle"></h2><p class="lede" id="r2rLede"></p>
   <div class="chain" id="r2rChain"></div>
   <div class="rail" id="r2rNotes"></div>
+</section>
+
+<section id="tab-fnd" hidden>
+  <div class="eyebrow">Foundation</div>
+  <h2 id="fndTitle"></h2><p class="lede" id="fndLede"></p>
+  <div class="chain" id="fndChain"></div>
+  <div class="rail" id="fndNotes"></div>
 </section>
 
 <section id="tab-onboard" hidden>
@@ -253,8 +254,8 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
   <div class="tools">
     <label class="eyebrow" for="q" style="align-self:center">Search</label>
     <input id="q" type="search" placeholder="System or flow, e.g. Kyriba or supplier">
-    <select id="laneSel" aria-label="Lane"><option value="">All lanes</option><option>OIC</option><option>Airflow</option><option>Bulk</option><option>Extract</option></select>
-    <select id="wsSel" aria-label="Workstream"><option value="">All workstreams</option><option>P2P</option><option>R2R</option><option>Platform</option><option>Foundation</option></select>
+    <select id="laneSel" aria-label="Lane"></select>
+    <select id="wsSel" aria-label="Workstream"></select>
     <span class="count" id="count"></span>
   </div>
   <div class="tablewrap"><table><thead><tr><th>Interface</th><th>Source → Target</th><th>Lane</th><th>Cadence</th><th>Workstream</th></tr></thead><tbody id="tbody"></tbody></table></div>
