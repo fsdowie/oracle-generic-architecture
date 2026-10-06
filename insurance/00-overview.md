@@ -22,7 +22,7 @@ Evidence tag for this folder: `[CO:INS-NB p.N]` = the finance-technology working
 | Oracle transactional | Suppliers & Supplier Qualification, Self-Service Procurement, Purchasing & Contracts, Payables (with invoice imaging), Payments, Cash Management, Expenses, Fixed Assets, Intercompany `[CO:INS-NB p.126, 135]` |
 | Accounting engine | Subledger Accounting (SLA) |
 | General Ledger | One chart of accounts (8 segments), Mutual and Agency ledgers in one data set, GL balances cube (Essbase) `[CO:INS-NB p.133]` |
-| Close, report, analyse | Enterprise EPM (close task manager, consolidation, planning, narrative reporting, account reconciliation, tax reporting, data management), **Autonomous Data Warehouse (ADW)**, Oracle Analytics Cloud (BI, Essbase, Data Visualization), OTBI, BI Publisher, Financial Reporting Studio, Smart View `[CO:INS-NB p.396, 490, 681]` |
+| Close, report, analyse | Enterprise EPM (close task manager, consolidation, planning, narrative reporting, account reconciliation, tax reporting, data management), **Autonomous Data Warehouse (ADW**, Oracle Autonomous Database: the Finance Transaction Data Warehouse**)**, on-premise SQL Server warehouses (EDW, BIM, HDS), Oracle Analytics Cloud (BI, Essbase, Data Visualization), OTBI, BI Publisher, Financial Reporting Studio, Smart View `[CO:INS-NB p.396, 490, 681]` |
 
 ## History that explains the design
 - Started on PeopleSoft Financials and HR, on-premise OBIEE and Hyperion; moved Hyperion to EPM Cloud, OBIEE to OAC, HR to HCM Cloud, then **Financials to Fusion Cloud (go-live 1 Jan 2021)** `[CO:INS-NB p.688, 167]`.

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.1 — 2026-10-07
+- Insurance map: ADW described as an Oracle Autonomous Database (Data Warehouse workload) holding transaction-level data, the Finance Transaction Data Warehouse; new node for the on-premise SQL Server warehouses (EDW, BIM, HDS); policy data routed Exceed → BIM → ADW → GL; note on where Essbase sits (OAC cube and Fusion GL balances cube).
+
 ## 0.4.0 — 2026-10-07
 - **Insurance Estate Map** (state as of 2023, historical): new `insurance/` pack from the finance-technology notebook 2020–2023, anonymised (Insurer, Mutual, Agency, Bank A; no people, hosts or credentials). Covers COA and hierarchies, mappings, SLA rules, BPM approvals, P2P and R2R with account types, ADW and integrations, reconciliation, OTBI / BIP / FRS / Smart View / OAC.
 - One site, several maps: map picker after sign-in; per-map access through `map_viewers.maps` and `public.can_read_map` (migration `supabase/migrations/002-per-map-access.sql`). Maps stored as `travel/map.json` and `insurance/map.json`.
