@@ -1642,5 +1642,201 @@
   "lede": "A strong sample assembled from production monitoring names and design documents, not a certified register. The lane a flow sits in tells you who operates it and where a failure surfaces."
  },
  "footer": "Source: this repository (anonymised review copy), validated against Oracle 26C implementation guides. Current state as of 30 September 2026. In-flight work is labelled as such and is not shown as architecture.",
- "docs_base": "https://github.com/fsdowie/oracle-generic-architecture/blob/main/"
+ "docs_base": "https://github.com/fsdowie/oracle-generic-architecture/blob/main/",
+ "r2r": {
+  "title": "Record to Report: eight stages",
+  "lede": "A funnel followed by a fan-out: subledgers, the Accounting Hub and 19+ feeders converge into one General Ledger, which then feeds consolidation, reconciliation, planning and reporting on the period calendar. The ledger is the only place completeness is asserted.",
+  "stages": [
+   {
+    "n": "01",
+    "title": "Journals in",
+    "system": "Subledger Accounting · Accounting Hub · feeders",
+    "accounting": "per source",
+    "points": [
+     "Subledger Accounting derives journals for every Oracle subledger under one accounting method",
+     "The Accounting Hub turns 10–12M platform events a day into about 3.5M GL lines in a 5–7 hour run",
+     "19+ feeders send journals already accounted: payroll, cash reconciliation, investments, real estate, Kyriba",
+     "Journal source and category drive approval; cross-validation rules and locked accounts govern what can post",
+     "Debits and credits are set per source by journal line rules, account rules and mapping sets"
+    ]
+   },
+   {
+    "n": "02",
+    "title": "Intercompany, allocations, transfer pricing",
+    "system": "General Ledger · Intercompany",
+    "accounting": "intercompany",
+    "points": [
+     "Intercompany balancing rules generate receivable and payable lines for journals out of balance by legal entity",
+     "A daily intercompany balancing interface detects imbalance on the intercompany imbalance account and posts balancing journals",
+     "Redenomination interfaces (cash, Brazil, global) each run with a configured mismatch tolerance",
+     "Allocation rules run cost-plus, royalties, platform and admin service fees, benefits and split statistics",
+     "Allocation hierarchies are revised as new cost centers appear"
+    ],
+    "entries": [
+     {
+      "event": "Intercompany balancing line",
+      "dr": [
+       "Intercompany receivable (asset), one entity"
+      ],
+      "cr": [
+       "Intercompany payable (liability), the other entity"
+      ]
+     },
+     {
+      "event": "Allocation or transfer-pricing charge",
+      "dr": [
+       "Expense in the receiving cost center or entity"
+      ],
+      "cr": [
+       "Offset account of the source pool"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "03",
+    "title": "Fixed assets",
+    "system": "Fixed Assets",
+    "accounting": "capitalisation, depreciation",
+    "points": [
+     "Additions arrive mostly as mass additions from Payables invoice distributions",
+     "Assets above a threshold are approved before posting",
+     "Depreciation runs by book across 40+ corporate and tax books in parallel",
+     "The Transaction Account Builder takes depreciation-expense segments from the original invoice distribution",
+     "Adjustments, transfers, retirements and reinstatements"
+    ],
+    "entries": [
+     {
+      "event": "Asset addition",
+      "dr": [
+       "Asset cost"
+      ],
+      "cr": [
+       "Asset clearing"
+      ]
+     },
+     {
+      "event": "Depreciation",
+      "dr": [
+       "Depreciation expense"
+      ],
+      "cr": [
+       "Accumulated depreciation"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "04",
+    "title": "Period-end adjustments",
+    "system": "General Ledger · Purchasing",
+    "accounting": "accrual, revaluation",
+    "points": [
+     "Receipts without invoices are accrued at period end and reversed when the next period opens",
+     "Consumption-based spend is accrued by the variable-accrual interface",
+     "Foreign-currency balances are revalued at period-end rates; balance-sheet revaluations reverse next period",
+     "Daily exchange rates load through the rates interface; revaluation data also feeds reconciliation"
+    ],
+    "entries": [
+     {
+      "event": "Period-end accrual",
+      "dr": [
+       "Expense"
+      ],
+      "cr": [
+       "Accrual / uninvoiced receipts (liability)"
+      ]
+     },
+     {
+      "event": "FX revaluation, gain",
+      "dr": [
+       "Revalued account"
+      ],
+      "cr": [
+       "Unrealized gain"
+      ]
+     },
+     {
+      "event": "FX revaluation, loss",
+      "dr": [
+       "Unrealized loss"
+      ],
+      "cr": [
+       "Revalued account"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "05",
+    "title": "Ledger close",
+    "system": "General Ledger",
+    "accounting": "none",
+    "points": [
+     "GAAP primary ledger with STAT and TAX secondary ledgers; ledger sets open and close periods across ledgers",
+     "Translation to reporting currency; the difference sits in the cumulative translation adjustment account",
+     "At year end, revenue and expense balances roll into retained earnings",
+     "Trial balance published as the reference balance for every downstream system",
+     "Reopening a prior period is governed: pause loads, snapshot EPM, reopen backwards"
+    ]
+   },
+   {
+    "n": "06",
+    "title": "Consolidation",
+    "system": "FCCS",
+    "accounting": "eliminations",
+    "points": [
+     "Twelve-period, multi-currency, multi-GAAP consolidation application with ownership management",
+     "GL balances load through Data Management at month-end rates, so FCCS and Oracle agree",
+     "The Consolidation team runs Consolidate and Translate; CTA sits on the balance sheet",
+     "Intercompany and profit eliminations plus consolidation journals, with approval units",
+     "Task Manager runs the close checklist; financial reports distributed with bursting"
+    ],
+    "entries": [
+     {
+      "event": "Intercompany elimination",
+      "dr": [
+       "Intercompany payable"
+      ],
+      "cr": [
+       "Intercompany receivable",
+       "Plug account takes any difference"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "07",
+    "title": "Reconciliation",
+    "system": "ARCS · ReconArt",
+    "accounting": "none",
+    "points": [
+     "A reconciliation profile per account compares the GL balance with an independent source balance",
+     "Reconciliation Compliance runs certification; Transaction Matching handles item-level matching",
+     "GAAP and STAT reconcile in separate pipelines",
+     "Auto-certifies within ±5,000 USD, or when difference and activity are both zero",
+     "Bank balances (day 4) and unmatched items (day 6) arrive from ReconArt"
+    ]
+   },
+   {
+    "n": "08",
+    "title": "Reporting and planning",
+    "system": "Warehouse · planning · archive",
+    "accounting": "none",
+    "points": [
+     "Actuals and master data go to planning (Anaplan, EPBCS)",
+     "Extracts feed the finance warehouse and Snowflake, which reconcile to GL",
+     "Trial balance and journal lines are archived",
+     "Ledger account balances are validated by a controls interface"
+    ]
+   }
+  ],
+  "accounting_note": "Account types follow the Oracle 26C guides: intercompany balancing uses receivable (asset) and payable (liability) accounts; allocations debit the target and credit the offset; revaluation posts to unrealized gain or loss; FCCS eliminations clear intercompany balances and leave differences in a plug account. Fixed Assets entries are the Oracle standard; no 26C Fixed Assets guide was available to cite.",
+  "notes": [
+   {
+    "title": "How the books are proved.",
+    "text": "GL is the reference balance. Accounting Hub detail reconciles back to it, FCCS must agree with it at month-end rates, and ARCS certifies it account by account. The warehouse is a fifth copy on a separate path."
+   }
+  ]
+ }
 }

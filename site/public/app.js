@@ -90,12 +90,16 @@
     });
     renderEstate();
 
-    // p2p
-    const p = model.p2p;
-    $("p2pTitle").textContent = p.title; $("p2pLede").textContent = p.lede;
+    // workstream chains: Procure to Pay and Record to Report
     const je = (e) => `<div class="je"><div class="je-ev">${esc(e.event)}</div><div class="je-row"><b>Dr</b><span>${e.dr.map(esc).join("<br>")}</span></div><div class="je-row"><b>Cr</b><span>${e.cr.map(esc).join("<br>")}</span></div></div>`;
-    $("chain").innerHTML = p.stages.map((s) => `<div class="stage"><span class="n">Stage ${esc(s.n)}</span><h4>${esc(s.title)}</h4><span class="sys">${esc(s.system)}</span><span class="acct ${s.accounting === "none" ? "none" : ""}">${s.accounting === "none" ? "no accounting" : esc(s.accounting) + " via XLA"}</span><ul>${(s.points || [s.what]).filter(Boolean).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>${(s.entries || []).map(je).join("")}</div>`).join("");
-    $("p2pNotes").innerHTML = (p.accounting_note ? `<div class="note"><b>Account types.</b> ${esc(p.accounting_note)}</div>` : "") + notes(p.notes);
+    function chain(p, ids, suffix) {
+      if (!p) return;
+      $(ids.title).textContent = p.title; $(ids.lede).textContent = p.lede;
+      $(ids.chain).innerHTML = p.stages.map((s) => `<div class="stage"><span class="n">Stage ${esc(s.n)}</span><h4>${esc(s.title)}</h4><span class="sys">${esc(s.system)}</span><span class="acct ${s.accounting === "none" ? "none" : ""}">${s.accounting === "none" ? "no accounting" : esc(s.accounting) + suffix}</span><ul>${(s.points || [s.what]).filter(Boolean).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>${(s.entries || []).map(je).join("")}</div>`).join("");
+      $(ids.notes).innerHTML = (p.accounting_note ? `<div class="note"><b>Account types.</b> ${esc(p.accounting_note)}</div>` : "") + notes(p.notes);
+    }
+    chain(model.p2p, { title: "p2pTitle", lede: "p2pLede", chain: "chain", notes: "p2pNotes" }, " via XLA");
+    chain(model.r2r, { title: "r2rTitle", lede: "r2rLede", chain: "r2rChain", notes: "r2rNotes" }, "");
 
     // onboarding
     const o = model.onboarding;
@@ -187,7 +191,7 @@
   }
   ["q", "laneSel", "wsSel"].forEach((id) => $(id).addEventListener("input", renderInts));
 
-  const TABS = ["estate", "p2p", "onboard", "close", "ints"];
+  const TABS = ["estate", "p2p", "r2r", "onboard", "close", "ints"];
   const tabs = document.querySelectorAll("nav.tabs button");
   function showTab(t) {
     tabs.forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === t));

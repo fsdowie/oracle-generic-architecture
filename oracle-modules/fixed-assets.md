@@ -21,7 +21,7 @@ Mass additions review and post → **asset addition approval workflow** (capital
 
 ## Counter-intuitive configuration
 By default every segment of the depreciation expense account derives from the asset **category**. Deriving specific segments from the originating AP distribution requires **Transaction Account Builder** (transaction account definitions/types). `[CO:03 §3.3]`
-Verification: the 26C guides supplied describe TAB for Purchasing and Intercompany only; FA usage of TAB could not be confirmed → `[UNVERIFIED]` Q-FA-1.
+Verification: the 26C guides supplied describe TAB for Purchasing and Intercompany only; FA usage of TAB could not be confirmed in them `[UNVERIFIED]`, but the R2R feature summary states it is used for depreciation-expense segments `[CO:R2R-FEATURES]` (R-21).
 
 ## Recent change
 Asset clearing account migrated `10490` → `14550`; combinations violated CVRs at zero balance during migration. `[CO:03 §3.3]`
