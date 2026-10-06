@@ -9,7 +9,7 @@ links: [INS-FOUNDATION, INS-P2P, INS-DATA]
 # Record to Report
 
 ## Journals in
-- **Policy administration (Exceed) daily journal:** premium and commission, claims, and change in case reserves land in the insurance data mart (stage and temp schemas), are mapped by a Financial Integrator, and post to GL in three journal categories — **Premium, Loss, Claims**. Feeds run in arrears: premium and commission one day, case reserves two days. A back-load chain reruns a missed load date `[CO:INS-NB p.315, 337, 796]`.
+- **Policy administration (Exceed) daily journal:** premium and commission, claims, and change in case reserves come from the on-premise BIM database (SQL Server), land in the insurance data mart in ADW (stage and temp schemas), are mapped by a Financial Integrator, and post to GL in three journal categories — **Premium, Loss, Claims**. Feeds run in arrears: premium and commission one day, case reserves two days. A back-load chain reruns a missed load date `[CO:INS-NB p.315, 337, 796]`.
 - **Payroll (ADP):** GL file from ADP, mapped to Oracle accounts. Target design ADP → SFTP → OIC → GL; legacy was a manual spreadsheet upload `[CO:INS-NB p.339–341]`.
 - **Investments (Clearwater)** and **tax (Sovos)** were planned interfaces `[CO:INS-NB p.331]`.
 - **Expenses** integrate with HCM for employee data `[CO:INS-NB p.331, 342]`.

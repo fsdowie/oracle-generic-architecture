@@ -9,13 +9,26 @@ links: [INS-FOUNDATION, INS-P2P, INS-R2R]
 # Data, integration and reporting
 
 ## Autonomous Data Warehouse (ADW)
-- **Finance transaction data warehouse** on ADW: a financial report mart of all transactional modules (live February 2021), plus PeopleSoft history and policy-administration data `[CO:INS-NB p.482, 490, 681]`.
+- **What it is:** an **Oracle Autonomous Database** with the *Data Warehouse* workload, provisioned in OCI under Autonomous Database (listed alongside Autonomous Transaction Processing) `[CO:INS-NB p.683]`. It is Oracle's database, not Essbase.
+- **Finance Transaction Data Warehouse** (one database): transaction-level data — a financial report mart of all Fusion transactional modules (live February 2021), PeopleSoft Financials history, and policy data brought over from the on-premise BIM database `[CO:INS-NB p.482, 490, 681]`. A second ADW instance served IT for ODI and APEX `[CO:INS-NB p.182, 713]`.
 - **Insurance data mart** schemas: stage (daily feeds), temp (journal breakdowns) and an integrated-journal schema with tables for premium, commission, claims, case reserves, new / renewed / cancelled policies and policy counts `[CO:INS-NB p.149, 315]`.
 - ADW is the source for OAC dashboards and BI Publisher reports, and the landing point for Fusion extracts `[CO:INS-NB p.681, 765]`.
+
+## On-premise data warehouses (SQL Server)
+- **EDW** — the enterprise data warehouse on SQL Server, with a Finance workgroup database `[CO:INS-NB p.401–403, 693]`.
+- **BIM** — the business-information reporting database on SQL Server that holds the Exceed policy, premium and claims reporting data; legacy BIM reports (and their history archive) came from here `[CO:INS-NB p.313, 316, 403]`.
+- **HDS** — a SQL Server data store; a few BIM reports were sourced from DB2 through it `[CO:INS-NB p.403, 693]`.
+- A dedicated load server moved BIM data into ADW `[CO:INS-NB p.400]`; some reporting data still lived in BIM after the move `[CO:INS-NB p.695]`.
+- None of these is Essbase.
+
+## Where Essbase sits
+- **OAC Essbase financials cube** — loaded from Planning by OneCloud (plus operational metrics from ADW); the main source behind the finance dashboards `[CO:INS-NB p.681–682, 499]`.
+- **Fusion GL balances cube** — the Essbase cube inside Fusion General Ledger, behind FRS, Smart View and OTBI balances `[CO:INS-NB p.454–458]`.
 
 ## How data moves
 | Path | Mechanism | Evidence |
 |---|---|---|
+| Policy data → ADW | Exceed reporting data lands in BIM (SQL Server); a load server copies it into the ADW insurance data mart | `[CO:INS-NB p.315–316, 400, 681]` |
 | Fusion → ADW (report-based) | OIC scheduled orchestration invokes a BI Publisher report through the report web service, stages the file, then inserts rows into an ADW table (delete-and-reload) | `[CO:INS-NB p.283–312]` |
 | Fusion → files (bulk) | OIC uses the ERP extract-bulk-data pattern: an ESS job writes the extract, a business event triggers download to object storage or FTP | `[CO:INS-NB p.224–274]` |
 | Fusion Payables → ADW | OneCloud chain for the invoice-imaging audit data set | `[CO:INS-NB p.763]` |

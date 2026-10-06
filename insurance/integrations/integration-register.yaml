@@ -4,7 +4,7 @@ schema: {id: str, name: str, source: str, target: str, direction: in|out|interna
 
 groups:
   journals-into-gl:
-    - {id: INS-POLICY-GL, name: Policy administration daily premium commission and claims journals to GL, source: Exceed (via insurance data mart in ADW), target: Oracle GL, direction: in, lane: Financial Integrator + FBDI, cadence: daily (1–2 days in arrears), workstream: R2R, notes: "Journal categories Premium, Loss, Claims; back-load chain reruns a missed load date", evidence: "CO:INS-NB p.315, 337, 796"}
+    - {id: INS-POLICY-GL, name: Policy administration daily premium commission and claims journals to GL, source: Exceed (via BIM on SQL Server and the insurance data mart in ADW), target: Oracle GL, direction: in, lane: Financial Integrator + FBDI, cadence: daily (1–2 days in arrears), workstream: R2R, notes: "Journal categories Premium, Loss, Claims; back-load chain reruns a missed load date", evidence: "CO:INS-NB p.315, 337, 796"}
     - {id: INS-ADP-GL, name: Payroll journal to GL, source: ADP, target: Oracle GL, direction: in, lane: SFTP + OIC, cadence: per pay period, workstream: R2R, notes: "Target design; legacy was a manual upload", evidence: "CO:INS-NB p.339–341"}
     - {id: INS-CLEARWATER-GL, name: Investment accounting journals to GL, source: Clearwater, target: Oracle GL, direction: in, lane: OIC, cadence: planned, workstream: R2R, notes: "Planned at go-live", evidence: "CO:INS-NB p.331"}
     - {id: INS-BUDGET-GL, name: Planning budgets and statistical journals to GL budget balances, source: EPM Planning, target: Oracle GL, direction: in, lane: EPM Data Management, cadence: per budget cycle, workstream: R2R, evidence: "CO:INS-NB p.424–426, 499"}
@@ -19,6 +19,7 @@ groups:
     - {id: INS-SQM-APEX, name: Supplier qualification questions maintenance app, source: APEX on ADW, target: Supplier Qualification (REST), direction: internal, lane: REST, cadence: on demand, workstream: P2P, evidence: "CO:INS-NB p.171–174"}
     - {id: INS-IMAGING, name: Invoice imaging (email and OCR) to Payables, source: Supplier email, target: Oracle Payables, direction: in, lane: Native, cadence: continuous, workstream: P2P, evidence: "CO:INS-NB p.519–535"}
   data-and-reporting:
+    - {id: INS-BIM-ADW, name: Policy reporting data from BIM to the ADW insurance data mart, source: BIM (SQL Server; Exceed data), target: ADW, direction: internal, lane: SQL Server load server, cadence: daily, workstream: DATA, evidence: "CO:INS-NB p.315–316, 400, 681"}
     - {id: INS-BIP-ADW, name: Fusion BI Publisher report to ADW table, source: Oracle Fusion (BI Publisher), target: ADW, direction: out, lane: OIC, cadence: scheduled, workstream: DATA, notes: "Invoke report web service, stage file, insert rows", evidence: "CO:INS-NB p.283–312"}
     - {id: INS-ERP-BULK, name: ERP bulk data extract to object storage or FTP, source: Oracle Fusion (ESS extract), target: Object storage / FTP, direction: out, lane: OIC, cadence: scheduled, workstream: DATA, evidence: "CO:INS-NB p.224–274"}
     - {id: INS-AP-IMAGING-ADW, name: Payables imaging audit data to ADW, source: Oracle Payables, target: ADW, direction: out, lane: OneCloud, cadence: daily, workstream: DATA, evidence: "CO:INS-NB p.759–768"}

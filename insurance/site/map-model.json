@@ -62,7 +62,7 @@
   },
   {
    "name": "Native / file",
-   "match": "Native|SFTP|REST",
+   "match": "Native|SFTP|REST|SQL Server",
    "color": "var(--extract)"
   }
  ],
@@ -139,7 +139,7 @@
    "functions": [
     "Issues, renews and cancels policies; bills premium and pays commission",
     "Records claims, losses and case reserves",
-    "Feeds the insurance data mart in ADW every day (premium one day in arrears, reserves two)",
+    "Reporting data lands in the on-premise BIM database, then in the ADW insurance data mart (premium one day in arrears, reserves two)",
     "Its activity reaches the ledger as daily Premium, Loss and Claims journals"
    ],
    "integrations": [
@@ -271,6 +271,34 @@
     {
      "label": "Integration register",
      "path": "insurance/integrations/integration-register.yaml"
+    }
+   ]
+  },
+  {
+   "id": "onprem",
+   "layer": "L1",
+   "title": "On-premise warehouses",
+   "subtitle": "EDW · BIM · HDS (SQL Server)",
+   "external": true,
+   "core": false,
+   "workstreams": [
+    "DATA",
+    "R2R"
+   ],
+   "description": "On-premise SQL Server data stores: the enterprise data warehouse (EDW), the BIM reporting database with Exceed policy data, and HDS. None of them is Essbase.",
+   "functions": [
+    "EDW: enterprise data warehouse with a Finance workgroup database",
+    "BIM: policy, premium and claims reporting data from Exceed; source of legacy BIM reports",
+    "HDS: data store; some BIM reports sourced from DB2 through it",
+    "A load server copies BIM data into the ADW insurance data mart"
+   ],
+   "integrations": [
+    "INS-BIM-ADW"
+   ],
+   "docs": [
+    {
+     "label": "ADW, integrations and reporting",
+     "path": "insurance/data-and-reporting.md"
     }
    ]
   },
@@ -746,22 +774,23 @@
    "id": "adw",
    "layer": "L6",
    "title": "Autonomous Data Warehouse",
-   "subtitle": "finance data warehouse",
+   "subtitle": "Oracle Autonomous Database",
    "external": false,
    "core": false,
    "workstreams": [
     "DATA",
     "R2R"
    ],
-   "description": "ADW: the finance transaction data warehouse and the insurance data mart.",
+   "description": "Oracle Autonomous Database (Data Warehouse workload): the Finance Transaction Data Warehouse, holding transaction-level data from Fusion, PeopleSoft history and policy data. Not Essbase.",
    "functions": [
-    "Financial report mart of all transactional modules (live February 2021)",
-    "Insurance data mart: stage, temp and integrated-journal schemas for premium, claims and policy counts",
+    "Financial report mart of all Fusion transactional modules (live February 2021)",
+    "PeopleSoft Financials history",
+    "Insurance data mart (stage, temp, integrated-journal schemas) fed from BIM for premium, claims and policy counts",
     "Loaded from Fusion through OIC (BI Publisher reports, bulk extracts) and OneCloud",
-    "SQL checks reconcile daily policy journals and extracts to source",
-    "Source for OAC dashboards and BI Publisher reports"
+    "SQL checks reconcile daily policy journals and extracts to source; source for OAC dashboards and BI Publisher"
    ],
    "integrations": [
+    "INS-BIM-ADW",
     "INS-BIP-ADW",
     "INS-ERP-BULK",
     "INS-AP-IMAGING-ADW",
@@ -787,7 +816,7 @@
    "description": "Oracle Analytics Cloud: dashboards, the Essbase financials cube and data visualisation.",
    "functions": [
     "BI dashboards on a semantic model (physical, logical, presentation layers)",
-    "Essbase financials cube loaded from Planning; operational metrics from ADW",
+    "Essbase financials cube loaded from Planning (OneCloud) and ADW metrics; one of two Essbase cubes, with the Fusion GL balances cube",
     "Data Visualization with data flows and data sets (e.g. AP imaging auditability)",
     "Report outputs distributed to a content-cloud folder for Accounting"
    ],
@@ -863,11 +892,6 @@
   }
  ],
  "edges": [
-  {
-   "from": "policy",
-   "to": "adw",
-   "kind": "int"
-  },
   {
    "from": "adw",
    "to": "fbdi",
@@ -1027,6 +1051,16 @@
    "from": "gl",
    "to": "rpt",
    "kind": "extract"
+  },
+  {
+   "from": "policy",
+   "to": "onprem",
+   "kind": "int"
+  },
+  {
+   "from": "onprem",
+   "to": "adw",
+   "kind": "bulk"
   }
  ],
  "default_node": "gl",
@@ -1514,11 +1548,16 @@
    },
    {
     "title": "Policy data to the ledger",
-    "route": "Exceed → insurance data mart → Financial Integrator → GL",
+    "route": "Exceed → BIM (SQL Server) → ADW insurance data mart → Financial Integrator → GL",
     "steps": [
      {
       "label": "Exceed",
       "text": "Premium, commission, claims and case reserves",
+      "kind": "ext"
+     },
+     {
+      "label": "BIM (SQL Server, on-premise)",
+      "text": "Policy, premium and claims reporting data; a load server copies it to ADW",
       "kind": "ext"
      },
      {
@@ -1602,7 +1641,11 @@
    },
    {
     "title": "ADW as the warehouse.",
-    "text": "Fusion data reaches ADW through OIC and OneCloud; Data Sync was replaced by ODI / OCI Data Integration with an API gateway for REST."
+    "text": "ADW is an Oracle Autonomous Database (Data Warehouse workload) holding transaction-level finance data. Fusion data reaches it through OIC and OneCloud, policy data through BIM; Data Sync was replaced by ODI / OCI Data Integration."
+   },
+   {
+    "title": "Where Essbase sits.",
+    "text": "Two Essbase cubes: the OAC financials cube (from Planning via OneCloud) and the Fusion GL balances cube (FRS, Smart View, OTBI). EDW, BIM and HDS are SQL Server databases, and ADW is an Oracle Autonomous Database."
    }
   ]
  },
