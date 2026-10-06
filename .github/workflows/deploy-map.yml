@@ -1,4 +1,4 @@
-name: Deploy estate map
+name: Deploy estate maps
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - "site/**"
       - "integrations/integration-register.yaml"
+      - "insurance/**"
       - "tools/build_map_data.py"
       - ".github/workflows/deploy-map.yml"
   workflow_dispatch:
@@ -51,7 +52,7 @@ jobs:
           python tools/validate_pack.py
 
       - name: Build map data
-        run: python tools/build_map_data.py
+        run: python tools/build_map_data.py --map all
 
       - name: Upload map data to private Supabase bucket
         env:
@@ -64,16 +65,19 @@ jobs:
             sb_*) ;;
             *) auth=(-H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY") ;;
           esac
-          status=$(curl -sS -o /tmp/upload.txt -w "%{http_code}" -X POST \
-            "$SUPABASE_URL/storage/v1/object/estate-map/map.json" \
-            "${auth[@]}" \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "x-upsert: true" \
-            -H "cache-control: no-cache" \
-            -H "Content-Type: application/json" \
-            --data-binary @build/map.json)
-          echo "Supabase responded $status"
-          if [ "$status" -ge 300 ]; then cat /tmp/upload.txt; exit 1; fi
+          # One object per map: <map>/map.json. Access is per map (see supabase/setup.sql).
+          for m in travel insurance; do
+            status=$(curl -sS -o /tmp/upload.txt -w "%{http_code}" -X POST \
+              "$SUPABASE_URL/storage/v1/object/estate-map/$m/map.json" \
+              "${auth[@]}" \
+              -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+              -H "x-upsert: true" \
+              -H "cache-control: no-cache" \
+              -H "Content-Type: application/json" \
+              --data-binary @build/$m/map.json)
+            echo "$m: Supabase responded $status"
+            if [ "$status" -ge 300 ]; then cat /tmp/upload.txt; exit 1; fi
+          done
 
       - name: Write public config
         env:
@@ -81,7 +85,9 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           cat > site/public/config.js <<EOF
-          window.MAP_CONFIG = { url: "${SUPABASE_URL}", anonKey: "${SUPABASE_ANON_KEY}", bucket: "estate-map", object: "map.json" };
+          window.MAP_CONFIG = { url: "${SUPABASE_URL}", anonKey: "${SUPABASE_ANON_KEY}", bucket: "estate-map",
+            maps: [{ id: "travel", title: "Travel Estate Map", object: "travel/map.json" },
+                   { id: "insurance", title: "Insurance Estate Map", object: "insurance/map.json" }] };
           EOF
 
       - name: Check nothing sensitive is in the deploy folder

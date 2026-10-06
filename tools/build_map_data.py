@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build build/map.json for the protected estate map.
+"""Build build/<map>/map.json for each protected estate map (travel, insurance).
 
 Merges site/model/map-model.json (layout, nodes, flows, process text) with
 integrations/integration-register.yaml (the integration table) so the map always
@@ -18,8 +18,21 @@ except ImportError:
     sys.exit("PyYAML is required: pip install pyyaml")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-model = json.load(open(os.path.join(ROOT, "site/model/map-model.json"), encoding="utf-8"))
-reg = yaml.safe_load(open(os.path.join(ROOT, "integrations/integration-register.yaml"), encoding="utf-8"))
+# One entry per map: (model, register). Usage: build_map_data.py [--map travel|insurance|all]
+MAPS = {
+    "travel": ("site/model/map-model.json", "integrations/integration-register.yaml"),
+    "insurance": ("insurance/site/map-model.json", "insurance/integrations/integration-register.yaml"),
+}
+which = sys.argv[sys.argv.index("--map") + 1] if "--map" in sys.argv else "all"
+if which == "all":
+    import subprocess
+    for name in MAPS:
+        subprocess.run([sys.executable, os.path.abspath(__file__), "--map", name], check=True)
+    sys.exit(0)
+if which not in MAPS:
+    sys.exit(f"unknown map {which}; choose from {', '.join(MAPS)}")
+model = json.load(open(os.path.join(ROOT, MAPS[which][0]), encoding="utf-8"))
+reg = yaml.safe_load(open(os.path.join(ROOT, MAPS[which][1]), encoding="utf-8"))
 
 
 def label(i):
@@ -97,7 +110,8 @@ leaks = list(scan(model))
 if leaks:
     sys.exit("interface numbers would be shown on the map:\n  " + "\n  ".join(leaks))
 
-os.makedirs(os.path.join(ROOT, "build"), exist_ok=True)
-out = os.path.join(ROOT, "build/map.json")
+model["map"] = which
+os.makedirs(os.path.join(ROOT, "build", which), exist_ok=True)
+out = os.path.join(ROOT, "build", which, "map.json")
 json.dump(model, open(out, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-print(f"wrote {out}: {len(model['nodes'])} nodes, {len(model['edges'])} edges, {len(ints)} integrations")
+print(f"wrote build/{which}/map.json: {len(model['nodes'])} nodes, {len(model['edges'])} edges, {len(ints)} integrations")

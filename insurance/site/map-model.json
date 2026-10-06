@@ -1,0 +1,1703 @@
+{
+ "_about": "Insurance Estate Map model. Built by tools/build_map_data.py --map insurance. State as of 2023 (historical).",
+ "docs_base": "https://github.com/fsdowie/oracle-generic-architecture/blob/main/",
+ "header": {
+  "eyebrow": "Finance Technology · State as of 2023, not current · Oracle Fusion Cloud",
+  "title": "Insurance Estate Map",
+  "lede": "Policy administration, payroll, procurement and banking feed one Oracle ledger per entity; a finance data warehouse on ADW and Enterprise EPM sit around it for reporting, planning and close. Select any system to see what it does, how it connects and where to read more.",
+  "facts": [
+   {
+    "value": "8",
+    "label": "COA segments"
+   },
+   {
+    "value": "{{integration_count}}",
+    "label": "interfaces mapped"
+   },
+   {
+    "value": "3",
+    "label": "entities (Mutual, Agency, Foundation)"
+   },
+   {
+    "value": "BD6",
+    "label": "GL close"
+   }
+  ]
+ },
+ "footer": "Source: finance-technology notebook 2020–2023 (anonymised). Shows the state as of 2023, not the current state.",
+ "tab_labels": {
+  "onboard": "Data & reporting",
+  "close": "Close calendar",
+  "fnd": "Foundation & controls"
+ },
+ "workstreams": [
+  {
+   "id": "P2P",
+   "label": "Procure to Pay"
+  },
+  {
+   "id": "R2R",
+   "label": "Record to Report"
+  },
+  {
+   "id": "DATA",
+   "label": "Data & reporting"
+  }
+ ],
+ "lane_groups": [
+  {
+   "name": "OIC",
+   "match": "OIC",
+   "color": "var(--oic)"
+  },
+  {
+   "name": "OneCloud",
+   "match": "OneCloud",
+   "color": "var(--airflow)"
+  },
+  {
+   "name": "EPM / bulk",
+   "match": "Data Management|FBDI|Integrator",
+   "color": "var(--bulk)"
+  },
+  {
+   "name": "Native / file",
+   "match": "Native|SFTP|REST",
+   "color": "var(--extract)"
+  }
+ ],
+ "legend": [
+  {
+   "label": "OIC integration",
+   "color": "var(--oic)"
+  },
+  {
+   "label": "OneCloud chain",
+   "color": "var(--airflow)"
+  },
+  {
+   "label": "Data Management / file load",
+   "color": "var(--bulk)"
+  },
+  {
+   "label": "Report / extract",
+   "color": "var(--extract)"
+  },
+  {
+   "label": "return path / internal",
+   "color": "var(--ext)",
+   "dash": true
+  }
+ ],
+ "layers": [
+  {
+   "id": "L1",
+   "label": "Layer 1",
+   "title": "Origination"
+  },
+  {
+   "id": "L2",
+   "label": "Layer 2",
+   "title": "Integration lanes"
+  },
+  {
+   "id": "L3",
+   "label": "Layer 3",
+   "title": "Oracle transactional"
+  },
+  {
+   "id": "L4",
+   "label": "Layer 4",
+   "title": "Accounting engine",
+   "narrow": true
+  },
+  {
+   "id": "L5",
+   "label": "Layer 5",
+   "title": "General Ledger",
+   "narrow": true
+  },
+  {
+   "id": "L6",
+   "label": "Layer 6",
+   "title": "Close, data, report, bank"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "policy",
+   "layer": "L1",
+   "title": "Policy administration",
+   "subtitle": "Exceed · premium & claims",
+   "external": true,
+   "core": false,
+   "workstreams": [
+    "R2R",
+    "DATA"
+   ],
+   "description": "The insurance system of record for policies, premium, commission, claims and case reserves.",
+   "functions": [
+    "Issues, renews and cancels policies; bills premium and pays commission",
+    "Records claims, losses and case reserves",
+    "Feeds the insurance data mart in ADW every day (premium one day in arrears, reserves two)",
+    "Its activity reaches the ledger as daily Premium, Loss and Claims journals"
+   ],
+   "integrations": [
+    "INS-POLICY-GL"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "insurance/processes/record-to-report.md"
+    },
+    {
+     "label": "ADW, integrations and reporting",
+     "path": "insurance/data-and-reporting.md"
+    }
+   ]
+  },
+  {
+   "id": "adp",
+   "layer": "L1",
+   "title": "Payroll",
+   "subtitle": "ADP",
+   "external": true,
+   "core": false,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "Payroll processing; produces the payroll journal file for the ledger.",
+   "functions": [
+    "Runs payroll per pay period",
+    "Produces a GL file with pay codes mapped to Oracle accounts",
+    "Target path: SFTP → OIC → GL (legacy: manual upload)"
+   ],
+   "integrations": [
+    "INS-ADP-GL"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "insurance/processes/record-to-report.md"
+    },
+    {
+     "label": "COA, hierarchies, mappings and approvals",
+     "path": "insurance/foundation/coa-hierarchies-controls.md"
+    }
+   ]
+  },
+  {
+   "id": "card",
+   "layer": "L1",
+   "title": "Corporate card",
+   "subtitle": "Visa",
+   "external": true,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Corporate card programme feeding employee expenses.",
+   "functions": [
+    "Daily card transaction file",
+    "Loaded directly into Oracle Expenses without a decryption server",
+    "Card transactions become expense report lines"
+   ],
+   "integrations": [
+    "INS-CARD"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "insurance/processes/procure-to-pay.md"
+    }
+   ]
+  },
+  {
+   "id": "invest",
+   "layer": "L1",
+   "title": "Investments",
+   "subtitle": "Clearwater · planned",
+   "external": true,
+   "core": false,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "Investment accounting for the bond and equity portfolio; journal interface planned at go-live.",
+   "functions": [
+    "Investment accounting and portfolio reporting",
+    "Journals to GL planned through OIC",
+    "Investment P&L reported separately in Financial Reporting"
+   ],
+   "integrations": [
+    "INS-CLEARWATER-GL"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "insurance/processes/record-to-report.md"
+    },
+    {
+     "label": "Integration register",
+     "path": "insurance/integrations/integration-register.yaml"
+    }
+   ]
+  },
+  {
+   "id": "hcm",
+   "layer": "L1",
+   "title": "Oracle HCM",
+   "subtitle": "workers · directory",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P",
+    "DATA"
+   ],
+   "description": "Oracle HCM Cloud: the worker record used by Expenses, approvals and single sign-on.",
+   "functions": [
+    "Holds workers, managers and departments used by approval hierarchies",
+    "Integrates with Expenses for employee data",
+    "Sends daily change and weekly full worker extracts for directory accounts and single sign-on"
+   ],
+   "integrations": [
+    "INS-EXP-HCM",
+    "INS-HCM-AD"
+   ],
+   "docs": [
+    {
+     "label": "Insurer estate overview",
+     "path": "insurance/00-overview.md"
+    },
+    {
+     "label": "Integration register",
+     "path": "insurance/integrations/integration-register.yaml"
+    }
+   ]
+  },
+  {
+   "id": "oic",
+   "layer": "L2",
+   "title": "Oracle Integration Cloud",
+   "subtitle": "orchestrations · REST · SOAP",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P",
+    "R2R",
+    "DATA"
+   ],
+   "description": "The integration platform for scheduled and event-driven flows into and out of Fusion.",
+   "functions": [
+    "Invokes BI Publisher reports and loads the output into ADW tables",
+    "Runs the ERP bulk-extract pattern (ESS job, business event, download)",
+    "Updates suppliers through REST (business classifications)",
+    "Carries payroll and planned investment journals into GL"
+   ],
+   "integrations": [
+    "{{oic_count}} of {{integration_count}} mapped flows"
+   ],
+   "docs": [
+    {
+     "label": "ADW, integrations and reporting",
+     "path": "insurance/data-and-reporting.md"
+    },
+    {
+     "label": "Integration register",
+     "path": "insurance/integrations/integration-register.yaml"
+    }
+   ]
+  },
+  {
+   "id": "onecloud",
+   "layer": "L2",
+   "title": "OneCloud",
+   "subtitle": "scheduler · data mover",
+   "external": true,
+   "core": false,
+   "workstreams": [
+    "DATA"
+   ],
+   "description": "Third-party cloud scheduler and data-integration tool around EPM, OAC and ADW.",
+   "functions": [
+    "Loads Planning financials into the OAC Essbase reporting cube",
+    "Moves Payables imaging audit data into ADW",
+    "Copies EPM and Essbase backups on-premise",
+    "Back-load chain reruns a missed policy journal load"
+   ],
+   "integrations": [
+    "INS-PLANNING-ESSBASE",
+    "INS-AP-IMAGING-ADW",
+    "INS-ADW-ESSBASE",
+    "INS-EPM-BACKUP"
+   ],
+   "docs": [
+    {
+     "label": "ADW, integrations and reporting",
+     "path": "insurance/data-and-reporting.md"
+    },
+    {
+     "label": "Integration register",
+     "path": "insurance/integrations/integration-register.yaml"
+    }
+   ]
+  },
+  {
+   "id": "dm",
+   "layer": "L2",
+   "title": "EPM Data Management",
+   "subtitle": "GL ↔ EPM",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "R2R",
+    "DATA"
+   ],
+   "description": "EPM's integration layer between the Fusion ledger and the EPM applications.",
+   "functions": [
+    "Loads GL actuals into Planning (and the close application)",
+    "Exports budget and statistical journals back to GL budget balances",
+    "Maps Fusion COA members to EPM dimensions"
+   ],
+   "integrations": [
+    "INS-GL-PLANNING",
+    "INS-BUDGET-GL"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "insurance/processes/record-to-report.md"
+    },
+    {
+     "label": "ADW, integrations and reporting",
+     "path": "insurance/data-and-reporting.md"
+    }
+   ]
+  },
+  {
+   "id": "fbdi",
+   "layer": "L2",
+   "title": "File loaders",
+   "subtitle": "FBDI · spreadsheets · REST",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "R2R",
+    "P2P"
+   ],
+   "description": "Standard Oracle bulk loaders used for journals, conversions and master data.",
+   "functions": [
+    "Journal import for the daily policy journals after Financial Integrator mapping",
+    "Spreadsheet loaders for journals, budgets and segment values / hierarchies",
+    "Go-live conversions: 5 years of GL balances, suppliers, assets, open POs, contracts"
+   ],
+   "integrations": [
+    "INS-POLICY-GL",
+    "Segment values and hierarchies import",
+    "GL budget balances import"
+   ],
+   "docs": [
+    {
+     "label": "COA, hierarchies, mappings and approvals",
+     "path": "insurance/foundation/coa-hierarchies-controls.md"
+    },
+    {
+     "label": "Insurer estate overview",
+     "path": "insurance/00-overview.md"
+    }
+   ]
+  },
+  {
+   "id": "sup",
+   "layer": "L3",
+   "title": "Suppliers",
+   "subtitle": "registration · qualification",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "The supplier master with registration, qualification and enrichment.",
+   "functions": [
+    "Supplier registration with approval for prospective and internal suppliers",
+    "Qualification questionnaires score business classifications (diversity)",
+    "DataFox enriches supplier firmographics",
+    "An OIC interface updates business classifications through REST",
+    "An APEX app maintains qualification questions through REST"
+   ],
+   "integrations": [
+    "INS-SUPP-CLASS",
+    "INS-DATAFOX",
+    "INS-SQM-APEX"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "insurance/processes/procure-to-pay.md"
+    },
+    {
+     "label": "COA, hierarchies, mappings and approvals",
+     "path": "insurance/foundation/coa-hierarchies-controls.md"
+    }
+   ]
+  },
+  {
+   "id": "ssp",
+   "layer": "L3",
+   "title": "Procurement & contracts",
+   "subtitle": "requisitions · agreements",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Self-Service Procurement, purchasing agreements and supplier contracts.",
+   "functions": [
+    "Requisitions approved by amount tier (to 5K, 50K, 100K, 250K, over 250K)",
+    "Blanket and contract purchase agreements; agreement change orders can auto-approve",
+    "Supplier contracts (MSA, CSA, SOW, NDA) with signed PDFs in Enterprise Contracts",
+    "Home-page tile for contracts expiring this week"
+   ],
+   "integrations": [
+    "Requisition approval rules",
+    "Contracts expiring infolet"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "insurance/processes/procure-to-pay.md"
+    },
+    {
+     "label": "COA, hierarchies, mappings and approvals",
+     "path": "insurance/foundation/coa-hierarchies-controls.md"
+    }
+   ]
+  },
+  {
+   "id": "po",
+   "layer": "L3",
+   "title": "Purchasing & receipts",
+   "subtitle": "POs · accruals",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Purchase orders and receipts; uninvoiced receipts accrue at period end.",
+   "functions": [
+    "Purchase orders from requisitions and agreements",
+    "Receipts against POs (three-way match)",
+    "Period-end chain: transfer to costing, then Create Uninvoiced Receipt Accruals",
+    "Only received-over-invoiced amounts accrue; finally closed POs drop off the accrual report"
+   ],
+   "integrations": [
+    "Create Uninvoiced Receipt Accruals"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "insurance/processes/procure-to-pay.md"
+    }
+   ]
+  },
+  {
+   "id": "ap",
+   "layer": "L3",
+   "title": "Payables & imaging",
+   "subtitle": "invoices · approvals",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Supplier invoices captured by email and OCR, matched, and approved by amount tier.",
+   "functions": [
+    "Integrated Invoice Imaging: email in, OCR, import to Payables",
+    "Invoice approval by tier; over 250K to an approval group; PO-matched and recurring invoices auto-approve",
+    "Credit memo and one-time payment rules",
+    "Imaging audit data goes to ADW for a dashboard"
+   ],
+   "integrations": [
+    "INS-IMAGING",
+    "INS-AP-IMAGING-ADW"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "insurance/processes/procure-to-pay.md"
+    },
+    {
+     "label": "COA, hierarchies, mappings and approvals",
+     "path": "insurance/foundation/coa-hierarchies-controls.md"
+    },
+    {
+     "label": "ADW, integrations and reporting",
+     "path": "insurance/data-and-reporting.md"
+    }
+   ]
+  },
+  {
+   "id": "pay",
+   "layer": "L3",
+   "title": "Payments & cash",
+   "subtitle": "Bank A · BAI2",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Payment runs, bank files and bank statement reconciliation.",
+   "functions": [
+    "Payment process requests with payment approval by approval group",
+    "ACH and control-totals file, and Positive Pay for printed checks, to Bank A over SFTP",
+    "BAI2 bank statements reconciled in Cash Management (new with Fusion)"
+   ],
+   "integrations": [
+    "INS-ACH",
+    "INS-POSPAY",
+    "INS-BAI2"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "insurance/processes/procure-to-pay.md"
+    }
+   ]
+  },
+  {
+   "id": "exp",
+   "layer": "L3",
+   "title": "Expenses",
+   "subtitle": "card · out of pocket",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Employee expense reports, fed by the corporate card and HCM.",
+   "functions": [
+    "Corporate card transactions loaded daily",
+    "Expense approval with an override-approver privilege",
+    "Approved reports become Payables invoices"
+   ],
+   "integrations": [
+    "INS-CARD",
+    "INS-EXP-HCM"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "insurance/processes/procure-to-pay.md"
+    },
+    {
+     "label": "COA, hierarchies, mappings and approvals",
+     "path": "insurance/foundation/coa-hierarchies-controls.md"
+    }
+   ]
+  },
+  {
+   "id": "fa",
+   "layer": "L3",
+   "title": "Fixed Assets",
+   "subtitle": "assets",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "Asset subledger fed from Payables.",
+   "functions": [
+    "Additions from Payables",
+    "Depreciation by book",
+    "Closed on business day 3–4"
+   ],
+   "integrations": [
+    "Mass additions"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "insurance/processes/record-to-report.md"
+    }
+   ]
+  },
+  {
+   "id": "ic",
+   "layer": "L3",
+   "title": "Intercompany & allocations",
+   "subtitle": "Mutual ↔ Agency",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "Intercompany billing between the Mutual and the Agency, and allocation rules.",
+   "functions": [
+    "Monthly shared-services billing from the Mutual to the Agency through Oracle Intercompany",
+    "Receiving organisation approves; batches transfer to GL; settlement clears receivable and payable",
+    "Allocation rule sets (source, target, range, basis, offset) post to allocation companies 81–89"
+   ],
+   "integrations": [
+    "Intercompany transactions",
+    "Allocation rules"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "insurance/processes/record-to-report.md"
+    }
+   ]
+  },
+  {
+   "id": "xla",
+   "layer": "L4",
+   "title": "Subledger Accounting",
+   "subtitle": "rules engine",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P",
+    "R2R"
+   ],
+   "description": "One accounting engine for Payables, Purchasing receipts, Payments and Assets.",
+   "functions": [
+    "Journal entry rule sets, account rules and mapping sets per subledger",
+    "Creates accounting for accruals, invoices, payments and assets",
+    "Transfers to GL by category"
+   ],
+   "integrations": [],
+   "docs": [
+    {
+     "label": "COA, hierarchies, mappings and approvals",
+     "path": "insurance/foundation/coa-hierarchies-controls.md"
+    }
+   ]
+  },
+  {
+   "id": "gl",
+   "layer": "L5",
+   "title": "General Ledger",
+   "subtitle": "Mutual · Agency · 8-segment COA",
+   "external": false,
+   "core": true,
+   "workstreams": [
+    "P2P",
+    "R2R",
+    "DATA"
+   ],
+   "description": "The ledgers for the Mutual and the Agency, on one 8-segment chart of accounts.",
+   "functions": [
+    "Company, Department, Account, Product, State, Class, Project, Intercompany",
+    "Hierarchies published to the GL balances cube for FRS, Smart View and OTBI",
+    "Journal approval by group; auto-reverse by category to the next period",
+    "Closed on business day 6; statutory balance sheet shows surplus",
+    "Segment value security and cross-validation rules"
+   ],
+   "integrations": [
+    "INS-POLICY-GL",
+    "INS-ADP-GL",
+    "INS-BUDGET-GL"
+   ],
+   "docs": [
+    {
+     "label": "COA, hierarchies, mappings and approvals",
+     "path": "insurance/foundation/coa-hierarchies-controls.md"
+    },
+    {
+     "label": "Record to Report",
+     "path": "insurance/processes/record-to-report.md"
+    }
+   ]
+  },
+  {
+   "id": "epm",
+   "layer": "L6",
+   "title": "Enterprise EPM",
+   "subtitle": "close · planning · reconciliation",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "R2R",
+    "DATA"
+   ],
+   "description": "Oracle Enterprise EPM: close task manager, planning, narrative reporting, reconciliation, tax reporting.",
+   "functions": [
+    "Close task manager with calendar, owners and sign-off",
+    "Planning for budgets and forecasts; budgets go back to GL",
+    "Narrative Reporting packages with author, review and sign-off phases",
+    "Account Reconciliation since September 2021",
+    "Migrated to the Enterprise EPM bundle in 2022"
+   ],
+   "integrations": [
+    "INS-GL-PLANNING",
+    "INS-BUDGET-GL"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "insurance/processes/record-to-report.md"
+    },
+    {
+     "label": "ADW, integrations and reporting",
+     "path": "insurance/data-and-reporting.md"
+    }
+   ]
+  },
+  {
+   "id": "adw",
+   "layer": "L6",
+   "title": "Autonomous Data Warehouse",
+   "subtitle": "finance data warehouse",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "DATA",
+    "R2R"
+   ],
+   "description": "ADW: the finance transaction data warehouse and the insurance data mart.",
+   "functions": [
+    "Financial report mart of all transactional modules (live February 2021)",
+    "Insurance data mart: stage, temp and integrated-journal schemas for premium, claims and policy counts",
+    "Loaded from Fusion through OIC (BI Publisher reports, bulk extracts) and OneCloud",
+    "SQL checks reconcile daily policy journals and extracts to source",
+    "Source for OAC dashboards and BI Publisher reports"
+   ],
+   "integrations": [
+    "INS-BIP-ADW",
+    "INS-ERP-BULK",
+    "INS-AP-IMAGING-ADW",
+    "INS-ADW-ESSBASE"
+   ],
+   "docs": [
+    {
+     "label": "ADW, integrations and reporting",
+     "path": "insurance/data-and-reporting.md"
+    }
+   ]
+  },
+  {
+   "id": "oac",
+   "layer": "L6",
+   "title": "Oracle Analytics Cloud",
+   "subtitle": "BI · Essbase · DV",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "DATA"
+   ],
+   "description": "Oracle Analytics Cloud: dashboards, the Essbase financials cube and data visualisation.",
+   "functions": [
+    "BI dashboards on a semantic model (physical, logical, presentation layers)",
+    "Essbase financials cube loaded from Planning; operational metrics from ADW",
+    "Data Visualization with data flows and data sets (e.g. AP imaging auditability)",
+    "Report outputs distributed to a content-cloud folder for Accounting"
+   ],
+   "integrations": [
+    "INS-PLANNING-ESSBASE",
+    "INS-ADW-ESSBASE"
+   ],
+   "docs": [
+    {
+     "label": "ADW, integrations and reporting",
+     "path": "insurance/data-and-reporting.md"
+    }
+   ]
+  },
+  {
+   "id": "rpt",
+   "layer": "L6",
+   "title": "Fusion reporting",
+   "subtitle": "OTBI · BIP · FRS · Smart View",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "DATA",
+    "R2R",
+    "P2P"
+   ],
+   "description": "Reporting inside Fusion: real-time analyses, pixel-perfect reports, financial statements and Excel analysis.",
+   "functions": [
+    "OTBI: real-time subject areas for GL balances and journals, P2P, and subledger-to-ledger reconciliation",
+    "BI Publisher: custom reports and data models; replaced about 130 legacy reports with about 50",
+    "Financial Reporting Studio: about 20 statements, including statutory balance sheet, statement of surplus, P&L by product",
+    "Smart View: ad hoc analysis on the GL balances cube",
+    "Transactional KPIs: invoices processed and paid on time, PO-backed %, payment method mix"
+   ],
+   "integrations": [
+    "COA segment extract report"
+   ],
+   "docs": [
+    {
+     "label": "ADW, integrations and reporting",
+     "path": "insurance/data-and-reporting.md"
+    }
+   ]
+  },
+  {
+   "id": "bank",
+   "layer": "L6",
+   "title": "Bank A",
+   "subtitle": "ACH · Positive Pay · BAI2",
+   "external": true,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "The operating bank: receives payment files, returns statements.",
+   "functions": [
+    "Receives ACH and control-totals files over SFTP",
+    "Receives Positive Pay files for printed checks",
+    "Returns BAI2 statements daily",
+    "Validates test files in 48–72 hours; about 5 days to move a format to production"
+   ],
+   "integrations": [
+    "INS-ACH",
+    "INS-POSPAY",
+    "INS-BAI2"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "insurance/processes/procure-to-pay.md"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "from": "policy",
+   "to": "adw",
+   "kind": "int"
+  },
+  {
+   "from": "adw",
+   "to": "fbdi",
+   "kind": "bulk"
+  },
+  {
+   "from": "fbdi",
+   "to": "gl",
+   "kind": "bulk"
+  },
+  {
+   "from": "adp",
+   "to": "oic",
+   "kind": "oic"
+  },
+  {
+   "from": "invest",
+   "to": "oic",
+   "kind": "oic"
+  },
+  {
+   "from": "oic",
+   "to": "gl",
+   "kind": "oic"
+  },
+  {
+   "from": "card",
+   "to": "exp",
+   "kind": "int"
+  },
+  {
+   "from": "hcm",
+   "to": "exp",
+   "kind": "int"
+  },
+  {
+   "from": "sup",
+   "to": "ssp",
+   "kind": "int"
+  },
+  {
+   "from": "ssp",
+   "to": "po",
+   "kind": "int"
+  },
+  {
+   "from": "po",
+   "to": "ap",
+   "kind": "int"
+  },
+  {
+   "from": "ap",
+   "to": "pay",
+   "kind": "int"
+  },
+  {
+   "from": "exp",
+   "to": "ap",
+   "kind": "int"
+  },
+  {
+   "from": "ap",
+   "to": "fa",
+   "kind": "int"
+  },
+  {
+   "from": "pay",
+   "to": "bank",
+   "kind": "int"
+  },
+  {
+   "from": "bank",
+   "to": "pay",
+   "kind": "ret"
+  },
+  {
+   "from": "oic",
+   "to": "sup",
+   "kind": "oic"
+  },
+  {
+   "from": "ap",
+   "to": "onecloud",
+   "kind": "sched"
+  },
+  {
+   "from": "onecloud",
+   "to": "adw",
+   "kind": "sched"
+  },
+  {
+   "from": "po",
+   "to": "xla",
+   "kind": "int"
+  },
+  {
+   "from": "ap",
+   "to": "xla",
+   "kind": "int"
+  },
+  {
+   "from": "pay",
+   "to": "xla",
+   "kind": "int"
+  },
+  {
+   "from": "fa",
+   "to": "xla",
+   "kind": "int"
+  },
+  {
+   "from": "xla",
+   "to": "gl",
+   "kind": "int"
+  },
+  {
+   "from": "ic",
+   "to": "gl",
+   "kind": "int"
+  },
+  {
+   "from": "gl",
+   "to": "dm",
+   "kind": "bulk"
+  },
+  {
+   "from": "dm",
+   "to": "epm",
+   "kind": "bulk"
+  },
+  {
+   "from": "epm",
+   "to": "onecloud",
+   "kind": "sched"
+  },
+  {
+   "from": "onecloud",
+   "to": "oac",
+   "kind": "sched"
+  },
+  {
+   "from": "gl",
+   "to": "oic",
+   "kind": "extract"
+  },
+  {
+   "from": "oic",
+   "to": "adw",
+   "kind": "oic"
+  },
+  {
+   "from": "adw",
+   "to": "oac",
+   "kind": "extract"
+  },
+  {
+   "from": "gl",
+   "to": "rpt",
+   "kind": "extract"
+  }
+ ],
+ "default_node": "gl",
+ "p2p": {
+  "title": "Procure to Pay: eight stages",
+  "lede": "Suppliers are registered and qualified, requisitions and invoices are approved by amount tier, and payments leave as bank files. Accounting starts with the period-end accrual; invoice and payment follow through Subledger Accounting.",
+  "stages": [
+   {
+    "n": "01",
+    "title": "Supplier onboarding",
+    "system": "Suppliers · DataFox",
+    "accounting": "none",
+    "points": [
+     "Supplier registration with approval for prospective and internal suppliers",
+     "Qualification questionnaires score business classifications (diversity)",
+     "DataFox enriches supplier records; an OIC interface updates classifications through REST",
+     "Go-live converted all suppliers with 18 months of AP history and 1099 flags"
+    ]
+   },
+   {
+    "n": "02",
+    "title": "Requisition",
+    "system": "Self-Service Procurement",
+    "accounting": "none",
+    "points": [
+     "Approval by amount tier: to 5K, 50K, 100K, 250K, and over 250K",
+     "Supervisory hierarchy with named exceptions",
+     "P-card on requisitions is limited: the PO is created closed for receiving and card details don't reach AP"
+    ]
+   },
+   {
+    "n": "03",
+    "title": "Purchase order & contracts",
+    "system": "Purchasing · Enterprise Contracts",
+    "accounting": "none",
+    "points": [
+     "Purchase orders, blanket and contract purchase agreements",
+     "Agreement change orders can auto-approve",
+     "Supplier contracts (MSA, CSA, SOW, NDA) stored with signed PDFs",
+     "Home-page tile shows contracts expiring this week"
+    ]
+   },
+   {
+    "n": "04",
+    "title": "Receipt",
+    "system": "Purchasing",
+    "accounting": "period-end accrual",
+    "points": [
+     "Receipts against POs complete the three-way match",
+     "No accounting at receipt: uninvoiced receipts accrue at period end",
+     "Only received-over-invoiced amounts accrue",
+     "POs leave the accrual report only when finally closed"
+    ],
+    "entries": [
+     {
+      "event": "Period end: receipts not yet invoiced",
+      "dr": [
+       "Expense",
+       "Asset clearing (capital items)"
+      ],
+      "cr": [
+       "Uninvoiced receipts accrual (liability)"
+      ]
+     },
+     {
+      "event": "Next period opens: reversal",
+      "dr": [
+       "Uninvoiced receipts accrual (liability)"
+      ],
+      "cr": [
+       "Expense"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "05",
+    "title": "Invoice",
+    "system": "Payables · Invoice Imaging",
+    "accounting": "liability",
+    "points": [
+     "Invoices arrive by email, are read by OCR and imported to Payables",
+     "Approval by amount tier; over 250K to an approval group",
+     "PO-matched and recurring invoices auto-approve",
+     "Imaging audit (imported not validated, deleted, not imported) tracked in ADW and OAC"
+    ],
+    "entries": [
+     {
+      "event": "Invoice",
+      "dr": [
+       "Expense or Asset clearing",
+       "Tax"
+      ],
+      "cr": [
+       "Liability (trade payables)"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "06",
+    "title": "Payment",
+    "system": "Payments",
+    "accounting": "cash",
+    "points": [
+     "Payment process requests with approval by approval group",
+     "ACH file built in Oracle and sent straight to the bank's SFTP",
+     "Printed checks with a Positive Pay file",
+     "Corporate card spend reaches Payables through Expenses"
+    ],
+    "entries": [
+     {
+      "event": "Payment",
+      "dr": [
+       "Liability (trade payables)"
+      ],
+      "cr": [
+       "Cash, or Cash clearing (option not documented)"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "07",
+    "title": "Settlement",
+    "system": "Bank A · Cash Management",
+    "accounting": "none",
+    "points": [
+     "Bank A receives ACH, control-totals and Positive Pay files",
+     "BAI2 statements return daily and are reconciled in Cash Management",
+     "New file formats: transmission test, content validation in 48–72 hours, about 5 days to production"
+    ]
+   },
+   {
+    "n": "08",
+    "title": "Monitoring",
+    "system": "OTBI · OAC",
+    "accounting": "none",
+    "points": [
+     "Invoices processed and paid on time; % of invoices with a PO",
+     "Payment method mix: check, ACH, manual",
+     "Requisitions and POs by source (requisition, agreement, contract); new contracts and suppliers",
+     "Payables-to-ledger reconciliation in OTBI"
+    ]
+   }
+  ],
+  "accounting_note": "Account types follow the Oracle Payables 26C defaults. Expense items accrue at period end and reverse when the next period opens. Whether payments are accounted at clearing (cash clearing) is not documented.",
+  "notes": [
+   {
+    "title": "Approvals are amount tiers.",
+    "text": "Requisitions and invoices share the same tiers (5K, 50K, 100K, 250K); the top tier goes to an approval group."
+   }
+  ]
+ },
+ "r2r": {
+  "title": "Record to Report: eight stages",
+  "lede": "Daily policy journals, payroll and subledger accounting land in the ledgers of the Mutual and the Agency; intercompany and allocations run monthly; the close is driven from the EPM close task manager and ends on business day 6.",
+  "stages": [
+   {
+    "n": "01",
+    "title": "Journals in",
+    "system": "Policy admin · ADP · subledgers",
+    "accounting": "per source",
+    "points": [
+     "Daily policy journals (Premium, Loss, Claims) from the insurance data mart via a Financial Integrator",
+     "Premium and commission one day in arrears; case reserves two days",
+     "Payroll journal from ADP, mapped to Oracle accounts",
+     "A back-load chain reruns a missed load date"
+    ],
+    "entries": [
+     {
+      "event": "Premium written (typical, illustrative)",
+      "dr": [
+       "Premiums receivable"
+      ],
+      "cr": [
+       "Written premium (revenue)"
+      ]
+     },
+     {
+      "event": "Losses incurred (typical, illustrative)",
+      "dr": [
+       "Losses incurred (expense)"
+      ],
+      "cr": [
+       "Loss reserves (liability)"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "02",
+    "title": "Intercompany",
+    "system": "Oracle Intercompany",
+    "accounting": "intercompany",
+    "points": [
+     "Monthly shared-services billing from the Mutual to the Agency",
+     "The receiving organisation approves; batches transfer to GL",
+     "Settlement clears the receivable and payable against cash"
+    ],
+    "entries": [
+     {
+      "event": "Mutual bills Agency",
+      "dr": [
+       "Intercompany receivable"
+      ],
+      "cr": [
+       "Shared-service reimbursement (expense credit)"
+      ]
+     },
+     {
+      "event": "Agency records the charge",
+      "dr": [
+       "Shared-service reimbursement (expense)"
+      ],
+      "cr": [
+       "Intercompany payable"
+      ]
+     },
+     {
+      "event": "Settlement",
+      "dr": [
+       "Intercompany payable (Agency) / Cash (Mutual)"
+      ],
+      "cr": [
+       "Cash (Agency) / Intercompany receivable (Mutual)"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "03",
+    "title": "Allocations",
+    "system": "Calculation Manager",
+    "accounting": "allocation",
+    "points": [
+     "Rule sets define source, target, range, basis and offset",
+     "A fixed point of view holds the segments that don't move",
+     "Results post to the allocation companies 81–89"
+    ],
+    "entries": [
+     {
+      "event": "Allocation",
+      "dr": [
+       "Expense in the target"
+      ],
+      "cr": [
+       "Offset account"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "04",
+    "title": "Fixed assets",
+    "system": "Fixed Assets",
+    "accounting": "capitalisation, depreciation",
+    "points": [
+     "Additions from Payables",
+     "Depreciation by book",
+     "Closed on business day 3–4"
+    ],
+    "entries": [
+     {
+      "event": "Addition",
+      "dr": [
+       "Asset cost"
+      ],
+      "cr": [
+       "Asset clearing"
+      ]
+     },
+     {
+      "event": "Depreciation",
+      "dr": [
+       "Depreciation expense"
+      ],
+      "cr": [
+       "Accumulated depreciation"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "05",
+    "title": "Period-end adjustments",
+    "system": "General Ledger · Purchasing",
+    "accounting": "accrual",
+    "points": [
+     "Uninvoiced receipts accrued at period end",
+     "Journals in accrual and adjustment categories auto-reverse on the first day of the next period",
+     "Journal approval by approval group"
+    ],
+    "entries": [
+     {
+      "event": "Accrual",
+      "dr": [
+       "Expense"
+      ],
+      "cr": [
+       "Accrued liability"
+      ]
+     },
+     {
+      "event": "Auto-reversal next period",
+      "dr": [
+       "Accrued liability"
+      ],
+      "cr": [
+       "Expense"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "06",
+    "title": "Ledger close",
+    "system": "General Ledger",
+    "accounting": "none",
+    "points": [
+     "Business day 6; may reopen for late statutory entries",
+     "Statutory balance sheet shows surplus, not retained earnings; Mutual and Agency differ",
+     "Year end: opening the new year rolls revenue and expense into retained earnings per balancing segment, without a journal",
+     "New segment values and hierarchies are published to the GL balances cube"
+    ]
+   },
+   {
+    "n": "07",
+    "title": "Close management & reconciliation",
+    "system": "EPM close · Account Reconciliation",
+    "accounting": "none",
+    "points": [
+     "Close task manager holds the calendar, owners and sign-off",
+     "Account Reconciliation for balance sheet accounts (since September 2021)",
+     "Payables and Receivables to Ledger reconciliation in OTBI"
+    ]
+   },
+   {
+    "n": "08",
+    "title": "Reporting & planning",
+    "system": "FRS · Narrative Reporting · Planning",
+    "accounting": "none",
+    "points": [
+     "About 20 FRS statements: statutory balance sheet, statement of surplus, P&L by product and state, cash flow",
+     "Foundation not-for-profit statements and Agency statements",
+     "Narrative Reporting packages with review and sign-off",
+     "Planning budgets and statistical journals return to GL budget balances"
+    ]
+   }
+  ],
+  "accounting_note": "Intercompany entries come from the source notebook. Allocation, revaluation-free accrual and fixed-asset types follow the Oracle 26C guides and Oracle standard. Premium and loss entries are typical insurance accounting shown for illustration; the source does not document them.",
+  "notes": [
+   {
+    "title": "Statutory view.",
+    "text": "Statutory statements show surplus rather than retained earnings; the Statement of Surplus is an FRS report."
+   }
+  ]
+ },
+ "fnd": {
+  "title": "Foundation & controls",
+  "lede": "The structures and rules every transaction passes through: the chart of accounts, hierarchies, security, accounting rules and approval workflows.",
+  "stages": [
+   {
+    "n": "01",
+    "title": "Enterprise structure",
+    "system": "Legal entities · ledgers · BUs",
+    "points": [
+     "Mutual (company 10) and Agency (company 20) ledgers in one data set",
+     "Foundation (company 90) reports as a not-for-profit",
+     "Statutory company 80 and allocation companies 81–89",
+     "New subsidiary: company value, hierarchy, legal entity, balancing segment, ledger and BU assignments"
+    ]
+   },
+   {
+    "n": "02",
+    "title": "Chart of accounts",
+    "system": "8 segments",
+    "points": [
+     "Company, Department, Account, Product, State, Class, Project, Intercompany",
+     "Product (line of business) and State support statutory reporting",
+     "Accounting Scenario values hold actual and budget versions"
+    ]
+   },
+   {
+    "n": "03",
+    "title": "Hierarchies & cube",
+    "system": "Trees · GL balances cube",
+    "points": [
+     "Account and segment trees audited, flattened and published to the balances cube",
+     "New values reach the cube through the cube-update process",
+     "Bulk changes through the segment values and hierarchies import",
+     "Alternate hierarchies for sales channel and statistical accounts"
+    ]
+   },
+   {
+    "n": "04",
+    "title": "Security & validation",
+    "system": "Security Console",
+    "points": [
+     "Segment value security on cost center and account",
+     "Data access sets per ledger and business-unit access for subledgers",
+     "Cross-validation rules and combination sets",
+     "Custom roles trimmed from seeded job roles"
+    ]
+   },
+   {
+    "n": "05",
+    "title": "Accounting rules & mappings",
+    "system": "SLA · integrators",
+    "points": [
+     "Subledger Accounting rule sets, account rules and mapping sets",
+     "Financial Integrator maps policy activity to GL accounts",
+     "ADP pay codes map to GL accounts",
+     "EPM Data Management maps GL to Planning and close"
+    ]
+   },
+   {
+    "n": "06",
+    "title": "Approval workflows",
+    "system": "BPM rules",
+    "points": [
+     "Requisitions and invoices by amount tier (5K, 50K, 100K, 250K, over 250K)",
+     "Payments, journals and invoices over 250K by approval group",
+     "Supplier registration and spend-authorisation approvals",
+     "Workflow Rules Report documents the configured rules"
+    ]
+   },
+   {
+    "n": "07",
+    "title": "Journal controls",
+    "system": "General Ledger",
+    "points": [
+     "Auto-reverse by category to the first day of the next period",
+     "Journal approval by approval group",
+     "Close by module from business day 1 to 6"
+    ]
+   },
+   {
+    "n": "08",
+    "title": "Change & release",
+    "system": "Quarterly updates",
+    "points": [
+     "Oracle updates each quarter (March, June, September, December)",
+     "Regression list: integrations, OTBI subject areas, Essbase, OneCloud chains",
+     "Post-refresh steps after copying production to test"
+    ]
+   }
+  ],
+  "notes": [
+   {
+    "title": "Why this matters.",
+    "text": "Most reporting and integration issues trace back to a mapping, a hierarchy not yet published to the cube, or a validation rule."
+   }
+  ]
+ },
+ "onboarding": {
+  "title": "Data & reporting",
+  "lede": "ADW is the finance data warehouse; Enterprise EPM handles planning and close; OAC and the Fusion reporting tools serve users. Each lane is a path data takes from Oracle to a report.",
+  "lanes": [
+   {
+    "title": "Fusion to ADW",
+    "route": "Fusion → OIC / OneCloud → ADW",
+    "steps": [
+     {
+      "label": "BI Publisher report",
+      "text": "Data model and report in Fusion define the extract",
+      "kind": ""
+     },
+     {
+      "label": "OIC scheduled orchestration",
+      "text": "Invokes the report web service, stages the file, inserts rows into an ADW table",
+      "kind": "int"
+     },
+     {
+      "label": "Bulk extract",
+      "text": "ESS extract job → business event → download to object storage or FTP",
+      "kind": "int"
+     },
+     {
+      "label": "ADW",
+      "text": "Finance report mart; spot checks compare report output with the table",
+      "kind": ""
+     }
+    ]
+   },
+   {
+    "title": "Policy data to the ledger",
+    "route": "Exceed → insurance data mart → Financial Integrator → GL",
+    "steps": [
+     {
+      "label": "Exceed",
+      "text": "Premium, commission, claims and case reserves",
+      "kind": "ext"
+     },
+     {
+      "label": "Insurance data mart (ADW)",
+      "text": "Stage and temp tables by load date",
+      "kind": ""
+     },
+     {
+      "label": "Financial Integrator",
+      "text": "Maps activity to GL accounts; journal categories Premium, Loss, Claims",
+      "kind": "int"
+     },
+     {
+      "label": "General Ledger",
+      "text": "Daily journals; SQL checks tie back to source",
+      "kind": ""
+     }
+    ]
+   },
+   {
+    "title": "EPM and cubes",
+    "route": "GL → Data Management → Planning → OneCloud → OAC Essbase",
+    "steps": [
+     {
+      "label": "Data Management",
+      "text": "GL actuals to Planning; budgets back to GL",
+      "kind": "int"
+     },
+     {
+      "label": "Planning",
+      "text": "Budgets and forecasts",
+      "kind": ""
+     },
+     {
+      "label": "OneCloud",
+      "text": "Loads Planning financials and ADW metrics into the OAC Essbase cube; backups",
+      "kind": "ext"
+     },
+     {
+      "label": "OAC",
+      "text": "Dashboards and Smart View on the Essbase cube",
+      "kind": ""
+     }
+    ]
+   },
+   {
+    "title": "Reporting layer",
+    "route": "OTBI · BI Publisher · FRS · Smart View · OAC",
+    "steps": [
+     {
+      "label": "OTBI",
+      "text": "Real-time subject areas; reconciliation subject areas",
+      "kind": ""
+     },
+     {
+      "label": "BI Publisher",
+      "text": "Custom reports to a content-cloud folder for Accounting",
+      "kind": ""
+     },
+     {
+      "label": "FRS & Smart View",
+      "text": "Financial statements and ad hoc analysis on the GL balances cube",
+      "kind": ""
+     },
+     {
+      "label": "OAC",
+      "text": "Enterprise analytics on ADW",
+      "kind": ""
+     }
+    ]
+   }
+  ],
+  "notes": [
+   {
+    "title": "Four types of finance reporting.",
+    "text": "Operational (OTBI, BIP), management (EPM, Essbase), enterprise analytics (OAC on ADW), regulatory (statutory statements)."
+   },
+   {
+    "title": "Reconciliation points.",
+    "text": "Account Reconciliation; Payables/Receivables to Ledger in OTBI; policy-feed SQL checks by load date; before/after extract checks."
+   },
+   {
+    "title": "ADW as the warehouse.",
+    "text": "Fusion data reaches ADW through OIC and OneCloud; Data Sync was replaced by ODI / OCI Data Integration with an API gateway for REST."
+   }
+  ]
+ },
+ "close": {
+  "title": "Close calendar",
+  "lede": "Modules close in sequence from business day 1 to 6, managed in the EPM close task manager.",
+  "timeline": [
+   {
+    "when": "Daily",
+    "what": "Policy journals (Premium, Loss, Claims) load one to two days in arrears",
+    "owner": "Finance technology",
+    "consolidation_team": false
+   },
+   {
+    "when": "Daily",
+    "what": "OneCloud and OIC loads into ADW and the OAC Essbase cube",
+    "owner": "Finance technology",
+    "consolidation_team": false
+   },
+   {
+    "when": "Monthly",
+    "what": "Shared-services intercompany billing, Mutual to Agency",
+    "owner": "Accounting",
+    "consolidation_team": false
+   },
+   {
+    "when": "Period end",
+    "what": "Uninvoiced receipt accruals created; reversed when the next period opens",
+    "owner": "Oracle (period close)",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD 1",
+    "what": "Payables and expense reports close",
+    "owner": "Accounts Payable",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD 2",
+    "what": "Cash Management (bank reconciliation)",
+    "owner": "Treasury / Accounting",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD 3",
+    "what": "Procurement and Payables close",
+    "owner": "Procurement / AP",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD 3–4",
+    "what": "Fixed Assets close",
+    "owner": "Accounting",
+    "consolidation_team": false
+   },
+   {
+    "when": "Monthly",
+    "what": "Allocation rules run into companies 81–89",
+    "owner": "Accounting",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD 6",
+    "what": "General Ledger close; may reopen for late statutory entries",
+    "owner": "Accounting",
+    "consolidation_team": true
+   },
+   {
+    "when": "After close",
+    "what": "Account reconciliations; FRS statements; Narrative Reporting packages",
+    "owner": "Accounting / FP&A",
+    "consolidation_team": false
+   },
+   {
+    "when": "Budget cycle",
+    "what": "Planning budgets and statistical journals to GL budget balances",
+    "owner": "FP&A",
+    "consolidation_team": false
+   },
+   {
+    "when": "Quarterly",
+    "what": "Oracle update and regression testing",
+    "owner": "Finance technology",
+    "consolidation_team": false
+   },
+   {
+    "when": "Year end",
+    "what": "Open the first period of the new year: revenue and expense roll to retained earnings",
+    "owner": "Accounting",
+    "consolidation_team": false
+   }
+  ]
+ },
+ "integrations": {
+  "title": "Integration register",
+  "lede": "Interfaces documented in the source notebook, by name. State as of 2023; a working list, not a certified register."
+ }
+}

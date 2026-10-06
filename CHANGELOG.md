@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 — 2026-10-07
+- **Insurance Estate Map** (state as of 2023, historical): new `insurance/` pack from the finance-technology notebook 2020–2023, anonymised (Insurer, Mutual, Agency, Bank A; no people, hosts or credentials). Covers COA and hierarchies, mappings, SLA rules, BPM approvals, P2P and R2R with account types, ADW and integrations, reconciliation, OTBI / BIP / FRS / Smart View / OAC.
+- One site, several maps: map picker after sign-in; per-map access through `map_viewers.maps` and `public.can_read_map` (migration `supabase/migrations/002-per-map-access.sql`). Maps stored as `travel/map.json` and `insurance/map.json`.
+- Page is map-driven: tab labels, workstream chips, legend and lane filters come from each map; new Foundation & controls tab.
+- `tools/build_map_data.py --map travel|insurance|all`; validator checks the Insurance register and no longer fails on Windows paths.
+
 ## 0.3.0 — 2026-10-05
 - Estate map renamed **Travel Estate Map** and made generic: interfaces are shown by name (`INT · <name>`), never by number; clicking a node shows what it does (bullets), its interfaces, its connections and links to the pack documents. "Where it breaks", the Procure-to-Pay "Breaks" lines and evidence tags are no longer shown on the map.
 - Procure-to-Pay cards: at least three process bullets each, and debit/credit account types for the accounting stages (receipt, invoice, payment, settlement). New "Accounting by stage" table in `processes/p2p-end-to-end.md`; Q-PAY-7 added.
