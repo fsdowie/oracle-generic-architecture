@@ -12,6 +12,19 @@ links: [MOD-GL, MOD-EPM, MOD-XLA, OPS-RHYTHM]
 
 **Shape:** a funnel (19+ feeders → one ledger) followed by a fan-out (FCCS, ARCS, planning, warehouse), each on its own clock. The **period calendar is the real coordination mechanism**; most apparent system dependencies are sequencing dependencies. `[CO:03 Purpose]`
 
+## Accounting by stage (account types)
+| Stage | Event | Debit | Credit | Evidence |
+|---|---|---|---|---|
+| Journals in | Subledger and Accounting Hub events | per source (journal line rules, account rules, mapping sets) | per source | `[CO:03 §3.2]` |
+| Intercompany | Balancing line for a journal out of balance by legal entity | Intercompany receivable (asset) | Intercompany payable (liability) | `[ORA26C:implementing-enterprise-structures-and-general-ledger p.373–374]` |
+| Allocations / TP | Allocation rule | Target (receiving cost center or entity) | Offset account | `[ORA26C:… p.566]` |
+| Fixed assets | Addition | Asset cost | Asset clearing | `[UNVERIFIED]` Oracle standard; no 26C FA guide supplied |
+| Fixed assets | Depreciation | Depreciation expense | Accumulated depreciation | same |
+| Period end | Receipt accrual (reversed next period) | Expense | Accrual / uninvoiced receipts | `[USER:2026-10-06]` `[ORA26C:implementing-payables-invoice-to-pay p.37]` |
+| Period end | FX revaluation | Revalued account (gain) or Unrealized loss | Unrealized gain, or Revalued account (loss) | `[ORA26C:implementing-enterprise-structures-and-general-ledger p.528, 530]`; balance-sheet revaluations reverse next period |
+| Ledger close | Translation; year end | CTA holds the translation difference; revenue and expense roll into retained earnings | | `[ORA26C:… p.309]` |
+| Consolidation | Intercompany elimination | Intercompany payable | Intercompany receivable; differences to a plug account | `[ORA26C:EPM FCCS p.367]` |
+
 ## Monthly sequence `[CO:03 §5]`
 | When | Owner | Step |
 |---|---|---|

@@ -36,6 +36,7 @@ usage: "Agents must cite the Q-ID instead of guessing when an answer depends on 
 | R-16 (was Q-KY-3, partly) | How are bank-rejected payments cancelled? | **Manually voided** in Oracle `[USER:2026-10-05]` |
 | R-18 (was Q-KY-3) | What does INT955B do? | **Only updates the DFFs on the Oracle payment.** It does not cancel or void payments or bank transfers, despite its name and the Kyriba document `[USER:2026-10-05]` |
 | R-17 (was Q-PAY-4) | Do `CHECK` payments carry a bank ack? | **No.** `CHECK` payments are not electronic; whether the bank accepted them is tracked **manually** `[USER:2026-10-05]`. A blank ack on a `CHECK` payment is expected, not FM-PAY-05. (Kyriba still has an outsourced-check code `CHK-OS` and passes Positive Pay files through for in-house checks `[CO:KYRIBA-DOC]`.) |
+| R-21 (was Q-FA-1) | Is TAB used to derive depreciation-expense segments in Fixed Assets? | **Yes**: the Transaction Account Builder derives depreciation-expense segments from the originating AP invoice distribution, not category defaults `[CO:R2R-FEATURES]`. FA use of TAB is still not confirmable in the 26C guides supplied |
 | R-20 (was Q-PAY-7) | Are payments accounted at clearing time? | **No: single step.** Create Accounting books Liability (Dr) / Cash (Cr) once, at payment issue, from the *Payment Created* event. No cash clearing account is configured, so statement reconciliation (payment → `CLEARED`) raises no *Payment Clearing* event and creates no journal entry. Bank acknowledgements are status only. `[USER:2026-10-06]` `[DATA:XLA trace of one cleared payment, 6-Oct-2026]` |
 | R-19 (was Q-PAY-7 a–b) | Do expense items accrue at receipt or at period end? | **Period end** `[USER:2026-10-06]`. Receipts without invoices are accrued at period close and reversed when the next period opens; the receipt itself creates no accounting, and the invoice books the expense |
 | R-14 (was Q-PAY-3) | Does INT955 use Oracle's standard disbursement-acknowledgment processing? | No. INT955 writes custom DFFs (`ATTRIBUTE1/3/4/5`) on `AP_CHECKS_ALL` through REST `payablesPayments/{CheckId}`. The standard feature is a modernisation option (see INT955.md) |
@@ -61,7 +62,6 @@ usage: "Agents must cite the Q-ID instead of guessing when an answer depends on 
 | Q-AP-2 | Invoice approval rules (who approves non-PO invoices; thresholds) | MOD-AP |
 | Q-SUP-2 | Cadence/owner of supplier inactivation (offboarding) | PROC-P2P |
 | Q-IC-1 | Are Oracle intercompany balancing rules configured alongside INT992? | MOD-GL |
-| Q-FA-1 | Is TAB (or another mechanism) used for FA depreciation-expense segment override? | MOD-FA |
 | Q-EPM-1 | Why custom TB BIP report rather than native Oracle GL / Trial Balance adapters in Data Management? | MOD-EPM |
 | Q-INT-1 | OIC/S3 integration identifier(s) for the daily FAH load | register |
 | Q-INT-3 | Direction semantics for INT931/931B and INT934 (listed "Out" but named "to Oracle") | register |
