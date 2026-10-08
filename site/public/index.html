@@ -153,6 +153,46 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
 .card button.primary[disabled]{opacity:.6;cursor:wait}
 .msg{margin-top:12px;font-size:14px;min-height:1.2em}
 .msg.err{color:var(--warn)}
+.gate-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,380px);gap:36px;align-items:start;max-width:980px;width:100%}
+@media (max-width:820px){.gate-grid{grid-template-columns:minmax(0,1fr)}}
+.about h1{font-family:var(--f-display);font-stretch:90%;font-size:34px;margin:4px 0 8px}
+.about .lede{font-size:17px}
+.about-list{padding-left:18px;margin:14px 0}
+.about-list li{margin:6px 0}
+.notice{border-left:3px solid var(--accent);background:var(--accent-soft);padding:12px 14px;border-radius:6px;font-size:14px}
+.seg{display:flex;gap:4px;background:var(--soft);border-radius:8px;padding:3px;margin-bottom:8px}
+.seg button{flex:1;border:0;background:none;padding:7px;border-radius:6px;font:600 14px var(--f-body);color:var(--muted);cursor:pointer}
+.seg button[aria-selected="true"]{background:var(--panel);color:var(--fg)}
+.card label.check{display:flex;gap:8px;align-items:flex-start;text-transform:none;letter-spacing:0;font:13px/1.4 var(--f-body);color:var(--fg);margin-top:14px}
+.card label.check input{width:auto;margin-top:2px}
+.btn{font:600 13px var(--f-body);background:var(--fg);color:var(--bg);border:0;border-radius:6px;padding:6px 12px;cursor:pointer}
+.btn.ghost{background:none;color:var(--fg);border:1px solid var(--line)}
+.btn.small{padding:3px 9px;font-size:12px}
+.btn.danger{background:var(--warn)}
+.cmt-btn{margin-top:12px}
+.stage .cmt-btn{align-self:flex-start;margin-top:4px}
+.dlg{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--fg);padding:20px 22px;width:min(520px,calc(100vw - 32px))}
+.dlg::backdrop{background:rgba(0,0,0,.35)}
+.dlg h3{margin:4px 0 6px;font-family:var(--f-display);font-stretch:90%}
+.dlg textarea{width:100%;font:14px var(--f-body);background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:8px;margin-top:8px}
+.dlg-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.muted{color:var(--muted);font-size:14px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:14px;z-index:20}
+.admin-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+@media (max-width:980px){.admin-grid{grid-template-columns:minmax(0,1fr)}}
+table.adm td{vertical-align:top}
+table.adm select{font:13px var(--f-body);background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:4px}
+.maps-pick{display:inline-flex;flex-wrap:wrap;gap:6px 10px;font-size:13px}
+.maps-pick label{display:inline-flex;gap:4px;align-items:center}
+.adm-form{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.adm-form input,.adm-form select{font:14px var(--f-body);background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.cmt{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:8px 0;background:var(--panel)}
+.cmt .meta{font:12px var(--f-mono);color:var(--muted)}
+.cmt .body{white-space:pre-wrap;margin:6px 0}
+.log{list-style:none;padding:0;margin:8px 0 0;max-height:70vh;overflow:auto;font-size:13px}
+.log li{border-bottom:1px solid var(--line);padding:6px 0}
+.log li.new{animation:flash 2s ease-out}
+@keyframes flash{from{background:var(--accent-soft)}to{background:transparent}}
 .userbar{display:flex;gap:10px;align-items:center;font:12px var(--f-mono);color:var(--muted)}
 .userbar button{font:600 12px var(--f-body);border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:999px;padding:4px 10px;cursor:pointer}
 .loading{padding:60px 0;text-align:center;color:var(--muted)}
@@ -163,16 +203,67 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
 <!-- Sign-in gate. The page itself holds no architecture content: the map data is
      downloaded from a private Supabase Storage bucket only after a permitted user signs in. -->
 <main id="gate" class="gate wrap" hidden>
-  <form class="card" id="loginForm" novalidate>
-    <div class="eyebrow">Private · review copy</div>
-    <h1>Estate Maps</h1>
-    <p>Sign in with the account you were given.</p>
-    <label for="email">Email</label>
-    <input id="email" type="email" autocomplete="username" required>
-    <label for="password">Password</label>
-    <input id="password" type="password" autocomplete="current-password" required>
-    <button class="primary" id="loginBtn" type="submit">Sign in</button>
-    <div class="msg" id="loginMsg" role="status"></div>
+  <div class="gate-grid">
+    <section class="about">
+      <div class="eyebrow">Private · internal use</div>
+      <h1>Estate Maps</h1>
+      <p class="lede">Interactive maps of Oracle finance estates: the applications, the business processes they run, and the integrations that connect them.</p>
+      <ul class="about-list">
+        <li><b>Applications</b> — Oracle Fusion ERP and EPM, analytics, data warehouses and the satellite systems around them, and what each one does.</li>
+        <li><b>Processes</b> — procure to pay, record to report, close and reporting, with the accounting each step creates.</li>
+        <li><b>Integrations</b> — every interface by name, with its source, target, lane and cadence.</li>
+      </ul>
+      <div class="notice"><b>Internal purposes only.</b> Each map is built from an organisation's own documentation and anonymised. Access is granted only to people who are, or were, part of the organisation a map was sourced from, and maps are not shared with anyone outside it. Registering does not grant access by itself: the administrator reviews every request and assigns the maps you may see.</div>
+    </section>
+
+    <section class="card auth">
+      <div class="seg" role="tablist">
+        <button type="button" role="tab" id="modeIn" aria-selected="true">Sign in</button>
+        <button type="button" role="tab" id="modeUp" aria-selected="false">Request access</button>
+      </div>
+      <form id="loginForm" novalidate>
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="username" required>
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button class="primary" id="loginBtn" type="submit">Sign in</button>
+        <div class="msg" id="loginMsg" role="status"></div>
+      </form>
+      <form id="signupForm" novalidate hidden>
+        <label for="suName">Full name</label>
+        <input id="suName" autocomplete="name" required>
+        <label for="suOrg">Organisation and your role there</label>
+        <input id="suOrg" placeholder="e.g. Finance Technology, former analyst" required>
+        <label for="suEmail">Email</label>
+        <input id="suEmail" type="email" autocomplete="email" required>
+        <label for="suPw">Password (at least 10 characters)</label>
+        <input id="suPw" type="password" autocomplete="new-password" minlength="10" required>
+        <label class="check"><input id="suAgree" type="checkbox"> I am, or was, part of an organisation these maps come from, and I will use them for internal purposes only.</label>
+        <button class="primary" id="signupBtn" type="submit">Request access</button>
+        <div class="msg" id="signupMsg" role="status"></div>
+      </form>
+    </section>
+  </div>
+</main>
+
+<main id="pending" class="gate wrap" hidden>
+  <section class="card">
+    <div class="eyebrow">Request received</div>
+    <h1>Waiting for approval</h1>
+    <p id="pendingText">Thanks for registering. The administrator reviews each request and assigns the maps you can see. Once that is done, sign in here with the password you chose.</p>
+    <button class="primary" id="pendingOut" type="button">Sign out</button>
+  </section>
+</main>
+
+<main id="setpw" class="gate wrap" hidden>
+  <form class="card" id="setpwForm" novalidate>
+    <div class="eyebrow">Welcome</div>
+    <h1>Choose a password</h1>
+    <p>You were invited to the Estate Maps. Choose the password you will use to sign in.</p>
+    <label for="newPw">New password (at least 10 characters)</label>
+    <input id="newPw" type="password" autocomplete="new-password" minlength="10" required>
+    <button class="primary" id="setpwBtn" type="submit">Save password</button>
+    <div class="msg" id="setpwMsg" role="status"></div>
   </form>
 </main>
 
@@ -198,6 +289,7 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
   <button role="tab" aria-selected="false" data-tab="onboard">Supplier onboarding</button>
   <button role="tab" aria-selected="false" data-tab="close">Close rhythm</button>
   <button role="tab" aria-selected="false" data-tab="ints">Integrations</button>
+  <button role="tab" aria-selected="false" data-tab="admin" class="admin-tab" hidden>Admin</button>
 </nav>
 
 <section id="tab-estate">
@@ -294,8 +386,50 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
   <div class="tablewrap"><table><thead><tr><th>Interface</th><th>Source → Target</th><th>Lane</th><th>Cadence</th><th>Workstream</th></tr></thead><tbody id="tbody"></tbody></table></div>
 </section>
 
+<section id="tab-admin" hidden>
+  <div class="eyebrow">Administration</div>
+  <h2>Users, access and comments</h2>
+  <div class="admin-grid">
+    <div>
+      <h3 class="subhead">Users <span class="count" id="admUserCount"></span></h3>
+      <div class="tablewrap"><table class="adm"><thead><tr><th>User</th><th>Registered</th><th>Status</th><th>Maps</th><th>Admin</th><th></th></tr></thead><tbody id="admUsers"></tbody></table></div>
+      <h3 class="subhead">Add a user</h3>
+      <form id="admAdd" class="adm-form" novalidate>
+        <input id="addEmail" type="email" placeholder="Email" required>
+        <input id="addName" placeholder="Full name">
+        <span id="addMaps" class="maps-pick"></span>
+        <select id="addMode" aria-label="How to add"><option value="invite">Send invite email</option><option value="create">Create with a password</option></select>
+        <input id="addPw" type="password" placeholder="Password (10+)" hidden>
+        <button type="submit" class="btn">Add</button>
+        <span class="msg" id="addMsg" role="status"></span>
+      </form>
+      <h3 class="subhead">Comments <span class="count" id="admCmtCount"></span></h3>
+      <div class="filters" id="cmtFilters"><span class="eyebrow">Show</span>
+        <button class="chip" aria-pressed="true" data-cs="new">New</button><button class="chip" aria-pressed="false" data-cs="accepted">Accepted</button><button class="chip" aria-pressed="false" data-cs="rejected">Rejected</button><button class="chip" aria-pressed="false" data-cs="">All</button></div>
+      <div id="admComments"></div>
+    </div>
+    <aside class="detail live">
+      <div class="eyebrow">Live</div>
+      <h3>Who is joining</h3>
+      <ul id="admLog" class="log"></ul>
+    </aside>
+  </div>
+</section>
+
 <footer id="footer"></footer>
 </div>
+
+<dialog id="cmtDlg" class="dlg">
+  <form method="dialog" id="cmtForm">
+    <div class="eyebrow" id="cmtWhere"></div>
+    <h3>Add a comment</h3>
+    <p class="muted">Your comment goes to the map administrator, who decides whether to add it and may reply to you by email.</p>
+    <textarea id="cmtBody" rows="6" maxlength="4000" required placeholder="What should change, or what is missing?"></textarea>
+    <div class="dlg-actions"><button type="button" class="btn ghost" id="cmtCancel">Cancel</button><button type="submit" class="btn" id="cmtSend">Send comment</button></div>
+    <div class="msg" id="cmtMsg" role="status"></div>
+  </form>
+</dialog>
+<div id="toast" class="toast" role="status" hidden></div>
 
 <div id="boot" class="loading wrap">Loading…</div>
 

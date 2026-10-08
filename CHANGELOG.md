@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 — 2026-10-08
+- Users and admin: self-registration with admin approval (status pending/active/disabled), per-user map access in `profiles`, admin role; login page explains the maps and the internal-use policy.
+- Comments: "Add comment" on every clickable map item and stage card; stored in `comments` and emailed to the admin (Reply-To the viewer) by the `estate-comment` function.
+- Admin tab: users (status, maps, admin, delete), add user by invite or with a password, comments (accept / reject), live log of registrations, sign-ins, map opens and comments (Supabase Realtime).
+- Supabase: migration `003-users-admin-comments.sql`; Edge Functions `estate-admin`, `estate-comment`, `estate-signup-notify`; setup in `site/SETUP-ADMIN.md`.
+
 ## 0.5.0 — 2026-10-08
 - Insurance map, from the ERP / corporate-IT notebook (2021–2023; anonymised):
   - **Dashboards** tab: clickable diagram of how the Essbase dashboards (GL cubes → Workiva (OneCloud) → Planning → OAC Essbase) and transactional dashboards (OTBI → DV data flows / ADW) are produced, plus static reporting (Narrative Reporting, BI Publisher) and insurance data feeds; path chips; `insurance/dashboards.md`.
