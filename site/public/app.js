@@ -67,21 +67,21 @@
     picker.value = first.meta.id;
     render(first.model);
     show("app");
-    requestAnimationFrame(drawEdges);
+    requestAnimationFrame(drawVisible);
   }
   $("mapSel").addEventListener("change", () => {
     const a = available.find((x) => x.meta.id === $("mapSel").value);
     if (!a) return;
     store.set("estateMap", a.meta.id);
     render(a.model);
-    requestAnimationFrame(drawEdges);
+    requestAnimationFrame(drawVisible);
   });
   sb.auth.getSession().then(({ data }) => onSession(data.session));
   sb.auth.onAuthStateChange((_evt, session) => { setTimeout(() => onSession(session), 0); });
 
   // ---------- defaults (the Travel map predates per-map settings) ----------
   const DEFAULTS = {
-    tab_labels: { estate: "Estate", p2p: "Procure to Pay", r2r: "Record to Report", fnd: "Foundation & controls", onboard: "Supplier onboarding", close: "Close rhythm", ints: "Integrations" },
+    tab_labels: { estate: "Estate", p2p: "Procure to Pay", r2r: "Record to Report", fnd: "Foundation & controls", dash: "Dashboards", onboard: "Supplier onboarding", close: "Close rhythm", ints: "Integrations" },
     workstreams: [{ id: "P2P", label: "Procure to Pay" }, { id: "R2R", label: "Record to Report" }, { id: "PLAT", label: "Platform accounting" }],
     lane_groups: [
       { name: "Airflow", match: "Airflow", color: "var(--airflow)" },
@@ -96,14 +96,112 @@
     ],
   };
 
-  // ---------- rendering ----------
-  let M = null, sel = null, ws = "all", groups = [];
+  // ---------- diagrams (estate, dashboards, close process) ----------
   const COL = { oic: "var(--oic)", airflow: "var(--airflow)", sched: "var(--airflow)", bulk: "var(--bulk)", extract: "var(--extract)", int: "var(--line)", ret: "var(--ext)" };
-  const TABS = ["estate", "p2p", "r2r", "fnd", "onboard", "close", "ints"];
+  const legendHtml = (items) => items.map((l) => `<span${l.dash ? ' class="dash"' : ""}><i style="border-color:${esc(l.color)}"></i>${esc(l.label)}</span>`).join("") + "<span>Dashed box = external system</span>";
+
+  /* One clickable layered diagram. ids: box, bands, edges, detail, chips, legend, tab (section id), prefix (node element id prefix). */
+  function makeDiagram(ids) {
+    const d = { data: null, sel: null, ws: "all" };
+    d.render = function (data, chips, legend) {
+      d.data = data; d.sel = data.default_node; d.ws = "all";
+      $(ids.chips).innerHTML = `<button class="chip" aria-pressed="true" data-ws="all">All</button>` +
+        chips.map((w) => `<button class="chip" aria-pressed="false" data-ws="${esc(w.id)}">${esc(w.label)}</button>`).join("");
+      $(ids.chips).querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
+        d.ws = c.dataset.ws;
+        $(ids.chips).querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", x === c));
+        d.select();
+      }));
+      $(ids.legend).innerHTML = legendHtml(legend);
+      const bands = $(ids.bands); bands.innerHTML = "";
+      data.layers.forEach((L) => {
+        const b = document.createElement("div");
+        b.className = "band" + (L.narrow ? " narrow" : "");
+        b.innerHTML = `<div class="lab">${esc(L.label)}<b>${esc(L.title)}</b></div><div class="nodes"></div>`;
+        data.nodes.filter((n) => n.layer === L.id).forEach((n) => {
+          const el = document.createElement("button");
+          el.type = "button";
+          el.className = "node" + (n.external ? " ext" : "") + (n.core ? " core" : "");
+          el.id = ids.prefix + n.id;
+          el.innerHTML = `${esc(n.title)}<small>${esc(n.subtitle)}</small>`;
+          el.addEventListener("click", () => { d.sel = n.id; d.select(); });
+          b.querySelector(".nodes").appendChild(el);
+        });
+        bands.appendChild(b);
+      });
+      d.select();
+    };
+    d.select = function () {
+      const D = d.data;
+      D.nodes.forEach((n) => {
+        const el = $(ids.prefix + n.id);
+        el.classList.toggle("sel", n.id === d.sel);
+        el.classList.toggle("dim", d.ws !== "all" && !n.workstreams.includes(d.ws));
+        el.setAttribute("aria-pressed", n.id === d.sel);
+      });
+      const n = D.nodes.find((x) => x.id === d.sel);
+      const layer = D.layers.find((L) => L.id === n.layer);
+      const nb = D.edges.filter((e) => e.from === d.sel || e.to === d.sel).map((e) => {
+        const o = D.nodes.find((x) => x.id === (e.from === d.sel ? e.to : e.from));
+        return (e.from === d.sel ? "→ " : "← ") + o.title;
+      });
+      const labels = Object.assign({ functions: "What it does", integrations: "Interfaces" }, D.labels || {});
+      const tags = (a) => a.map((i) => `<span class="tag">${esc(i)}</span>`).join("");
+      const list = (a, cls) => `<ul class="${cls}">${a.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`;
+      const fns = n.functions || [], ifs = n.integrations || [], docs = n.docs || [], facts = n.facts || [];
+      const docLinks = docs.filter((x) => /^https:\/\//.test(x.url))
+        .map((x) => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.label)}</a></li>`).join("");
+      $(ids.detail).innerHTML = `
+        <div class="eyebrow">${esc(layer.label)} · ${esc(layer.title)}${n.external ? " · external" : ""}</div>
+        <h3>${esc(n.title)}</h3><p>${esc(n.description)}</p>
+        <dl>
+          ${facts.map((f) => `<div><dt>${esc(f[0])}</dt><dd>${esc(f[1])}</dd></div>`).join("")}
+          ${fns.length ? `<div><dt>${esc(labels.functions)}</dt><dd>${list(fns, "fn")}</dd></div>` : ""}
+          ${ifs.length ? `<div><dt>${esc(labels.integrations)}</dt><dd>${list(ifs, "ifs")}</dd></div>` : ""}
+          ${nb.length ? `<div><dt>Connected to</dt><dd>${tags(nb)}</dd></div>` : ""}
+          ${docLinks ? `<div><dt>Documents</dt><dd><ul class="docs">${docLinks}</ul></dd></div>` : ""}
+        </dl>`;
+      d.draw();
+    };
+    d.draw = function () {
+      const D = d.data;
+      if (!D || $("app").hidden || $(ids.tab).hidden || $(ids.box).closest("[hidden]")) return;
+      const svg = $(ids.edges), box = $(ids.box).getBoundingClientRect();
+      let out = "";
+      D.edges.forEach(({ from: a, to: b, kind: k }) => {
+        const A = $(ids.prefix + a), B = $(ids.prefix + b); if (!A || !B) return;
+        const ra = A.getBoundingClientRect(), rb = B.getBoundingClientRect();
+        const na = D.nodes.find((x) => x.id === a), nbb = D.nodes.find((x) => x.id === b);
+        const on = a === d.sel || b === d.sel;
+        const hidden = d.ws !== "all" && (!na.workstreams.includes(d.ws) || !nbb.workstreams.includes(d.ws));
+        let x1 = ra.left + ra.width / 2 - box.left, y1 = ra.top + ra.height / 2 - box.top, x2 = rb.left + rb.width / 2 - box.left, y2 = rb.top + rb.height / 2 - box.top;
+        const vertical = Math.abs(y1 - y2) > 8;
+        if (vertical) { if (y2 > y1) { y1 = ra.bottom - box.top; y2 = rb.top - box.top; } else { y1 = ra.top - box.top; y2 = rb.bottom - box.top; } }
+        else { if (x2 > x1) { x1 = ra.right - box.left; x2 = rb.left - box.left; } else { x1 = ra.left - box.left; x2 = rb.right - box.left; } }
+        const my = (y1 + y2) / 2;
+        const path = vertical ? `M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}` : `M${x1},${y1} L${x2},${y2}`;
+        out += `<path d="${path}" fill="none" stroke="${COL[k] || "var(--line)"}" stroke-width="${on ? 2.4 : 1.2}" stroke-opacity="${hidden ? 0.06 : on ? 1 : 0.35}" ${k === "ret" ? 'stroke-dasharray="5 4"' : ""}/>`;
+      });
+      svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
+      svg.innerHTML = out;
+    };
+    new ResizeObserver(() => d.draw()).observe($(ids.box));
+    return d;
+  }
+  const estate = makeDiagram({ box: "diagram", bands: "bands", edges: "edges", detail: "detail", chips: "wsChips", legend: "legend", tab: "tab-estate", prefix: "n-" });
+  const dash = makeDiagram({ box: "dbDiagram", bands: "dbBands", edges: "dbEdges", detail: "dbDetail", chips: "dbChips", legend: "dbLegend", tab: "tab-dash", prefix: "d-" });
+  const closeMap = makeDiagram({ box: "cpDiagram", bands: "cpBands", edges: "cpEdges", detail: "cpDetail", chips: "cpChips", legend: "cpLegend", tab: "tab-close", prefix: "c-" });
+  const DIAGRAMS = [estate, dash, closeMap];
+  function drawVisible() { DIAGRAMS.forEach((g) => g.draw()); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawVisible);
+
+  // ---------- rendering ----------
+  let M = null, groups = [];
+  const TABS = ["estate", "p2p", "r2r", "fnd", "dash", "onboard", "close", "ints"];
   const notes = (arr) => (arr || []).map((n) => `<div class="note"><b>${esc(n.title)}</b> ${esc(n.text)}</div>`).join("");
 
   function render(model) {
-    M = model; sel = model.default_node; ws = "all";
+    M = model;
     const h = model.header;
     document.title = h.title || "Estate Map";
     $("hEyebrow").textContent = h.eyebrow; $("hTitle").textContent = h.title; $("hLede").textContent = h.lede;
@@ -112,44 +210,18 @@
 
     // tabs: labels from the model; tabs without data are hidden
     const labels = Object.assign({}, DEFAULTS.tab_labels, model.tab_labels || {});
-    const has = { estate: true, p2p: !!model.p2p, r2r: !!model.r2r, fnd: !!model.fnd, onboard: !!model.onboarding, close: !!model.close, ints: !!model.integrations };
+    const has = { estate: true, p2p: !!model.p2p, r2r: !!model.r2r, fnd: !!model.fnd, dash: !!model.dashboards, onboard: !!model.onboarding, close: !!model.close, ints: !!model.integrations };
     document.querySelectorAll("nav.tabs button").forEach((b) => { b.textContent = labels[b.dataset.tab]; b.hidden = !has[b.dataset.tab]; });
     const current = TABS.find((k) => !$("tab-" + k).hidden) || "estate";
     showTab(has[current] ? current : "estate");
 
-    // workstream chips, legend, register filters
+    // estate diagram and register filters
     const wss = model.workstreams || DEFAULTS.workstreams;
-    $("wsChips").innerHTML = `<button class="chip" aria-pressed="true" data-ws="all">All</button>` +
-      wss.map((w) => `<button class="chip" aria-pressed="false" data-ws="${esc(w.id)}">${esc(w.label)}</button>`).join("");
-    document.querySelectorAll("#wsChips .chip").forEach((c) => c.addEventListener("click", () => {
-      ws = c.dataset.ws;
-      document.querySelectorAll("#wsChips .chip").forEach((x) => x.setAttribute("aria-pressed", x === c));
-      renderEstate();
-    }));
-    $("legend").innerHTML = (model.legend || DEFAULTS.legend).map((l) => `<span${l.dash ? ' class="dash"' : ""}><i style="border-color:${esc(l.color)}"></i>${esc(l.label)}</span>`).join("") + "<span>Dashed box = external system</span>";
+    estate.render(model, wss, model.legend || DEFAULTS.legend);
     groups = (model.lane_groups || DEFAULTS.lane_groups).map((g) => Object.assign({}, g, { re: new RegExp(g.match) }));
     $("laneSel").innerHTML = `<option value="">All lanes</option>` + groups.map((g) => `<option>${esc(g.name)}</option>`).join("");
     $("wsSel").innerHTML = `<option value="">All workstreams</option>` + wss.map((w) => `<option value="${esc(w.id)}">${esc(w.label)}</option>`).join("");
     $("q").value = "";
-
-    // estate bands
-    const bands = $("bands"); bands.innerHTML = "";
-    model.layers.forEach((L) => {
-      const b = document.createElement("div");
-      b.className = "band" + (L.narrow ? " narrow" : "");
-      b.innerHTML = `<div class="lab">${esc(L.label)}<b>${esc(L.title)}</b></div><div class="nodes"></div>`;
-      model.nodes.filter((n) => n.layer === L.id).forEach((n) => {
-        const el = document.createElement("button");
-        el.type = "button";
-        el.className = "node" + (n.external ? " ext" : "") + (n.core ? " core" : "");
-        el.id = "n-" + n.id;
-        el.innerHTML = `${esc(n.title)}<small>${esc(n.subtitle)}</small>`;
-        el.addEventListener("click", () => { sel = n.id; renderEstate(); });
-        b.querySelector(".nodes").appendChild(el);
-      });
-      bands.appendChild(b);
-    });
-    renderEstate();
 
     // stage chains: Procure to Pay, Record to Report, Foundation & controls
     const je = (e) => `<div class="je"><div class="je-ev">${esc(e.event)}</div><div class="je-row"><b>Dr</b><span>${e.dr.map(esc).join("<br>")}</span></div><div class="je-row"><b>Cr</b><span>${e.cr.map(esc).join("<br>")}</span></div></div>`;
@@ -165,6 +237,14 @@
     chain(model.r2r, { title: "r2rTitle", lede: "r2rLede", chain: "r2rChain", notes: "r2rNotes" }, "");
     chain(model.fnd, { title: "fndTitle", lede: "fndLede", chain: "fndChain", notes: "fndNotes" }, "");
 
+    // dashboards diagram
+    const db = model.dashboards;
+    if (db) {
+      $("dbTitle").textContent = db.title; $("dbLede").textContent = db.lede;
+      dash.render(db, db.chips || [], db.legend || model.legend || DEFAULTS.legend);
+      $("dbNotes").innerHTML = notes(db.notes);
+    }
+
     // lanes (supplier onboarding on Travel, data & reporting on Insurance)
     const o = model.onboarding;
     if (o) {
@@ -172,10 +252,15 @@
       $("lanes").innerHTML = o.lanes.map((l) => `<div class="lane"><header><h3>${esc(l.title)}</h3><span class="eyebrow">${esc(l.route)}</span></header><div class="steps">${l.steps.map((s) => `<div class="step ${esc(s.kind)}"><b>${esc(s.label)}</b>${esc(s.text)}</div>`).join("")}</div></div>`).join("") + `<div class="rail">${notes(o.notes)}</div>`;
     }
 
-    // close
+    // close: optional process map, then the calendar
     const c = model.close;
     if (c) {
       $("clTitle").textContent = c.title; $("clLede").textContent = c.lede;
+      const pm = c.process;
+      $("cpWrap").hidden = !pm;
+      $("clCalTitle").hidden = !pm;
+      $("clCalTitle").textContent = c.calendar_title || "Calendar";
+      if (pm) closeMap.render(pm, pm.chips || [], pm.legend || DEFAULTS.legend);
       $("timeline").innerHTML = c.timeline.map((r) => `<div class="trow ${r.consolidation_team ? "cons" : ""}"><span class="when">${esc(r.when)}</span><span>${esc(r.what)}</span><span class="who">${esc(r.owner)}</span></div>`).join("");
     }
 
@@ -183,60 +268,6 @@
     $("inTitle").textContent = model.integrations.title; $("inLede").textContent = model.integrations.lede;
     renderInts();
   }
-
-  function renderEstate() {
-    M.nodes.forEach((n) => {
-      const el = $("n-" + n.id);
-      el.classList.toggle("sel", n.id === sel);
-      el.classList.toggle("dim", ws !== "all" && !n.workstreams.includes(ws));
-      el.setAttribute("aria-pressed", n.id === sel);
-    });
-    const n = M.nodes.find((x) => x.id === sel);
-    const layer = M.layers.find((L) => L.id === n.layer);
-    const nb = M.edges.filter((e) => e.from === sel || e.to === sel).map((e) => {
-      const o = M.nodes.find((x) => x.id === (e.from === sel ? e.to : e.from));
-      return (e.from === sel ? "→ " : "← ") + o.title;
-    });
-    const tags = (a) => a.map((i) => `<span class="tag">${esc(i)}</span>`).join("");
-    const list = (a, cls) => `<ul class="${cls}">${a.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`;
-    const fns = n.functions || [], ifs = n.integrations || [], docs = n.docs || [];
-    const docLinks = docs.filter((d) => /^https:\/\//.test(d.url))
-      .map((d) => `<li><a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">${esc(d.label)}</a></li>`).join("");
-    $("detail").innerHTML = `
-      <div class="eyebrow">${esc(layer.label)} · ${n.external ? "external system" : "Oracle / platform"}</div>
-      <h3>${esc(n.title)}</h3><p>${esc(n.description)}</p>
-      <dl>
-        ${fns.length ? `<div><dt>What it does</dt><dd>${list(fns, "fn")}</dd></div>` : ""}
-        ${ifs.length ? `<div><dt>Interfaces</dt><dd>${list(ifs, "ifs")}</dd></div>` : ""}
-        ${nb.length ? `<div><dt>Connected to</dt><dd>${tags(nb)}</dd></div>` : ""}
-        ${docLinks ? `<div><dt>Documents</dt><dd><ul class="docs">${docLinks}</ul></dd></div>` : ""}
-      </dl>`;
-    drawEdges();
-  }
-
-  function drawEdges() {
-    if (!M || $("app").hidden || $("tab-estate").hidden) return;
-    const svg = $("edges"), box = $("diagram").getBoundingClientRect();
-    let out = "";
-    M.edges.forEach(({ from: a, to: b, kind: k }) => {
-      const A = $("n-" + a), B = $("n-" + b); if (!A || !B) return;
-      const ra = A.getBoundingClientRect(), rb = B.getBoundingClientRect();
-      const na = M.nodes.find((x) => x.id === a), nbb = M.nodes.find((x) => x.id === b);
-      const on = a === sel || b === sel;
-      const hidden = ws !== "all" && (!na.workstreams.includes(ws) || !nbb.workstreams.includes(ws));
-      let x1 = ra.left + ra.width / 2 - box.left, y1 = ra.top + ra.height / 2 - box.top, x2 = rb.left + rb.width / 2 - box.left, y2 = rb.top + rb.height / 2 - box.top;
-      const vertical = Math.abs(y1 - y2) > 8;
-      if (vertical) { if (y2 > y1) { y1 = ra.bottom - box.top; y2 = rb.top - box.top; } else { y1 = ra.top - box.top; y2 = rb.bottom - box.top; } }
-      else { if (x2 > x1) { x1 = ra.right - box.left; x2 = rb.left - box.left; } else { x1 = ra.left - box.left; x2 = rb.right - box.left; } }
-      const my = (y1 + y2) / 2;
-      const d = vertical ? `M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}` : `M${x1},${y1} L${x2},${y2}`;
-      out += `<path d="${d}" fill="none" stroke="${COL[k] || "var(--line)"}" stroke-width="${on ? 2.4 : 1.2}" stroke-opacity="${hidden ? 0.06 : on ? 1 : 0.35}" ${k === "ret" ? 'stroke-dasharray="5 4"' : ""}/>`;
-    });
-    svg.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
-    svg.innerHTML = out;
-  }
-  new ResizeObserver(drawEdges).observe($("diagram"));
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawEdges);
 
   const groupOf = (lane) => groups.find((g) => g.re.test(lane || "")) || null;
   function renderInts() {
@@ -258,7 +289,7 @@
   function showTab(t) {
     tabs.forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === t));
     TABS.forEach((k) => { $("tab-" + k).hidden = k !== t; });
-    if (t === "estate") requestAnimationFrame(drawEdges);
+    requestAnimationFrame(drawVisible);
   }
   tabs.forEach((b) => b.addEventListener("click", () => { showTab(b.dataset.tab); try { history.replaceState(null, "", "#" + b.dataset.tab); } catch (e) {} }));
   const h = (location.hash || "").slice(1);
