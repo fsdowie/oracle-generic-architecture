@@ -27,8 +27,9 @@
  "footer": "Source: finance-technology notebook 2020–2023 (anonymised). Shows the state as of 2023, not the current state.",
  "tab_labels": {
   "onboard": "Data & reporting",
-  "close": "Close calendar",
-  "fnd": "Foundation & controls"
+  "close": "Close process",
+  "fnd": "Foundation & controls",
+  "dash": "Dashboards"
  },
  "workstreams": [
   {
@@ -51,12 +52,17 @@
    "color": "var(--oic)"
   },
   {
-   "name": "OneCloud",
-   "match": "OneCloud",
+   "name": "Workiva (OneCloud)",
+   "match": "Workiva|OneCloud",
    "color": "var(--airflow)"
   },
   {
-   "name": "EPM / bulk",
+   "name": "Data Integration",
+   "match": "Data Integration",
+   "color": "var(--bulk)"
+  },
+  {
+   "name": "EPM / file load",
    "match": "Data Management|FBDI|Integrator",
    "color": "var(--bulk)"
   },
@@ -72,15 +78,15 @@
    "color": "var(--oic)"
   },
   {
-   "label": "OneCloud chain",
+   "label": "Workiva (OneCloud)",
    "color": "var(--airflow)"
   },
   {
-   "label": "Data Management / file load",
+   "label": "Data Integration / Data Management / file load",
    "color": "var(--bulk)"
   },
   {
-   "label": "Report / extract",
+   "label": "Native (Oracle) / report",
    "color": "var(--extract)"
   },
   {
@@ -139,11 +145,16 @@
    "functions": [
     "Issues, renews and cancels policies; bills premium and pays commission",
     "Records claims, losses and case reserves",
-    "Reporting data lands in the on-premise BIM database, then in the ADW insurance data mart (premium one day in arrears, reserves two)",
+    "Reporting data lands in the on-premise warehouse, then reaches the ADW insurance data mart through OCI Data Integration",
     "Its activity reaches the ledger as daily Premium, Loss and Claims journals"
    ],
    "integrations": [
-    "INS-POLICY-GL"
+    "INS-POLICY-DAILY-PREM",
+    "INS-POLICY-DAILY-CLAIMS",
+    "INS-POLICY-DAILY-RESV",
+    "INS-POLICY-MONTHLY-COUNT",
+    "INS-POLICY-MONTHLY-ADV",
+    "INS-POLICY-MONTHLY-WRITTEN"
    ],
    "docs": [
     {
@@ -277,8 +288,8 @@
   {
    "id": "onprem",
    "layer": "L1",
-   "title": "On-premise warehouses",
-   "subtitle": "EDW · BIM · HDS (SQL Server)",
+   "title": "On-premise data warehouse",
+   "subtitle": "EDW · BIM · HDS · DWM (SQL Server)",
    "external": true,
    "core": false,
    "workstreams": [
@@ -287,18 +298,50 @@
    ],
    "description": "On-premise SQL Server data stores: the enterprise data warehouse (EDW), the BIM reporting database with Exceed policy data, and HDS. None of them is Essbase.",
    "functions": [
-    "EDW: enterprise data warehouse with a Finance workgroup database",
-    "BIM: policy, premium and claims reporting data from Exceed; source of legacy BIM reports",
-    "HDS: data store; some BIM reports sourced from DB2 through it",
-    "A load server copies BIM data into the ADW insurance data mart"
+    "EDW: enterprise data warehouse; the Finance workgroup database feeds Tableau reports and receives the budget",
+    "BIM / DWM: policy, premium (GWP, EP, UEP), claims and losses, loss reserves, subrogation and salvage",
+    "HDS: data store; some reports sourced from Db2 through it",
+    "Feeds ADW through OCI Data Integration (previously DataSync)"
    ],
    "integrations": [
-    "INS-BIM-ADW"
+    "INS-DI-ADW",
+    "INS-BIM-ADW",
+    "INS-ESSBASE-EDW"
    ],
    "docs": [
     {
      "label": "ADW, integrations and reporting",
      "path": "insurance/data-and-reporting.md"
+    }
+   ]
+  },
+  {
+   "id": "docusign",
+   "layer": "L1",
+   "title": "DocuSign",
+   "subtitle": "eSignature",
+   "external": true,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "DocuSign eSignature for internal agreements across departments (not Claims); not part of the dashboard flow.",
+   "functions": [
+    "Organisation → account → group structure with three sub-accounts (one for the Agency)",
+    "Single sign-on through Azure AD; about 70 active users; external accounts cleaned up",
+    "Offboarding checklist covers DocuSign documents and contract ownership"
+   ],
+   "integrations": [
+    "INS-DOCUSIGN"
+   ],
+   "docs": [
+    {
+     "label": "Insurer estate overview",
+     "path": "insurance/00-overview.md"
+    },
+    {
+     "label": "Integration register",
+     "path": "insurance/integrations/integration-register.yaml"
     }
    ]
   },
@@ -338,25 +381,26 @@
   {
    "id": "onecloud",
    "layer": "L2",
-   "title": "OneCloud",
-   "subtitle": "scheduler · data mover",
+   "title": "Workiva (OneCloud)",
+   "subtitle": "ETL · scheduler (non-Oracle)",
    "external": true,
    "core": false,
    "workstreams": [
     "DATA"
    ],
-   "description": "Third-party cloud scheduler and data-integration tool around EPM, OAC and ADW.",
+   "description": "Workiva (OneCloud): the third-party integration studio and data-prep tool used for ETL between the finance Oracle cloud systems.",
    "functions": [
-    "Loads Planning financials into the OAC Essbase reporting cube",
-    "Moves Payables imaging audit data into ADW",
-    "Copies EPM and Essbase backups on-premise",
-    "Back-load chain reruns a missed policy journal load"
+    "Moves GL trial balances and actuals/budget into Planning, and Planning into the OAC Essbase cubes",
+    "Sends allocations and statistical allocation rates back to GL; loads the budget to the on-premise EDW",
+    "Publishes report outputs to the Financials Doc Cloud; runs the EPM backups",
+    "Connectors for OTBI, ADW, Financials Cloud, ARCS, OAC, Planning, SQL Server, Db2, SFTP; review planned to replace them with Data Integration and OIC"
    ],
    "integrations": [
+    "INS-GL-PLANNING-TB",
     "INS-PLANNING-ESSBASE",
-    "INS-AP-IMAGING-ADW",
-    "INS-ADW-ESSBASE",
-    "INS-EPM-BACKUP"
+    "INS-ALLOC-GL",
+    "INS-ESSBASE-EDW",
+    "INS-ADW-DOCCLOUD"
    ],
    "docs": [
     {
@@ -431,6 +475,69 @@
     {
      "label": "Insurer estate overview",
      "path": "insurance/00-overview.md"
+    }
+   ]
+  },
+  {
+   "id": "di",
+   "layer": "L2",
+   "title": "OCI Data Integration",
+   "subtitle": "Fast Connect",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "DATA",
+    "R2R"
+   ],
+   "description": "OCI Data Integration (\"Fast Connect\"): the connection from on-premise Exceed data to ADW for FP&A, replacing DataSync.",
+   "functions": [
+    "Loads Exceed policy data from the on-premise warehouse into the ADW insurance data mart",
+    "Converted the BIM reports, including six-month auto policy reporting, and allowed BIM to retire",
+    "Treated as implemented (successor to the DataSync VM)"
+   ],
+   "integrations": [
+    "INS-DI-ADW"
+   ],
+   "docs": [
+    {
+     "label": "How the dashboards are produced",
+     "path": "insurance/dashboards.md"
+    },
+    {
+     "label": "ADW, integrations and reporting",
+     "path": "insurance/data-and-reporting.md"
+    }
+   ]
+  },
+  {
+   "id": "vm",
+   "layer": "L2",
+   "title": "Integration VM",
+   "subtitle": "DataSync · Data Gateway · GroundRunner",
+   "external": true,
+   "core": false,
+   "workstreams": [
+    "DATA"
+   ],
+   "description": "On-premise Windows VM that hosted the legacy connectors between on-premise data and Oracle Cloud.",
+   "functions": [
+    "DataSync: BIM to the ADW insurance data mart (legacy)",
+    "Oracle Data Gateway: on-premise data to OAC",
+    "GroundRunner: Workiva (OneCloud) agent and EPM automation; services needed a check after monthly patching"
+   ],
+   "integrations": [
+    "INS-BIM-ADW",
+    "INS-GATEWAY-OAC",
+    "INS-EPM-AUTOMATE"
+   ],
+   "docs": [
+    {
+     "label": "How the dashboards are produced",
+     "path": "insurance/dashboards.md"
+    },
+    {
+     "label": "ADW, integrations and reporting",
+     "path": "insurance/data-and-reporting.md"
     }
    ]
   },
@@ -539,10 +646,10 @@
    ],
    "description": "Supplier invoices captured by email and OCR, matched, and approved by amount tier.",
    "functions": [
-    "Integrated Invoice Imaging: email in, OCR, import to Payables",
-    "Invoice approval by tier; over 250K to an approval group; PO-matched and recurring invoices auto-approve",
-    "Credit memo and one-time payment rules",
-    "Imaging audit data goes to ADW for a dashboard"
+    "Integrated Invoice Imaging (OCR): invoices by email, imported hourly to Payables",
+    "OCR accuracy was weak: automatic validation was held for the Mutual and the Agency and AP validated manually",
+    "Planned move to Oracle Intelligent Document Recognition (IDR), the AI-based engine for images and email",
+    "Approval by amount tier; over 250K to an approval group; PO-matched and recurring invoices auto-approve"
    ],
    "integrations": [
     "INS-IMAGING",
@@ -716,13 +823,15 @@
    "functions": [
     "Company, Department, Account, Product, State, Class, Project, Intercompany",
     "Hierarchies published to the GL balances cube for FRS, Smart View and OTBI",
-    "Journal approval by group; auto-reverse by category to the next period",
+    "About six allocation rules a month in Calculation Manager; payroll allocations post by state",
     "Closed on business day 6; statutory balance sheet shows surplus",
     "Segment value security and cross-validation rules"
    ],
    "integrations": [
-    "INS-POLICY-GL",
+    "INS-POLICY-DAILY-PREM",
+    "INS-POLICY-DAILY-CLAIMS",
     "INS-ADP-GL",
+    "INS-ALLOC-GL",
     "INS-BUDGET-GL"
    ],
    "docs": [
@@ -749,14 +858,16 @@
    ],
    "description": "Oracle Enterprise EPM: close task manager, planning, narrative reporting, reconciliation, tax reporting.",
    "functions": [
-    "Close task manager with calendar, owners and sign-off",
-    "Planning for budgets and forecasts; budgets go back to GL",
-    "Narrative Reporting packages with author, review and sign-off phases",
-    "Account Reconciliation since September 2021",
+    "Planning: Financials, Workforce and Reporting Essbase cubes (plus Capital and Strategic Planning cubes)",
+    "Financial Consolidation and Close used as the month-end close checklist (consolidation planned)",
+    "Account Reconciliation (2021/22) and Narrative Reporting packages (about 200 reports)",
+    "Enterprise Data Management (future); Financial Reporting & Compliance for model-audit-rule and internal-audit controls",
     "Migrated to the Enterprise EPM bundle in 2022"
    ],
    "integrations": [
-    "INS-GL-PLANNING",
+    "INS-GL-PLANNING-TB",
+    "INS-HR-WORKFORCE",
+    "INS-PLANNING-ARCS",
     "INS-BUDGET-GL"
    ],
    "docs": [
@@ -785,16 +896,16 @@
    "functions": [
     "Financial report mart of all Fusion transactional modules (live February 2021)",
     "PeopleSoft Financials history",
-    "Insurance data mart (stage, temp, integrated-journal schemas) fed from BIM for premium, claims and policy counts",
-    "Loaded from Fusion through OIC (BI Publisher reports, bulk extracts) and OneCloud",
+    "Insurance data mart (daily, monthly and stage schemas) fed from the on-premise warehouse through OCI Data Integration",
+    "Loaded from Fusion through OIC (BI Publisher reports, bulk extracts) and Workiva (OneCloud)",
     "SQL checks reconcile daily policy journals and extracts to source; source for OAC dashboards and BI Publisher"
    ],
    "integrations": [
-    "INS-BIM-ADW",
+    "INS-DI-ADW",
     "INS-BIP-ADW",
-    "INS-ERP-BULK",
-    "INS-AP-IMAGING-ADW",
-    "INS-ADW-ESSBASE"
+    "INS-OTBI-DV",
+    "INS-ADW-DOCCLOUD",
+    "INS-POLICY-DAILY-PREM"
    ],
    "docs": [
     {
@@ -807,7 +918,7 @@
    "id": "oac",
    "layer": "L6",
    "title": "Oracle Analytics Cloud",
-   "subtitle": "BI · Essbase · DV",
+   "subtitle": "BI · DV · Essbase · BI Publisher",
    "external": false,
    "core": false,
    "workstreams": [
@@ -815,13 +926,16 @@
    ],
    "description": "Oracle Analytics Cloud: dashboards, the Essbase financials cube and data visualisation.",
    "functions": [
-    "BI dashboards on a semantic model (physical, logical, presentation layers)",
-    "Essbase financials cube loaded from Planning (OneCloud) and ADW metrics; one of two Essbase cubes, with the Fusion GL balances cube",
-    "Data Visualization with data flows and data sets (e.g. AP imaging auditability)",
-    "Report outputs distributed to a content-cloud folder for Accounting"
+    "Dynamic reporting: BI dashboards, Data Visualization and Smart View analytics",
+    "OAC Essbase cubes: Financials, Revenue Planning, Analytics, Foundation",
+    "Transactional dashboards from OTBI datasets and ADW through DV data flows",
+    "Static reporting for non-Essbase data with BI Publisher, against ADW and the on-premise warehouse"
    ],
    "integrations": [
     "INS-PLANNING-ESSBASE",
+    "INS-PLANNING-REVENUE",
+    "INS-OTBI-DV",
+    "INS-GATEWAY-OAC",
     "INS-ADW-ESSBASE"
    ],
    "docs": [
@@ -887,6 +1001,32 @@
     {
      "label": "Procure to Pay",
      "path": "insurance/processes/procure-to-pay.md"
+    }
+   ]
+  },
+  {
+   "id": "oci",
+   "layer": "L6",
+   "title": "OCI tenancy",
+   "subtitle": "usage & cost",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "DATA"
+   ],
+   "description": "The Oracle Cloud Infrastructure tenancy hosting ADW, OIC, OAC, Essbase, Data Integration and EPM.",
+   "functions": [
+    "Usage and cost dashboard by service, maintained monthly",
+    "Stakeholders consulted to estimate future usage from their planned projects",
+    "Later replaced by Oracle's live OCI usage application; user and role provisioning through OCI IAM"
+   ],
+   "integrations": [
+    "OCI usage and cost dashboard"
+   ],
+   "docs": [
+    {
+     "label": "Insurer estate overview",
+     "path": "insurance/00-overview.md"
     }
    ]
   }
@@ -1059,8 +1199,33 @@
   },
   {
    "from": "onprem",
+   "to": "di",
+   "kind": "bulk"
+  },
+  {
+   "from": "di",
    "to": "adw",
    "kind": "bulk"
+  },
+  {
+   "from": "onprem",
+   "to": "vm",
+   "kind": "extract"
+  },
+  {
+   "from": "vm",
+   "to": "oac",
+   "kind": "extract"
+  },
+  {
+   "from": "docusign",
+   "to": "ssp",
+   "kind": "ret"
+  },
+  {
+   "from": "oci",
+   "to": "adw",
+   "kind": "ret"
   }
  ],
  "default_node": "gl",
@@ -1504,7 +1669,7 @@
     "system": "Quarterly updates",
     "points": [
      "Oracle updates each quarter (March, June, September, December)",
-     "Regression list: integrations, OTBI subject areas, Essbase, OneCloud chains",
+     "Regression list: integrations, OTBI subject areas, Essbase, Workiva (OneCloud) chains",
      "Post-refresh steps after copying production to test"
     ]
    }
@@ -1522,7 +1687,7 @@
   "lanes": [
    {
     "title": "Fusion to ADW",
-    "route": "Fusion → OIC / OneCloud → ADW",
+    "route": "Fusion → OIC / Workiva (OneCloud) → ADW",
     "steps": [
      {
       "label": "BI Publisher report",
@@ -1579,7 +1744,7 @@
    },
    {
     "title": "EPM and cubes",
-    "route": "GL → Data Management → Planning → OneCloud → OAC Essbase",
+    "route": "GL → Data Management → Planning → Workiva (OneCloud) → OAC Essbase",
     "steps": [
      {
       "label": "Data Management",
@@ -1592,7 +1757,7 @@
       "kind": ""
      },
      {
-      "label": "OneCloud",
+      "label": "Workiva (OneCloud)",
       "text": "Loads Planning financials and ADW metrics into the OAC Essbase cube; backups",
       "kind": "ext"
      },
@@ -1641,40 +1806,82 @@
    },
    {
     "title": "ADW as the warehouse.",
-    "text": "ADW is an Oracle Autonomous Database (Data Warehouse workload) holding transaction-level finance data. Fusion data reaches it through OIC and OneCloud, policy data through BIM; Data Sync was replaced by ODI / OCI Data Integration."
+    "text": "ADW is an Oracle Autonomous Database (Data Warehouse workload) holding transaction-level finance data. Fusion data reaches it through OIC and Workiva (OneCloud), policy data through BIM; Data Sync was replaced by ODI / OCI Data Integration."
    },
    {
     "title": "Where Essbase sits.",
-    "text": "Two Essbase cubes: the OAC financials cube (from Planning via OneCloud) and the Fusion GL balances cube (FRS, Smart View, OTBI). EDW, BIM and HDS are SQL Server databases, and ADW is an Oracle Autonomous Database."
+    "text": "Two Essbase cubes: the OAC financials cube (from Planning via Workiva (OneCloud)) and the Fusion GL balances cube (FRS, Smart View, OTBI). EDW, BIM and HDS are SQL Server databases, and ADW is an Oracle Autonomous Database."
    }
   ]
  },
  "close": {
-  "title": "Close calendar",
-  "lede": "Modules close in sequence from business day 1 to 6, managed in the EPM close task manager.",
+  "title": "Close process",
+  "lede": "Scheduled processes run the daily rhythm; at month end the subledgers close from business day 1 to 4, allocations and intercompany run, the GL closes on day 6, and FP&A publishes the dashboards. Select any step for details; the calendar follows below.",
   "timeline": [
    {
-    "when": "Daily",
-    "what": "Policy journals (Premium, Loss, Claims) load one to two days in arrears",
-    "owner": "Finance technology",
+    "when": "Daily 02:00 →",
+    "what": "Create Accounting every 4 hours (subledgers 15 minutes apart); AutoPost every 8 hours",
+    "owner": "Scheduled processes",
     "consolidation_team": false
    },
    {
-    "when": "Daily",
-    "what": "OneCloud and OIC loads into ADW and the OAC Essbase cube",
-    "owner": "Finance technology",
+    "when": "Daily 01:00 →",
+    "what": "Import imaged invoices hourly; validate every 15 minutes (held for Mutual and Agency while OCR accuracy improved)",
+    "owner": "Payables",
     "consolidation_team": false
    },
    {
-    "when": "Monthly",
-    "what": "Shared-services intercompany billing, Mutual to Agency",
-    "owner": "Accounting",
+    "when": "Daily 04:25",
+    "what": "Initiate invoice approval workflow, per business unit",
+    "owner": "Payables",
+    "consolidation_team": false
+   },
+   {
+    "when": "Daily 05:00",
+    "what": "Create mass additions (Payables to Assets)",
+    "owner": "Assets",
+    "consolidation_team": false
+   },
+   {
+    "when": "Daily 05:45",
+    "what": "Refresh the GL balances cubes (Smart View, FRS, Planning loads)",
+    "owner": "General Ledger",
+    "consolidation_team": false
+   },
+   {
+    "when": "Daily 07:00",
+    "what": "BAI2 bank statements processed; autoreconcile at 10:00",
+    "owner": "Cash Management",
+    "consolidation_team": false
+   },
+   {
+    "when": "Daily 08:00",
+    "what": "Corporate card file uploaded; expense reimbursements every 12 hours",
+    "owner": "Expenses",
+    "consolidation_team": false
+   },
+   {
+    "when": "Daily 10:00",
+    "what": "Policy journals: premium and commissions, claims, change in case reserves (OIC from ADW)",
+    "owner": "OIC",
+    "consolidation_team": false
+   },
+   {
+    "when": "Bi-weekly Wed",
+    "what": "Payroll journal from ADP",
+    "owner": "OIC",
+    "consolidation_team": false
+   },
+   {
+    "when": "Monthly days 1–5",
+    "what": "Policy journals: policy count and average written, advanced premiums, written vs prior written",
+    "owner": "OIC",
     "consolidation_team": false
    },
    {
     "when": "Period end",
-    "what": "Uninvoiced receipt accruals created; reversed when the next period opens",
-    "owner": "Oracle (period close)",
+    "what": "Receiving to costing → uninvoiced receipt accruals → report → Create Accounting (final); reverses next period",
+    "owner": "Procurement / Accounting",
     "consolidation_team": false
    },
    {
@@ -1685,8 +1892,8 @@
    },
    {
     "when": "BD 2",
-    "what": "Cash Management (bank reconciliation)",
-    "owner": "Treasury / Accounting",
+    "what": "Cash Management close",
+    "owner": "Accounting",
     "consolidation_team": false
    },
    {
@@ -1702,8 +1909,8 @@
     "consolidation_team": false
    },
    {
-    "when": "Monthly",
-    "what": "Allocation rules run into companies 81–89",
+    "when": "Month end",
+    "what": "About six allocation rules (payroll by state); shared-services intercompany billing",
     "owner": "Accounting",
     "consolidation_team": false
    },
@@ -1714,20 +1921,20 @@
     "consolidation_team": true
    },
    {
-    "when": "After close",
-    "what": "Account reconciliations; FRS statements; Narrative Reporting packages",
-    "owner": "Accounting / FP&A",
+    "when": "BD 6 →",
+    "what": "FP&A loads actuals into Planning once or twice a day until the P&Ls tie; account reconciliations",
+    "owner": "FP&A / Accounting",
     "consolidation_team": false
    },
    {
-    "when": "Budget cycle",
-    "what": "Planning budgets and statistical journals to GL budget balances",
+    "when": "After FP&A sign-off",
+    "what": "Dashboards and financial reports published; month announced closed",
     "owner": "FP&A",
-    "consolidation_team": false
+    "consolidation_team": true
    },
    {
     "when": "Quarterly",
-    "what": "Oracle update and regression testing",
+    "what": "Oracle update: patch DEV, TEST covers production, then TEST and PROD; regression of integrations, OTBI reports and trial balance",
     "owner": "Finance technology",
     "consolidation_team": false
    },
@@ -1737,10 +1944,1609 @@
     "owner": "Accounting",
     "consolidation_team": false
    }
-  ]
+  ],
+  "process": {
+   "layers": [
+    {
+     "id": "CL1",
+     "label": "Daily",
+     "title": "Subledgers and feeds"
+    },
+    {
+     "id": "CL2",
+     "label": "Daily",
+     "title": "Accounting and ledger"
+    },
+    {
+     "id": "CL3",
+     "label": "Month end",
+     "title": "Subledger close (BD1–BD4)"
+    },
+    {
+     "id": "CL4",
+     "label": "Month end",
+     "title": "Ledger close (BD5–BD6)"
+    },
+    {
+     "id": "CL5",
+     "label": "After close",
+     "title": "Reconcile, plan, publish"
+    }
+   ],
+   "chips": [
+    {
+     "id": "DAILY",
+     "label": "Daily"
+    },
+    {
+     "id": "ME",
+     "label": "Month end"
+    },
+    {
+     "id": "AFTER",
+     "label": "After close"
+    }
+   ],
+   "legend": [
+    {
+     "label": "process flow",
+     "color": "var(--line)"
+    },
+    {
+     "label": "OIC journal",
+     "color": "var(--oic)"
+    },
+    {
+     "label": "Workiva (OneCloud) load",
+     "color": "var(--airflow)"
+    },
+    {
+     "label": "tracked by the checklist",
+     "color": "var(--ext)",
+     "dash": true
+    }
+   ],
+   "labels": {
+    "integrations": "Scheduled processes and interfaces"
+   },
+   "nodes": [
+    {
+     "id": "c_inv",
+     "layer": "CL1",
+     "title": "Invoice import & validation",
+     "subtitle": "Payables · imaging",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "DAILY"
+     ],
+     "description": "Imaged invoices enter Payables and are validated.",
+     "functions": [
+      "Import Payables Invoices hourly from 01:00 per business unit (source: Invoice Image)",
+      "Validation every 15 minutes; held for the Mutual and the Agency while OCR accuracy was improved",
+      "Planned move from OCR to Intelligent Document Recognition (IDR)"
+     ],
+     "integrations": [
+      "Import Payables Invoices",
+      "Validate Payables Invoices"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      },
+      {
+       "label": "Procure to Pay",
+       "path": "insurance/processes/procure-to-pay.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Hourly / every 15 minutes"
+      ]
+     ]
+    },
+    {
+     "id": "c_appr",
+     "layer": "CL1",
+     "title": "Invoice approval",
+     "subtitle": "workflow",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "DAILY"
+     ],
+     "description": "Routes invoices to approvers by amount tier.",
+     "functions": [
+      "Initiate Invoice Approval Workflow daily per business unit (04:25 / 04:30)",
+      "Tiers to 5K, 50K, 100K, 250K; over 250K to an approval group",
+      "PO-matched and recurring invoices auto-approve"
+     ],
+     "integrations": [
+      "Initiate Invoice Approval Workflow"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      },
+      {
+       "label": "COA, hierarchies, mappings and approvals",
+       "path": "insurance/foundation/coa-hierarchies-controls.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Daily, early morning"
+      ]
+     ]
+    },
+    {
+     "id": "c_exp",
+     "layer": "CL1",
+     "title": "Corporate card & expenses",
+     "subtitle": "Expenses",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "DAILY"
+     ],
+     "description": "Card transactions and expense reports become payables.",
+     "functions": [
+      "Corporate card file uploaded and validated by OIC (08:00)",
+      "Process Expense Reimbursements and Cash Advances every 12 hours",
+      "Workers synced weekly with the card issuer"
+     ],
+     "integrations": [
+      "Upload and validate corporate card file",
+      "Process Expense Reimbursements"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Daily / every 12 hours"
+      ]
+     ]
+    },
+    {
+     "id": "c_bank",
+     "layer": "CL1",
+     "title": "Bank statements",
+     "subtitle": "Cash Management",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "DAILY"
+     ],
+     "description": "Daily bank data and reconciliation.",
+     "functions": [
+      "BAI2 statements from Bank A processed at 07:00",
+      "Autoreconcile Bank Statements at 10:00 per bank account",
+      "ACH and Positive Pay transmit automatically with payment runs"
+     ],
+     "integrations": [
+      "Process Electronic Bank Statements",
+      "Autoreconcile Bank Statements"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      },
+      {
+       "label": "Procure to Pay",
+       "path": "insurance/processes/procure-to-pay.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Daily 07:00–10:00"
+      ]
+     ]
+    },
+    {
+     "id": "c_policy",
+     "layer": "CL1",
+     "title": "Policy journals",
+     "subtitle": "OIC",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "DAILY",
+      "ME"
+     ],
+     "description": "Insurance operations activity booked to GL from ADW.",
+     "functions": [
+      "Daily premium and commissions, claims, change in case reserves at 10:00",
+      "Monthly policy count, advanced premiums, written vs prior written in the first 5 days",
+      "Creates unposted batches; daily load status shown on a dashboard"
+     ],
+     "integrations": [
+      "INS-POLICY-DAILY-PREM",
+      "INS-POLICY-DAILY-CLAIMS",
+      "INS-POLICY-DAILY-RESV",
+      "INS-POLICY-MONTHLY-WRITTEN"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      },
+      {
+       "label": "How the dashboards are produced",
+       "path": "insurance/dashboards.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Daily 10:00; monthly days 1–5"
+      ]
+     ]
+    },
+    {
+     "id": "c_payroll",
+     "layer": "CL1",
+     "title": "Payroll journal",
+     "subtitle": "ADP → GL",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "DAILY"
+     ],
+     "description": "Bi-weekly payroll journal from ADP.",
+     "functions": [
+      "ADP file loaded by OIC on Wednesdays, bi-weekly",
+      "Accounts mapped from ADP pay codes",
+      "State captured for payroll allocations"
+     ],
+     "integrations": [
+      "INS-ADP-GL"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      },
+      {
+       "label": "Record to Report",
+       "path": "insurance/processes/record-to-report.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Bi-weekly, Wednesday"
+      ]
+     ]
+    },
+    {
+     "id": "c_acct",
+     "layer": "CL2",
+     "title": "Create Accounting",
+     "subtitle": "all subledgers",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "DAILY",
+      "ME"
+     ],
+     "description": "Subledger Accounting creates journal entries for every subledger.",
+     "functions": [
+      "Every 4 hours from 02:00; per-subledger runs 15 minutes apart (rescheduled January 2022)",
+      "Multiperiod accounting hourly afterwards",
+      "Month end: final run for receipt accounting, transfer and post"
+     ],
+     "integrations": [
+      "Create Accounting",
+      "Create Multiperiod Accounting"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Every 4 hours"
+      ]
+     ]
+    },
+    {
+     "id": "c_post",
+     "layer": "CL2",
+     "title": "AutoPost",
+     "subtitle": "General Ledger",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "DAILY"
+     ],
+     "description": "Posts journal batches periodically.",
+     "functions": [
+      "AutoPost Journals every 8 hours from 02:00",
+      "Picks up subledger, policy and payroll batches",
+      "Journal approval by approval group for manual journals"
+     ],
+     "integrations": [
+      "AutoPost Journals"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Every 8 hours"
+      ]
+     ]
+    },
+    {
+     "id": "c_cube",
+     "layer": "CL2",
+     "title": "Balances cube refresh",
+     "subtitle": "GL → Essbase",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "DAILY",
+      "AFTER"
+     ],
+     "description": "Refreshes the GL balances cubes.",
+     "functions": [
+      "Transfer General Ledger Balances to Balances Cube daily at 05:45",
+      "Feeds Smart View, Financial Reporting and the Planning loads",
+      "New segment values reach the cube through the cube-update process"
+     ],
+     "integrations": [
+      "Transfer GL Balances to Balances Cube"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      },
+      {
+       "label": "How the dashboards are produced",
+       "path": "insurance/dashboards.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Daily 05:45"
+      ]
+     ]
+    },
+    {
+     "id": "c_mass",
+     "layer": "CL2",
+     "title": "Mass additions",
+     "subtitle": "Payables → Assets",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "DAILY",
+      "ME"
+     ],
+     "description": "Capital invoice lines become asset additions.",
+     "functions": [
+      "Create Mass Additions daily at 05:00",
+      "Post Mass Additions as needed",
+      "Depreciation by book at month end"
+     ],
+     "integrations": [
+      "Create Mass Additions",
+      "Post Mass Additions"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Daily 05:00"
+      ]
+     ]
+    },
+    {
+     "id": "c_accr",
+     "layer": "CL3",
+     "title": "Receipt accruals",
+     "subtitle": "Purchasing",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "ME"
+     ],
+     "description": "Period-end accrual of uninvoiced receipts, run as one job set.",
+     "functions": [
+      "Transfer Transactions from Receiving to Costing → Create Uninvoiced Receipt Accruals (per bill-to BU)",
+      "Uninvoiced Receipt Accrual Report, then Create Accounting (final)",
+      "Accrual reverses when the next period opens"
+     ],
+     "integrations": [
+      "Create Uninvoiced Receipt Accruals"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      },
+      {
+       "label": "Procure to Pay",
+       "path": "insurance/processes/procure-to-pay.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Month end"
+      ]
+     ]
+    },
+    {
+     "id": "c_sub",
+     "layer": "CL3",
+     "title": "Subledger close",
+     "subtitle": "BD1–BD4",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "ME"
+     ],
+     "description": "Subledgers close in sequence.",
+     "functions": [
+      "BD1: Payables and expense reports",
+      "BD2: Cash Management; BD3: Procurement and Payables",
+      "BD3–4: Fixed Assets"
+     ],
+     "integrations": [],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Business days 1–4"
+      ]
+     ]
+    },
+    {
+     "id": "c_alloc",
+     "layer": "CL4",
+     "title": "Allocations & intercompany",
+     "subtitle": "Calculation Manager",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "ME"
+     ],
+     "description": "Monthly allocation rules and intercompany billing.",
+     "functions": [
+      "About six allocation rules a month: run, validate, deploy",
+      "Payroll and payroll-accrual allocations post by state",
+      "Monthly shared-services billing from the Mutual to the Agency"
+     ],
+     "integrations": [
+      "INS-ALLOC-GL",
+      "Allocation rules"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      },
+      {
+       "label": "Record to Report",
+       "path": "insurance/processes/record-to-report.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Month end"
+      ]
+     ]
+    },
+    {
+     "id": "c_gl",
+     "layer": "CL4",
+     "title": "GL close",
+     "subtitle": "BD6",
+     "external": false,
+     "core": true,
+     "workstreams": [
+      "ME"
+     ],
+     "description": "The ledger closes on business day 6.",
+     "functions": [
+      "Closed for monetary journals on BD6",
+      "May reopen for late statutory entries",
+      "Year end: revenue and expense roll to retained earnings when the new year opens"
+     ],
+     "integrations": [],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      },
+      {
+       "label": "Record to Report",
+       "path": "insurance/processes/record-to-report.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Business day 6"
+      ]
+     ]
+    },
+    {
+     "id": "c_fccs",
+     "layer": "CL4",
+     "title": "Close checklist",
+     "subtitle": "EPM close task manager",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "ME"
+     ],
+     "description": "The month-end checklist with calendar, owners and sign-off.",
+     "functions": [
+      "Every close task with owner, due date and sign-off",
+      "Corporate Accounting signals FP&A when its close is done",
+      "Consolidation capability planned"
+     ],
+     "integrations": [],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      },
+      {
+       "label": "Record to Report",
+       "path": "insurance/processes/record-to-report.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "Throughout close"
+      ]
+     ]
+    },
+    {
+     "id": "c_arcs",
+     "layer": "CL5",
+     "title": "Account reconciliation",
+     "subtitle": "ARCS",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "AFTER"
+     ],
+     "description": "Balance-sheet reconciliations after close.",
+     "functions": [
+      "Reconciliations loaded and certified each month",
+      "Implemented 2021/22",
+      "Data loaded through Workiva (OneCloud)"
+     ],
+     "integrations": [
+      "INS-PLANNING-ARCS"
+     ],
+     "docs": [
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "After GL close"
+      ]
+     ]
+    },
+    {
+     "id": "c_plan",
+     "layer": "CL5",
+     "title": "Actuals to Planning",
+     "subtitle": "FP&A",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "AFTER"
+     ],
+     "description": "FP&A loads actuals and ties the P&Ls.",
+     "functions": [
+      "Loads once or twice a day until the P&Ls tie",
+      "Manual journal errors (e.g. missing product) are traced back with Accounting",
+      "Pushes the results into OAC Essbase"
+     ],
+     "integrations": [
+      "INS-GL-PLANNING-TB",
+      "INS-PLANNING-ESSBASE"
+     ],
+     "docs": [
+      {
+       "label": "How the dashboards are produced",
+       "path": "insurance/dashboards.md"
+      },
+      {
+       "label": "Close process and scheduled processes",
+       "path": "insurance/processes/close-process.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "BD6 onward"
+      ]
+     ]
+    },
+    {
+     "id": "c_pub",
+     "layer": "CL5",
+     "title": "Publish dashboards & reports",
+     "subtitle": "OAC · Narrative",
+     "external": false,
+     "core": false,
+     "workstreams": [
+      "AFTER"
+     ],
+     "description": "The month is announced closed with dashboards and financial reports published.",
+     "functions": [
+      "Dashboards and financial reports published together",
+      "Users reach them from the finance systems landing page",
+      "Dashboards are the preferred view over financial statements"
+     ],
+     "integrations": [],
+     "docs": [
+      {
+       "label": "How the dashboards are produced",
+       "path": "insurance/dashboards.md"
+      }
+     ],
+     "facts": [
+      [
+       "When",
+       "After FP&A sign-off"
+      ]
+     ]
+    }
+   ],
+   "edges": [
+    {
+     "from": "c_inv",
+     "to": "c_appr",
+     "kind": "int"
+    },
+    {
+     "from": "c_appr",
+     "to": "c_acct",
+     "kind": "int"
+    },
+    {
+     "from": "c_exp",
+     "to": "c_inv",
+     "kind": "int"
+    },
+    {
+     "from": "c_bank",
+     "to": "c_acct",
+     "kind": "int"
+    },
+    {
+     "from": "c_policy",
+     "to": "c_post",
+     "kind": "oic"
+    },
+    {
+     "from": "c_payroll",
+     "to": "c_post",
+     "kind": "oic"
+    },
+    {
+     "from": "c_mass",
+     "to": "c_acct",
+     "kind": "int"
+    },
+    {
+     "from": "c_acct",
+     "to": "c_post",
+     "kind": "int"
+    },
+    {
+     "from": "c_post",
+     "to": "c_cube",
+     "kind": "int"
+    },
+    {
+     "from": "c_accr",
+     "to": "c_acct",
+     "kind": "int"
+    },
+    {
+     "from": "c_post",
+     "to": "c_sub",
+     "kind": "int"
+    },
+    {
+     "from": "c_sub",
+     "to": "c_gl",
+     "kind": "int"
+    },
+    {
+     "from": "c_alloc",
+     "to": "c_gl",
+     "kind": "int"
+    },
+    {
+     "from": "c_fccs",
+     "to": "c_gl",
+     "kind": "ret"
+    },
+    {
+     "from": "c_gl",
+     "to": "c_arcs",
+     "kind": "sched"
+    },
+    {
+     "from": "c_gl",
+     "to": "c_plan",
+     "kind": "sched"
+    },
+    {
+     "from": "c_cube",
+     "to": "c_plan",
+     "kind": "sched"
+    },
+    {
+     "from": "c_plan",
+     "to": "c_pub",
+     "kind": "sched"
+    }
+   ],
+   "default_node": "c_gl"
+  },
+  "calendar_title": "Calendar"
  },
  "integrations": {
   "title": "Integration register",
   "lede": "Interfaces documented in the source notebook, by name. State as of 2023; a working list, not a certified register."
+ },
+ "dashboards": {
+  "title": "Finance dashboards: how they are produced",
+  "lede": "Dynamic reporting (OAC dashboards, Data Visualization, Smart View) draws on Planning, OAC Essbase, Oracle Financials and insurance operations data; static reporting runs in Narrative Reporting (on Essbase) and BI Publisher (non-Essbase). Pick a path to follow it; select any box for details.",
+  "layers": [
+   {
+    "id": "DL1",
+    "label": "Sources",
+    "title": "Systems of record"
+   },
+   {
+    "id": "DL2",
+    "label": "Integration",
+    "title": "Moves the data"
+   },
+   {
+    "id": "DL3",
+    "label": "Stores & cubes",
+    "title": "Warehouse and Essbase"
+   },
+   {
+    "id": "DL4",
+    "label": "Dynamic reporting",
+    "title": "Oracle Analytics Cloud"
+   },
+   {
+    "id": "DL5",
+    "label": "Static reporting",
+    "title": "Reports and distribution"
+   }
+  ],
+  "chips": [
+   {
+    "id": "ESS",
+    "label": "Essbase dashboards"
+   },
+   {
+    "id": "TRX",
+    "label": "Transactional dashboards"
+   },
+   {
+    "id": "STATIC",
+    "label": "Static reports"
+   },
+   {
+    "id": "FEED",
+    "label": "Insurance data feeds"
+   }
+  ],
+  "legend": [
+   {
+    "label": "OIC integration",
+    "color": "var(--oic)"
+   },
+   {
+    "label": "Workiva (OneCloud)",
+    "color": "var(--airflow)"
+   },
+   {
+    "label": "Data Integration / Data Management / file load",
+    "color": "var(--bulk)"
+   },
+   {
+    "label": "Native (Oracle) / report",
+    "color": "var(--extract)"
+   },
+   {
+    "label": "return path / internal",
+    "color": "var(--ext)",
+    "dash": true
+   }
+  ],
+  "nodes": [
+   {
+    "id": "d_exceed",
+    "layer": "DL1",
+    "title": "Exceed",
+    "subtitle": "policy administration",
+    "external": true,
+    "core": false,
+    "workstreams": [
+     "FEED",
+     "TRX",
+     "STATIC"
+    ],
+    "description": "Insurance operations system: policies, premium, claims and reserves.",
+    "functions": [
+     "Source of the insurance operations data in the dashboards",
+     "Daily and monthly figures feed the GL through ADW",
+     "Reports historically ran from the BIM database"
+    ],
+    "integrations": [
+     "INS-POLICY-DAILY-PREM"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     }
+    ]
+   },
+   {
+    "id": "d_dw",
+    "layer": "DL1",
+    "title": "On-premise warehouse",
+    "subtitle": "EDW · BIM · HDS · DWM",
+    "external": true,
+    "core": false,
+    "workstreams": [
+     "FEED",
+     "TRX",
+     "STATIC"
+    ],
+    "description": "SQL Server warehouses holding the insurance data (DWM): loss reserves, premium (GWP, EP, UEP), claims, subrogation and salvage, policy.",
+    "functions": [
+     "Source for ADW through OCI Data Integration",
+     "BI Publisher static reports read DWM directly",
+     "EDW Finance workgroup receives the budget for Tableau reports"
+    ],
+    "integrations": [
+     "INS-DI-ADW",
+     "INS-ESSBASE-EDW"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     },
+     {
+      "label": "ADW, integrations and reporting",
+      "path": "insurance/data-and-reporting.md"
+     }
+    ]
+   },
+   {
+    "id": "d_fusion",
+    "layer": "DL1",
+    "title": "Fusion ERP",
+    "subtitle": "GL · AP · procurement · assets",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "ESS",
+     "TRX",
+     "STATIC"
+    ],
+    "description": "Oracle Fusion Financials: the system of record for balances and transactions.",
+    "functions": [
+     "GL balances feed the Essbase dashboards through the balances cubes",
+     "Subledger and GL detail feed the transactional dashboards through OTBI",
+     "Receives policy journals (OIC) and allocations (Workiva (OneCloud))"
+    ],
+    "integrations": [
+     "INS-POLICY-DAILY-PREM",
+     "INS-ALLOC-GL"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     },
+     {
+      "label": "Record to Report",
+      "path": "insurance/processes/record-to-report.md"
+     }
+    ]
+   },
+   {
+    "id": "d_di",
+    "layer": "DL2",
+    "title": "OCI Data Integration",
+    "subtitle": "Fast Connect",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "FEED"
+    ],
+    "description": "Moves on-premise Exceed data into ADW (treated as implemented).",
+    "functions": [
+     "Replaced DataSync for the daily insurance feeds",
+     "Converted the BIM reports (e.g. six-month auto policy)",
+     "Was to trigger both daily jobs: reports and journals"
+    ],
+    "integrations": [
+     "INS-DI-ADW"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     }
+    ]
+   },
+   {
+    "id": "d_vm",
+    "layer": "DL2",
+    "title": "Integration VM",
+    "subtitle": "DataSync · Gateway · GroundRunner",
+    "external": true,
+    "core": false,
+    "workstreams": [
+     "FEED",
+     "TRX"
+    ],
+    "description": "Legacy on-premise connectors.",
+    "functions": [
+     "DataSync loaded BIM data to the ADW stage schema",
+     "Oracle Data Gateway exposed on-premise data to OAC",
+     "GroundRunner ran Workiva (OneCloud) and EPM automation"
+    ],
+    "integrations": [
+     "INS-BIM-ADW",
+     "INS-GATEWAY-OAC"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     }
+    ]
+   },
+   {
+    "id": "d_workiva",
+    "layer": "DL2",
+    "title": "Workiva (OneCloud)",
+    "subtitle": "ETL between Oracle clouds",
+    "external": true,
+    "core": false,
+    "workstreams": [
+     "ESS",
+     "STATIC"
+    ],
+    "description": "Integration studio and data prep used for ETL between the finance Oracle cloud systems.",
+    "functions": [
+     "GL trial balances and actuals/budget into Planning",
+     "Planning actuals, budget and forecast into the OAC Essbase cubes",
+     "Report outputs to the Financials Doc Cloud; budget to the EDW"
+    ],
+    "integrations": [
+     "INS-GL-PLANNING-TB",
+     "INS-PLANNING-ESSBASE",
+     "INS-ADW-DOCCLOUD"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     }
+    ]
+   },
+   {
+    "id": "d_oic",
+    "layer": "DL2",
+    "title": "Oracle Integration Cloud",
+    "subtitle": "policy journals",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "FEED"
+    ],
+    "description": "Creates GL journals from the ADW insurance data mart.",
+    "functions": [
+     "Daily premium and commissions, claims, change in case reserves (10:00)",
+     "Monthly policy count, advanced premiums, written vs prior written (first 5 days)",
+     "Creates unposted GL batches for review and posting"
+    ],
+    "integrations": [
+     "INS-POLICY-DAILY-PREM",
+     "INS-POLICY-DAILY-CLAIMS",
+     "INS-POLICY-MONTHLY-WRITTEN"
+    ],
+    "docs": [
+     {
+      "label": "Close process and scheduled processes",
+      "path": "insurance/processes/close-process.md"
+     }
+    ]
+   },
+   {
+    "id": "d_otbi",
+    "layer": "DL2",
+    "title": "OTBI",
+    "subtitle": "subject areas · catalog",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "TRX"
+    ],
+    "description": "Oracle Transactional Business Intelligence: real-time subject areas over Fusion data.",
+    "functions": [
+     "Exposed to OAC as datasets through an OTBI catalog connection",
+     "Daily transactional reports start the transactional dashboard refresh",
+     "Reports used by dashboards are regression-tested every quarterly update"
+    ],
+    "integrations": [
+     "INS-OTBI-DV"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     }
+    ]
+   },
+   {
+    "id": "d_adw",
+    "layer": "DL3",
+    "title": "ADW",
+    "subtitle": "FDW · ORAFINANCIALS · insurance mart",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "TRX",
+     "FEED",
+     "STATIC"
+    ],
+    "description": "Oracle Autonomous Database: the finance data warehouse with transaction-level data.",
+    "functions": [
+     "Finance data warehouse and ORAFINANCIALS schema with OTBI-based Fusion data",
+     "Insurance data mart: daily, monthly and stage schemas",
+     "Source for transactional dashboards and BI Publisher reports"
+    ],
+    "integrations": [
+     "INS-OTBI-DV",
+     "INS-DI-ADW",
+     "INS-BIP-ADW"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     },
+     {
+      "label": "ADW, integrations and reporting",
+      "path": "insurance/data-and-reporting.md"
+     }
+    ]
+   },
+   {
+    "id": "d_glcube",
+    "layer": "DL3",
+    "title": "GL balances cubes",
+    "subtitle": "Fusion Essbase",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "ESS",
+     "STATIC"
+    ],
+    "description": "The Essbase balances cubes inside Fusion General Ledger.",
+    "functions": [
+     "Refreshed daily (05:45) by Transfer GL Balances to Balances Cube",
+     "Source of trial balances and actuals/budget for Planning",
+     "Read by Smart View and Financial Reporting"
+    ],
+    "integrations": [
+     "INS-GL-PLANNING-TB"
+    ],
+    "docs": [
+     {
+      "label": "Close process and scheduled processes",
+      "path": "insurance/processes/close-process.md"
+     },
+     {
+      "label": "COA, hierarchies, mappings and approvals",
+      "path": "insurance/foundation/coa-hierarchies-controls.md"
+     }
+    ]
+   },
+   {
+    "id": "d_planning",
+    "layer": "DL3",
+    "title": "Planning",
+    "subtitle": "Financials · Workforce · Reporting cubes",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "ESS",
+     "STATIC"
+    ],
+    "description": "EPM Planning: Financials BSO (current and prior year), Workforce BSO (budget cycle), Reporting ASO (2010 onward).",
+    "functions": [
+     "Actuals loaded once or twice a day during close until the P&Ls tie",
+     "Workforce cubes fed from Core HR through Data Management",
+     "Budget and forecast; Capital and Strategic Planning cubes owned by FP&A"
+    ],
+    "integrations": [
+     "INS-GL-PLANNING-TB",
+     "INS-HR-WORKFORCE",
+     "INS-BUDGET-GL"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     },
+     {
+      "label": "Record to Report",
+      "path": "insurance/processes/record-to-report.md"
+     }
+    ]
+   },
+   {
+    "id": "d_essbase",
+    "layer": "DL3",
+    "title": "OAC Essbase",
+    "subtitle": "Financials · Revenue Planning · Analytics · Foundation",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "ESS"
+    ],
+    "description": "The OAC Essbase cubes behind most of the financial dashboards.",
+    "functions": [
+     "Financials cube loaded from Planning (actuals, budget, forecast)",
+     "Revenue Planning, Analytics and Foundation cubes",
+     "Sends allocations and statistical allocation rates back to GL"
+    ],
+    "integrations": [
+     "INS-PLANNING-ESSBASE",
+     "INS-PLANNING-REVENUE",
+     "INS-ALLOC-GL"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     }
+    ]
+   },
+   {
+    "id": "d_dash",
+    "layer": "DL4",
+    "title": "OAC BI dashboards",
+    "subtitle": "dynamic reporting",
+    "external": false,
+    "core": true,
+    "workstreams": [
+     "ESS",
+     "TRX"
+    ],
+    "description": "Oracle Analytics Cloud dashboards: the preferred way for leadership to see the financials.",
+    "functions": [
+     "Essbase dashboards on the OAC Essbase cubes",
+     "Transactional dashboards on OTBI datasets and ADW",
+     "Published by FP&A after close and announced"
+    ],
+    "integrations": [
+     "INS-PLANNING-ESSBASE",
+     "INS-OTBI-DV"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     }
+    ]
+   },
+   {
+    "id": "d_dv",
+    "layer": "DL4",
+    "title": "Data Visualization",
+    "subtitle": "data flows · datasets",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "TRX"
+    ],
+    "description": "OAC Data Visualization: data flows that shape OTBI and ADW data into dashboard datasets.",
+    "functions": [
+     "Daily OTBI report → data flow → mapped dataset",
+     "Examples: AP imaging auditability, procurement and contracts, daily policy-feed status",
+     "Analysts can create their own data sources and connections"
+    ],
+    "integrations": [
+     "INS-OTBI-DV"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     }
+    ]
+   },
+   {
+    "id": "d_sv",
+    "layer": "DL4",
+    "title": "Smart View",
+    "subtitle": "Excel analytics",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "ESS"
+    ],
+    "description": "Smart View for Office: ad hoc analysis on the Essbase cubes.",
+    "functions": [
+     "Connects to the Fusion GL balances cubes and OAC Essbase",
+     "Used to build and check allocation rules",
+     "Part of the dynamic reporting toolset"
+    ],
+    "integrations": [],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     },
+     {
+      "label": "COA, hierarchies, mappings and approvals",
+      "path": "insurance/foundation/coa-hierarchies-controls.md"
+     }
+    ]
+   },
+   {
+    "id": "d_home",
+    "layer": "DL4",
+    "title": "Finance systems landing page",
+    "subtitle": "single entry point",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "ESS",
+     "TRX"
+    ],
+    "description": "Landing page linking the Oracle finance systems: Planning, dashboards and reports.",
+    "functions": [
+     "One place to navigate between Planning, OAC dashboards and reports",
+     "New reporting functions added as cards",
+     "Month-closed announcements point users here"
+    ],
+    "integrations": [],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     }
+    ]
+   },
+   {
+    "id": "d_narr",
+    "layer": "DL5",
+    "title": "Narrative Reporting",
+    "subtitle": "static · on Essbase",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "STATIC"
+    ],
+    "description": "EPM Narrative Reporting: management and narrative report packages on Essbase.",
+    "functions": [
+     "Report packages with author, review and sign-off",
+     "About 200 reports",
+     "Fed from Planning and the GL"
+    ],
+    "integrations": [],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     },
+     {
+      "label": "Record to Report",
+      "path": "insurance/processes/record-to-report.md"
+     }
+    ]
+   },
+   {
+    "id": "d_bip",
+    "layer": "DL5",
+    "title": "BI Publisher",
+    "subtitle": "static · non-Essbase",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "STATIC",
+     "FEED"
+    ],
+    "description": "Oracle Analytics BI Publisher: static reports for non-Essbase data.",
+    "functions": [
+     "Written directly against ADW and the on-premise warehouse (DWM)",
+     "Daily and monthly report outputs for Accounting",
+     "Replaced most legacy Business Objects reports"
+    ],
+    "integrations": [
+     "INS-BIP-ADW"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     },
+     {
+      "label": "ADW, integrations and reporting",
+      "path": "insurance/data-and-reporting.md"
+     }
+    ]
+   },
+   {
+    "id": "d_doc",
+    "layer": "DL5",
+    "title": "Financials Doc Cloud",
+    "subtitle": "Oracle Content Cloud",
+    "external": false,
+    "core": false,
+    "workstreams": [
+     "STATIC"
+    ],
+    "description": "Oracle Content Cloud folder where Accounting picks up report outputs.",
+    "functions": [
+     "Receives BI Publisher outputs daily and monthly",
+     "Finance security group controls access",
+     "One place for Accounting to find the reports"
+    ],
+    "integrations": [
+     "INS-ADW-DOCCLOUD"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     }
+    ]
+   },
+   {
+    "id": "d_tableau",
+    "layer": "DL5",
+    "title": "Finance workgroup (Tableau)",
+    "subtitle": "on-premise EDW",
+    "external": true,
+    "core": false,
+    "workstreams": [
+     "STATIC",
+     "ESS"
+    ],
+    "description": "Tableau reports run by the Finance workgroup on the on-premise EDW.",
+    "functions": [
+     "Receives the budget from OAC Essbase",
+     "Reports for audiences outside the Oracle tools",
+     "Part of the on-premise warehouse"
+    ],
+    "integrations": [
+     "INS-ESSBASE-EDW"
+    ],
+    "docs": [
+     {
+      "label": "How the dashboards are produced",
+      "path": "insurance/dashboards.md"
+     }
+    ]
+   }
+  ],
+  "edges": [
+   {
+    "from": "d_fusion",
+    "to": "d_glcube",
+    "kind": "int"
+   },
+   {
+    "from": "d_glcube",
+    "to": "d_workiva",
+    "kind": "sched"
+   },
+   {
+    "from": "d_workiva",
+    "to": "d_planning",
+    "kind": "sched"
+   },
+   {
+    "from": "d_planning",
+    "to": "d_essbase",
+    "kind": "sched"
+   },
+   {
+    "from": "d_essbase",
+    "to": "d_dash",
+    "kind": "int"
+   },
+   {
+    "from": "d_essbase",
+    "to": "d_sv",
+    "kind": "int"
+   },
+   {
+    "from": "d_glcube",
+    "to": "d_sv",
+    "kind": "int"
+   },
+   {
+    "from": "d_essbase",
+    "to": "d_fusion",
+    "kind": "ret"
+   },
+   {
+    "from": "d_essbase",
+    "to": "d_tableau",
+    "kind": "sched"
+   },
+   {
+    "from": "d_planning",
+    "to": "d_narr",
+    "kind": "extract"
+   },
+   {
+    "from": "d_fusion",
+    "to": "d_otbi",
+    "kind": "int"
+   },
+   {
+    "from": "d_otbi",
+    "to": "d_dv",
+    "kind": "extract"
+   },
+   {
+    "from": "d_otbi",
+    "to": "d_adw",
+    "kind": "extract"
+   },
+   {
+    "from": "d_adw",
+    "to": "d_dv",
+    "kind": "extract"
+   },
+   {
+    "from": "d_dv",
+    "to": "d_dash",
+    "kind": "int"
+   },
+   {
+    "from": "d_dash",
+    "to": "d_home",
+    "kind": "int"
+   },
+   {
+    "from": "d_narr",
+    "to": "d_home",
+    "kind": "int"
+   },
+   {
+    "from": "d_exceed",
+    "to": "d_dw",
+    "kind": "int"
+   },
+   {
+    "from": "d_dw",
+    "to": "d_di",
+    "kind": "bulk"
+   },
+   {
+    "from": "d_di",
+    "to": "d_adw",
+    "kind": "bulk"
+   },
+   {
+    "from": "d_dw",
+    "to": "d_vm",
+    "kind": "extract"
+   },
+   {
+    "from": "d_vm",
+    "to": "d_adw",
+    "kind": "extract"
+   },
+   {
+    "from": "d_vm",
+    "to": "d_essbase",
+    "kind": "extract"
+   },
+   {
+    "from": "d_adw",
+    "to": "d_oic",
+    "kind": "oic"
+   },
+   {
+    "from": "d_oic",
+    "to": "d_fusion",
+    "kind": "oic"
+   },
+   {
+    "from": "d_adw",
+    "to": "d_bip",
+    "kind": "extract"
+   },
+   {
+    "from": "d_dw",
+    "to": "d_bip",
+    "kind": "extract"
+   },
+   {
+    "from": "d_bip",
+    "to": "d_doc",
+    "kind": "sched"
+   },
+   {
+    "from": "d_workiva",
+    "to": "d_doc",
+    "kind": "sched"
+   }
+  ],
+  "default_node": "d_dash",
+  "notes": [
+   {
+    "title": "Essbase dashboards.",
+    "text": "GL balances cubes → Workiva (OneCloud) → Planning → OAC Essbase → dashboards and Smart View. Most financial dashboards follow this path; FP&A publishes them after close."
+   },
+   {
+    "title": "Transactional dashboards.",
+    "text": "Fusion → OTBI → Data Visualization data flows (and ADW for history and insurance joins) → dashboards. Refreshed daily."
+   },
+   {
+    "title": "Insurance data.",
+    "text": "Exceed → on-premise warehouse → OCI Data Integration → ADW; OIC turns it into GL journals and BI Publisher into static reports."
+   }
+  ]
  }
 }

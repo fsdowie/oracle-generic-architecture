@@ -21,8 +21,13 @@ links: [INS-FOUNDATION, INS-P2P, INS-R2R]
 - A dedicated load server moved BIM data into ADW `[CO:INS-NB p.400]`; some reporting data still lived in BIM after the move `[CO:INS-NB p.695]`.
 - None of these is Essbase.
 
+## Integration VM and Data Integration
+- An on-premise **integration VM** ran DataSync (BIM → ADW insurance data mart stage), **Oracle Data Gateway** (on-premise data to OAC) and **GroundRunner** (Workiva (OneCloud) agent, EPM automation) `[CO:INS-ERP p.155, 157]`. After monthly server patching the services sometimes didn't restart, stopping the daily Exceed load until restarted `[CO:INS-ERP p.155]`.
+- **OCI Data Integration ("Fast Connect")** replaced DataSync for Exceed data feeding FP&A, converting the BIM reports (e.g. six-month auto policy reporting) and retiring BIM — treated as implemented `[USER:2026-10-08]` `[CO:INS-ERP p.166–168]`.
+- How the dashboards use all of this: `insurance/dashboards.md`.
+
 ## Where Essbase sits
-- **OAC Essbase financials cube** — loaded from Planning by OneCloud (plus operational metrics from ADW); the main source behind the finance dashboards `[CO:INS-NB p.681–682, 499]`.
+- **OAC Essbase financials cube** — loaded from Planning by Workiva (OneCloud) (plus operational metrics from ADW); the main source behind the finance dashboards `[CO:INS-NB p.681–682, 499]`.
 - **Fusion GL balances cube** — the Essbase cube inside Fusion General Ledger, behind FRS, Smart View and OTBI balances `[CO:INS-NB p.454–458]`.
 
 ## How data moves
@@ -31,10 +36,10 @@ links: [INS-FOUNDATION, INS-P2P, INS-R2R]
 | Policy data → ADW | Exceed reporting data lands in BIM (SQL Server); a load server copies it into the ADW insurance data mart | `[CO:INS-NB p.315–316, 400, 681]` |
 | Fusion → ADW (report-based) | OIC scheduled orchestration invokes a BI Publisher report through the report web service, stages the file, then inserts rows into an ADW table (delete-and-reload) | `[CO:INS-NB p.283–312]` |
 | Fusion → files (bulk) | OIC uses the ERP extract-bulk-data pattern: an ESS job writes the extract, a business event triggers download to object storage or FTP | `[CO:INS-NB p.224–274]` |
-| Fusion Payables → ADW | OneCloud chain for the invoice-imaging audit data set | `[CO:INS-NB p.763]` |
+| Fusion Payables → ADW | Workiva (OneCloud) chain for the invoice-imaging audit data set | `[CO:INS-NB p.763]` |
 | Data Sync → ODI / OCI Data Integration | Data Sync replaced by Data Integrator / OCI Data Integration workspaces, with an API gateway for REST sources | `[CO:INS-NB p.176–182, 351]` |
 | Fusion GL ↔ Planning | EPM Data Management: actuals to Planning; budget and statistical journals back to GL | `[CO:INS-NB p.499]` |
-| Planning → OAC Essbase | OneCloud chain loads the Planning financials into the OAC Essbase reporting cube; OneCloud also copies EPM and Essbase backups | `[CO:INS-NB p.682, 689]` |
+| Planning → OAC Essbase | Workiva (OneCloud) chain loads the Planning financials into the OAC Essbase reporting cube; Workiva (OneCloud) also copies EPM and Essbase backups | `[CO:INS-NB p.682, 689]` |
 | ADW → OAC Essbase | Operational metrics into the financials cube | `[CO:INS-NB p.499]` |
 
 ## Reconciliation

@@ -68,7 +68,14 @@ for f in model["header"]["facts"]:
     f["value"] = fill(f["value"])
 
 base = model.pop("docs_base", "")
-for n in model["nodes"]:
+# Every diagram on the map: the estate, plus optional dashboards and close-process diagrams.
+diagrams = [("estate", model)]
+if model.get("dashboards"):
+    diagrams.append(("dashboards", model["dashboards"]))
+if (model.get("close") or {}).get("process"):
+    diagrams.append(("close.process", model["close"]["process"]))
+for _, dg in diagrams:
+  for n in dg["nodes"]:
     seen, shown = set(), []
     for x in n.get("integrations", []):
         x = by_id[x]["label"] if x in by_id else fill(x)
@@ -83,12 +90,17 @@ for n in model["nodes"]:
     n.pop("failure_modes", None)
     n.pop("evidence", None)
 
-ids = {n["id"] for n in model["nodes"]}
-bad = [e for e in model["edges"] if e["from"] not in ids or e["to"] not in ids]
-if bad:
-    sys.exit(f"edges reference unknown nodes: {bad}")
-if model.get("default_node") not in ids:
-    sys.exit("default_node is not a node id")
+for name, dg in diagrams:
+    ids = {n["id"] for n in dg["nodes"]}
+    layers = {L["id"] for L in dg["layers"]}
+    bad = [e for e in dg["edges"] if e["from"] not in ids or e["to"] not in ids]
+    if bad:
+        sys.exit(f"{name}: edges reference unknown nodes: {bad}")
+    if dg.get("default_node") not in ids:
+        sys.exit(f"{name}: default_node is not a node id")
+    stray = [n["id"] for n in dg["nodes"] if n["layer"] not in layers]
+    if stray:
+        sys.exit(f"{name}: nodes on unknown layers: {stray}")
 
 # No interface number may reach the screen. Row ids (used only for search) and link URLs are not displayed.
 NUM = re.compile(r"\b(?:INT|API)\s?\d{3}|INT#")

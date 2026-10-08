@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0 — 2026-10-08
+- Insurance map, from the ERP / corporate-IT notebook (2021–2023; anonymised):
+  - **Dashboards** tab: clickable diagram of how the Essbase dashboards (GL cubes → Workiva (OneCloud) → Planning → OAC Essbase) and transactional dashboards (OTBI → DV data flows / ADW) are produced, plus static reporting (Narrative Reporting, BI Publisher) and insurance data feeds; path chips; `insurance/dashboards.md`.
+  - **Close process** tab replaces the close calendar: clickable process map from the finance schedule (daily, month end, after close) with the calendar below; `insurance/processes/close-process.md`.
+  - Estate: Workiva (OneCloud) naming; OCI Data Integration (treated as implemented) and the integration VM; DocuSign; OCI usage and cost; OCR → IDR on invoices; modules in use (ERP, EPM; HCM out of scope).
+  - Register: 44 interfaces (daily and monthly policy journals, allocations, EPM and dashboard flows, card, contracts, DocuSign).
+- Site: reusable diagram component (estate, dashboards, close process); detail panel shows facts such as timing.
+
 ## 0.4.1 — 2026-10-07
 - Insurance map: ADW described as an Oracle Autonomous Database (Data Warehouse workload) holding transaction-level data, the Finance Transaction Data Warehouse; new node for the on-premise SQL Server warehouses (EDW, BIM, HDS); policy data routed Exceed → BIM → ADW → GL; note on where Essbase sits (OAC cube and Fusion GL balances cube).
 

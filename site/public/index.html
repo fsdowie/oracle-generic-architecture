@@ -87,7 +87,8 @@ aside.detail ul.docs a::after{content:" ↗";font-size:12px}
 .ev{font:11px var(--f-mono);color:var(--muted)}
 .mappick{display:flex;align-items:center;gap:6px}
 .mappick select{font:inherit;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--fg)}
-#wsChips{display:contents}
+#wsChips,.chipset{display:contents}
+.subhead{font-family:var(--f-display);font-stretch:90%;font-size:18px;margin:22px 0 8px}
 
 /* p2p chain */
 .chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
@@ -193,6 +194,7 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
   <button role="tab" aria-selected="false" data-tab="p2p">Procure to Pay</button>
   <button role="tab" aria-selected="false" data-tab="r2r">Record to Report</button>
   <button role="tab" aria-selected="false" data-tab="fnd" hidden>Foundation &amp; controls</button>
+  <button role="tab" aria-selected="false" data-tab="dash" hidden>Dashboards</button>
   <button role="tab" aria-selected="false" data-tab="onboard">Supplier onboarding</button>
   <button role="tab" aria-selected="false" data-tab="close">Close rhythm</button>
   <button role="tab" aria-selected="false" data-tab="ints">Integrations</button>
@@ -236,6 +238,23 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
   <div class="rail" id="fndNotes"></div>
 </section>
 
+<section id="tab-dash" hidden>
+  <div class="eyebrow">Reporting</div>
+  <h2 id="dbTitle"></h2><p class="lede" id="dbLede"></p>
+  <div class="estate">
+    <div>
+      <div class="filters"><span class="eyebrow">Path</span><span id="dbChips" class="chipset"></span></div>
+      <div class="diagram" id="dbDiagram">
+        <svg class="edges" id="dbEdges" aria-hidden="true"></svg>
+        <div id="dbBands"></div>
+      </div>
+      <div class="legend" id="dbLegend"></div>
+    </div>
+    <aside class="detail" id="dbDetail" aria-live="polite"></aside>
+  </div>
+  <div class="rail" id="dbNotes"></div>
+</section>
+
 <section id="tab-onboard" hidden>
   <div class="eyebrow">Process</div>
   <h2 id="obTitle"></h2><p class="lede" id="obLede"></p>
@@ -245,6 +264,20 @@ footer{margin-top:28px;color:var(--muted);font-size:13px;border-top:1px solid va
 <section id="tab-close" hidden>
   <div class="eyebrow">Operating rhythm</div>
   <h2 id="clTitle"></h2><p class="lede" id="clLede"></p>
+  <div id="cpWrap" hidden>
+  <div class="estate">
+    <div>
+      <div class="filters"><span class="eyebrow">Show</span><span id="cpChips" class="chipset"></span></div>
+      <div class="diagram" id="cpDiagram">
+        <svg class="edges" id="cpEdges" aria-hidden="true"></svg>
+        <div id="cpBands"></div>
+      </div>
+      <div class="legend" id="cpLegend"></div>
+    </div>
+    <aside class="detail" id="cpDetail" aria-live="polite"></aside>
+  </div>
+  </div>
+  <h3 class="subhead" id="clCalTitle" hidden>Calendar</h3>
   <div class="timeline" id="timeline"></div>
 </section>
 
