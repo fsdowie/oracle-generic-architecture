@@ -12,10 +12,23 @@ export function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
 
+/** The project's current secret key. Prefers the platform-managed SUPABASE_SECRET_KEYS (JSON map of
+ *  sb_secret_ keys, always valid), then the ESTATE_SECRET_KEY secret. Legacy JWT keys are disabled here. */
+function secretKey(): string {
+  const managed = Deno.env.get("SUPABASE_SECRET_KEYS");
+  if (managed) {
+    try {
+      const keys = Object.values(JSON.parse(managed)).filter((k) => typeof k === "string" && k.startsWith("sb_secret_")) as string[];
+      if (keys.length) return keys[0];
+    } catch (_) {
+      if (managed.startsWith("sb_secret_")) return managed;
+    }
+  }
+  return Deno.env.get("ESTATE_SECRET_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+}
+
 export function adminClient(): SupabaseClient {
-  // ESTATE_SECRET_KEY = the project's sb_secret_ key (legacy JWT keys are disabled on this project).
-  const key = Deno.env.get("ESTATE_SECRET_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  return createClient(Deno.env.get("SUPABASE_URL")!, key, {
+  return createClient(Deno.env.get("SUPABASE_URL")!, secretKey(), {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 }
