@@ -483,10 +483,9 @@
     });
     return {
       async start() {
-        if (started) return; started = true;
-        $("addMaps").innerHTML = mapBoxes([], "add");
+        if (!started) { started = true; $("addMaps").innerHTML = mapBoxes([], "add"); }
         try { await loadUsers(); await Promise.all([loadComments(), loadLog()]); subscribe(); }
-        catch (err) { started = false; toast("Admin data could not be loaded: " + err.message); }
+        catch (err) { toast("Admin data could not be loaded: " + err.message); }
       },
     };
   })();
@@ -495,6 +494,7 @@
   function showTab(t) {
     tabs.forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === t));
     TABS.forEach((k) => { $("tab-" + k).hidden = k !== t; });
+    if (t === "admin" && me && me.is_admin) admin.start(); // refresh users, comments and log each time
     requestAnimationFrame(drawVisible);
   }
   tabs.forEach((b) => b.addEventListener("click", () => { showTab(b.dataset.tab); try { history.replaceState(null, "", "#" + b.dataset.tab); } catch (e) {} }));

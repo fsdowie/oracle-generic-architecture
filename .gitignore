@@ -5,3 +5,4 @@ __pycache__/
 build/
 site/public/config.js
 .vercel/
+supabase/.temp/
