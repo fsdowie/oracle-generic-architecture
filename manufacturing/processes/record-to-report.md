@@ -27,9 +27,11 @@ links: [MFG-OVERVIEW, MFG-FOUNDATION, MFG-CLOSE, MFG-PROCESSES]
 | Translation of the MX ledger to USD | Translated balances; difference to the cumulative translation adjustment (equity) | — | `[ORA26C:GL p.530, 533]` |
 | Intercompany journal crossing companies | Intercompany receivable (due from) | Intercompany payable (due to) | `[ORA26C:GL p.373]` |
 | Allocation of plant overhead | Cost centre / product-line expense | Overhead pool (allocation offset) | `[ORA26C:GL p.559]` |
-| Asset capitalisation from AP (asset clearing) | Asset cost | Asset clearing | `[INFERRED]` |
-| Depreciation | Depreciation expense | Accumulated depreciation | `[INFERRED]` |
+| Asset invoice in Payables | Asset clearing | Supplier liability | `[ORA26C:FA p.31]` |
+| Asset capitalisation (Post Mass Additions) | Asset cost | Asset clearing | `[ORA26C:FA p.12, 30]` |
+| Depreciation (Calculate Depreciation) | Depreciation expense | Accumulated depreciation | `[ORA26C:FA p.12]` |
+| MX tax book addition (secondary ledger, Perform Periodic Mass Copy) | Asset cost | Asset clearing | `[ORA26C:FA p.32]` |
 
 ## Open interfaces
-`GL_INTERFACE`, `GL_DAILY_RATES_INTERFACE`, `GL_HISTORICAL_RATES_INT`, `GL_BUDGET_INTERFACE`, `FA_MASS_ADDITIONS` `[INFERRED]`,
+`GL_INTERFACE`, `GL_DAILY_RATES_INTERFACE`, `GL_HISTORICAL_RATES_INT`, `GL_BUDGET_INTERFACE`, `FA_MASS_ADDITIONS` `[ORA26C:FA p.15, 18]`,
 `CE_STATEMENT_HEADERS_INT` `[INFERRED]`.

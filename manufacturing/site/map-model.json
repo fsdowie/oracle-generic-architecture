@@ -631,15 +631,17 @@
    "workstreams": [
     "O2C"
    ],
-   "description": "Captures sales orders, checks credit and availability, and orchestrates fulfilment through shipping and billing.",
+   "description": "Captures sales orders and runs an orchestration process for each fulfilment line: schedule, reserve, ship and bill.",
    "functions": [
-    "Order capture from EDI and portal",
-    "Pricing, credit check and scheduling",
-    "Fulfilment lines to Shipping; fulfilled lines to Receivables"
+    "Order capture from EDI, portal or the Sales Orders for Order Hub REST API",
+    "Orchestration steps call task services: Create Inventory Reservation, Create Shipping and Wait for Shipment, Create Billing Lines and Wait for Billing",
+    "Intercompany (change of ownership) shipments start Financial Orchestration"
    ],
    "processes": [
-    "Import Sales Orders",
-    "Order orchestration"
+    "Load Interface File for Import; Import Sales Orders",
+    "Plan Orchestration Processes",
+    "Update or Close Sales Orders",
+    "Submit Financial Orchestration Events (Process Direct Sales Order Issues)"
    ],
    "integrations": [
     "OI-SO"
@@ -860,13 +862,13 @@
    ],
    "description": "Loads bank statements and reconciles them against payments, receipts and journal entries.",
    "functions": [
-    "Bank statements loaded daily",
-    "Automatic reconciliation by rule",
-    "Bank charges and interest accounted from statement lines"
+    "Bank statement files transferred from the bank to the open interface",
+    "Reconciliation matching rules match statement lines to system transactions",
+    "Each bank account carries a cash and a cash clearing account"
    ],
    "processes": [
-    "Load and import bank statements",
-    "Autoreconcile bank statements"
+    "Load the bank statement file (automated process)",
+    "Run the reconciliation process"
    ],
    "integrations": [
     "OI-CE-STMT"
@@ -892,15 +894,17 @@
    "workstreams": [
     "R2R"
    ],
-   "description": "Capitalises plant equipment from Payables invoices and depreciates it.",
+   "description": "Capitalises plant equipment from Payables invoices or receipts and depreciates it in a corporate book and tax books.",
    "functions": [
-    "Mass additions from Payables asset lines",
-    "Depreciation per asset book",
+    "Mass additions from Payables asset lines (Create Mass Additions) or from Receiving",
+    "Corporate book → primary ledger; MX tax book → MX secondary ledger (Perform Periodic Mass Copy)",
     "Retirements and transfers between plants"
    ],
    "processes": [
+    "Create Mass Additions (Payables)",
     "Post Mass Additions",
-    "Calculate Depreciation"
+    "Calculate Depreciation (and close the period)",
+    "Create Accounting for Assets"
    ],
    "entries": [
     {
@@ -1554,7 +1558,7 @@
    "from": "om",
    "to": "ship",
    "kind": "doc",
-   "label": "fulfilment line → shipment request"
+   "label": "Create Shipping → shipment request"
   },
   {
    "from": "inv",
@@ -1566,13 +1570,13 @@
    "from": "ship",
    "to": "om",
    "kind": "ret",
-   "label": "ship confirm → fulfilled line"
+   "label": "ship confirm → Wait for Shipment completes"
   },
   {
    "from": "om",
    "to": "ar",
    "kind": "doc",
-   "label": "fulfilled line → AutoInvoice"
+   "label": "Create Billing Lines → Import AutoInvoice"
   },
   {
    "from": "ap",
@@ -2089,7 +2093,7 @@
  },
  "fnd": {
   "title": "Key processes by module",
-  "lede": "The scheduled processes that move work through each module. Names are as printed in the Oracle 26C guides (Fixed Assets and Cash Management names are INFERRED).",
+  "lede": "The scheduled processes that move work through each module. Names are as printed in the Oracle 26C guides.",
   "stages": [
    {
     "n": "01",
@@ -2190,9 +2194,9 @@
     "title": "Order Management & Shipping",
     "system": "Order to Cash",
     "points": [
-     "Import Sales Orders",
-     "Pick, pack, Ship Confirm",
-     "Order orchestration"
+     "Load Interface File for Import; Import Sales Orders",
+     "Plan Orchestration Processes; Update or Close Sales Orders",
+     "Pick, pack, Ship Confirm"
     ]
    },
    {
@@ -2209,9 +2213,9 @@
     "title": "Cash, Assets, Orchestration",
     "system": "Cash Management · Fixed Assets · SCFO",
     "points": [
-     "Load and reconcile bank statements",
-     "Post Mass Additions; Calculate Depreciation",
-     "Financial orchestration flows and transfer pricing"
+     "Load the bank statement file; run reconciliation",
+     "Post Mass Additions; Calculate Depreciation; Create Accounting for Assets",
+     "Submit Financial Orchestration Events; transfer pricing"
     ]
    }
   ],
@@ -2271,7 +2275,7 @@
    },
    {
     "when": "BD+3",
-    "what": "Assets: post mass additions, depreciate, close the book",
+    "what": "Assets: Post Mass Additions, Calculate Depreciation and close the period, Create Accounting for Assets",
     "owner": "Fixed assets",
     "consolidation_team": false
    },
@@ -2503,9 +2507,9 @@
       "system": "Order Management",
       "accounting": "none",
       "points": [
-       "EDI and portal orders",
-       "Pricing, credit check and scheduling",
-       "Hand-off: fulfilment line → shipment request"
+       "EDI or portal orders: DOO_ORDER_HEADERS_ALL_INT → Import Sales Orders, or the Sales Orders for Order Hub REST API",
+       "Orchestration process: schedule, reserve, ship, bill",
+       "Hand-off: Create Shipping → shipment request"
       ]
      },
      {
@@ -2515,8 +2519,8 @@
       "accounting": "deferred COGS",
       "points": [
        "Lots picked first-expiry, first-out",
-       "Ship Confirm issues inventory",
-       "Hand-off: fulfilled line → AutoInvoice"
+       "Ship Confirm issues inventory (Direct Sales Order Issue)",
+       "Hand-off: Create Billing Lines → AutoInvoice"
       ],
       "entries": [
        {
@@ -2629,7 +2633,7 @@
       ]
      }
     ],
-    "accounting_note": "Receivables and COGS entries follow the Receivables and Cost Accounting guides. Order Management steps and the intercompany line accounts are INFERRED (no Order Management guide in the set).",
+    "accounting_note": "Order steps and the deferred COGS / COGS templates follow the Oracle 26C Order Management guides; Receivables entries follow the Receivables guide. The intercompany line accounts and FEFO picking at shipment are INFERRED.",
     "notes": []
    }
   },
@@ -2711,6 +2715,47 @@
         "Process",
         "Create Accounting"
        ]
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "l-fa",
+      "layer": "LG1",
+      "title": "Asset books",
+      "subtitle": "Corporate book · MX tax book",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Fixed Assets keeps one corporate book per primary ledger. The MX tax book is assigned to the MX secondary ledger.",
+      "functions": [
+       "Corporate book: Create Accounting for Assets → primary ledger",
+       "Tax book: Perform Periodic Mass Copy from the corporate book, then accounted to the secondary ledger",
+       "Payables asset invoices and the tax-book addition use the same conversion rate, so asset clearing clears in both ledgers"
+      ],
+      "facts": [
+       [
+        "Process",
+        "Perform Periodic Mass Copy"
+       ]
+      ],
+      "entries": [
+       {
+        "event": "Asset addition (each book)",
+        "dr": [
+         "Asset cost"
+        ],
+        "cr": [
+         "Asset clearing"
+        ]
+       }
       ],
       "docs": [
        {
@@ -2981,6 +3026,18 @@
       "to": "l-mx2",
       "kind": "acct",
       "label": "Create Accounting (subledger level)"
+     },
+     {
+      "from": "l-fa",
+      "to": "l-mx",
+      "kind": "acct",
+      "label": "corporate book: Create Accounting for Assets"
+     },
+     {
+      "from": "l-fa",
+      "to": "l-mx2",
+      "kind": "acct",
+      "label": "tax book (Perform Periodic Mass Copy)"
      },
      {
       "from": "l-gli",

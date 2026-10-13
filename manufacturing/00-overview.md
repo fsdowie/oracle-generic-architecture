@@ -29,8 +29,9 @@ Mexico is the single non-US organisation. It shows how a **primary ledger**, a *
   Accounting), Supply Chain Orchestration and Financial Orchestration.
 - Warehouse management is shown thin (inventory organisations, subinventories, pick, pack and ship): the guides
   provided cover it lightly.
-- Order Management has no guide in the set; its steps are tagged `[INFERRED]` where the Receivables, Shipping,
-  Supply Chain Orchestration and Cost Accounting guides don't describe them.
+- Cash Management has no Fusion guide in the set (the copy provided is the E-Business Suite 12.1 table of contents).
+  Its processes come from the Financials getting-started and Receivables guides; its interface table names are
+  `[INFERRED]`.
 
 ## Sources (evidence keys)
 | Key | Guide (Oracle Fusion Cloud 26C) |
@@ -49,6 +50,11 @@ Mexico is the single non-US organisation. It shows how a **primary ledger**, a *
 | `PLN` | Using Planning Central |
 | `SCO` | Using Supply Chain Orchestration |
 | `SCFO` | Using Supply Chain Financial Orchestration |
+| `OM` | Implementing Order Management |
+| `OMU` | Using Order Management |
+| `FA` | Using Assets |
+| `FAI` | Implementing Assets |
+| `FIN` | Getting Started with Your Financials Implementation |
 
 Page numbers are PDF pages. Example: `[ORA26C:GL p.301]`.
 
