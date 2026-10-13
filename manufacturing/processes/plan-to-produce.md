@@ -10,7 +10,9 @@ links: [MFG-OVERVIEW, MFG-P2P, MFG-O2C, MFG-PROCESSES]
 FBCo makes beverages, dairy and concentrates with **process manufacturing**:
 - Work definitions (the formula or recipe: ingredients in, primary output and co-products out) and process work orders.
 - Ingredients and finished goods are lot-controlled with expiry dates.
-- Costing uses standard cost in the US and perpetual average cost in Mexico `[INFERRED]`.
+- Costing uses standard cost in the US and perpetual average cost in Mexico. Cost Management supports Standard,
+  Actual and Perpetual Average cost methods `[ORA26C:MFG p.102]`; the split per country is a design choice for the mock company.
+- Backflushed ingredient lots can be defaulted first-expiry, first-out (*Lot Selection During Backflush* = Lot FEFO) `[ORA26C:MFG p.490]`.
 
 The guide lists Plan to Produce as Discrete Manufacturing, Process Manufacturing (work definitions and work orders),
 Contract Manufacturing and Outside Processing `[ORA26C:MFG p.122]`. Process manufacturing is enabled per plant

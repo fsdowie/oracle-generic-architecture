@@ -20,8 +20,8 @@ Each subledger's own steps are from the guides.
 | BD+1 | Close the cost accounting period (inventory organisation and cost organisation) | Cost accounting | `[ORA26C:MFG p.359]` |
 | BD+2 | Payables: *Validate Payables Invoices*, approve, *Create Accounting*, close the period (sweep or resolve exceptions) | AP | `[ORA26C:AP p.13, 189]` |
 | BD+2 | Receivables: *Import AutoInvoice*, *Recognize Revenue*, *Create Receivables Accounting*, close the period | AR | `[ORA26C:AR p.13, 105, 318]` |
-| BD+2 | Cash Management: reconcile bank statements | Treasury | `[ORA26C:AR p.353]` |
-| BD+3 | Assets: post additions, run depreciation, close the book | Fixed assets | `[INFERRED]` |
+| BD+2 | Cash Management: reconcile bank statements | Treasury | `[ORA26C:FIN p.197]` `[ORA26C:AR p.353]` |
+| BD+3 | Assets: *Post Mass Additions*, *Calculate Depreciation* and close the period, *Create Accounting for Assets* (corporate and tax books) | Fixed assets | `[ORA26C:FA p.8, 10, 18]` |
 | BD+3 | GL: post remaining journals, intercompany, allocations | GL | `[ORA26C:GL p.389, 559]` |
 | BD+4 | *Revalue Balances* (US and MX); MX secondary ledger review; reporting currency check | GL | `[ORA26C:GL p.530]` |
 | BD+4 | *Translate General Ledger Account Balances* where needed; close the periods (primary, secondary, reporting) | GL | `[ORA26C:GL p.533]` |

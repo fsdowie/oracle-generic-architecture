@@ -40,6 +40,11 @@ The guide's conversion levels:
   flight, some of them may never be accounted in it. The guide suggests journal level unless subledger level is
   required `[ORA26C:GL p.301-302]`. FBCo needs it here because the statutory accounting method differs.
 
+- **Asset books.** Each primary ledger has a corporate asset book. A tax book is copied from its corporate book and
+  can be assigned to a secondary ledger of that book's ledger, so FBCo México keeps its statutory asset values in the
+  MX secondary ledger `[ORA26C:FAI p.22]`. *Perform Periodic Mass Copy* copies additions into the tax book, and
+  Payables and Assets use the same conversion rate so asset clearing clears in both ledgers `[ORA26C:FA p.30-32]`.
+
 ## Chart of accounts mapping
 - The corporate chart maps to the Mexican statutory chart through **segment rules and account rules**
   (*Manage Chart of Accounts Mapping*).
