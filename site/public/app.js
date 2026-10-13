@@ -198,6 +198,12 @@
   const COL = { oic: "var(--oic)", airflow: "var(--airflow)", sched: "var(--airflow)", bulk: "var(--bulk)", extract: "var(--extract)", int: "var(--line)", ret: "var(--ext)",
     doc: "var(--oic)", acct: "var(--airflow)", oi: "var(--bulk)", ledger: "var(--extract)" };
   // one journal entry card: { event, dr: [account types], cr: [account types] }
+  // a REST resource: name linked to Oracle's page, root path, then methods and custom actions
+  const safeUrl = (u) => /^https:\/\//.test(u || "") ? u : "#";
+  const REST_BASE = /^\/fscmRestApi\/resources\/[\d.]+/;
+  const shortPath = (p) => p.replace(REST_BASE, "");
+  const restItem = (r) => `<li><a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a>` +
+    `<div class="ev">${esc(r.methods.join(" · "))} ${esc(shortPath(r.path))}${r.actions.length ? " · actions: " + esc(r.actions.join(", ")) : ""}</div></li>`;
   const je = (e) => `<div class="je"><div class="je-ev">${esc(e.event)}</div><div class="je-row"><b>Dr</b><span>${e.dr.map(esc).join("<br>")}</span></div><div class="je-row"><b>Cr</b><span>${e.cr.map(esc).join("<br>")}</span></div></div>`;
   const legendHtml = (items) => items.map((l) => `<span${l.dash ? ' class="dash"' : ""}><i style="border-color:${esc(l.color)}"></i>${esc(l.label)}</span>`).join("") + "<span>Dashed box = external system</span>";
 
@@ -248,11 +254,11 @@
         return (e.from === d.sel ? "→ " : "← ") + o.title + (e.label ? " · " + e.label : "");
       });
       const labels = Object.assign({ functions: "What it does", integrations: "Interfaces", processes: "Key processes",
-        open_interfaces: "Open interfaces", entries: "Journal entries" }, D.labels || {});
+        open_interfaces: "Open interfaces", entries: "Journal entries", rest: "REST APIs" }, D.labels || {});
       const tags = (a) => a.map((i) => `<span class="tag">${esc(i)}</span>`).join("");
       const list = (a, cls) => `<ul class="${cls}">${a.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`;
       const fns = n.functions || [], ifs = n.integrations || [], docs = n.docs || [], facts = n.facts || [];
-      const procs = n.processes || [], ois = n.open_interfaces || [], entries = n.entries || [];
+      const procs = n.processes || [], ois = n.open_interfaces || [], entries = n.entries || [], rest = n.rest || [];
       const docLinks = docs.filter((x) => /^https:\/\//.test(x.url))
         .map((x) => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.label)}</a></li>`).join("");
       $(ids.detail).innerHTML = `
@@ -265,6 +271,7 @@
           ${entries.length ? `<div><dt>${esc(labels.entries)}</dt><dd>${entries.map(je).join("")}</dd></div>` : ""}
           ${ois.length ? `<div><dt>${esc(labels.open_interfaces)}</dt><dd>${list(ois, "ifs")}</dd></div>` : ""}
           ${ifs.length ? `<div><dt>${esc(labels.integrations)}</dt><dd>${list(ifs, "ifs")}</dd></div>` : ""}
+          ${rest.length ? `<div><dt>${esc(labels.rest)}</dt><dd><ul class="docs rest">${rest.map(restItem).join("")}</ul></dd></div>` : ""}
           ${nb.length ? `<div><dt>Connected to</dt><dd>${links.some((e) => e.label) ? list(nb, "fn") : tags(nb)}</dd></div>` : ""}
           ${docLinks ? `<div><dt>Documents</dt><dd><ul class="docs">${docLinks}</ul></dd></div>` : ""}
         </dl>
@@ -414,6 +421,12 @@
           ? `<div class="estate"><div><div class="filters"><span class="eyebrow">Path</span><span id="${P}chips" class="chipset"></span></div>
                <div class="diagram" id="${P}box"><svg class="edges" id="${P}edges" aria-hidden="true"></svg><div id="${P}bands"></div></div>
                <div class="legend" id="${P}legend"></div></div><aside class="detail" id="${P}detail" aria-live="polite"></aside></div>`
+          : v.kind === "table"
+          ? `<div class="tools"><label class="eyebrow" for="${P}q" style="align-self:center">Search</label>
+               <input id="${P}q" type="search" placeholder="${esc(v.data.search_hint || "Search")}">
+               <select id="${P}mod" aria-label="Module"></select><select id="${P}src" aria-label="Guide"></select>
+               <span class="count" id="${P}count"></span></div>
+             <div class="tablewrap"><table><thead><tr>${(v.data.columns || []).map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody id="${P}body"></tbody></table></div>`
           : `<div class="chain" id="${P}chain"></div>`) +
         `<div class="rail" id="${P}notes"></div>`;
       $("tab-admin").before(sec);
@@ -424,10 +437,36 @@
         g.render(D, D.chips || [], D.legend || model.legend || DEFAULTS.legend);
         $(P + "notes").innerHTML = notes(D.notes);
         extraDiagrams.push(g);
+      } else if (v.kind === "table") {
+        restTable(D, P);
       } else {
         chain(D, { title: P + "title", lede: P + "lede", chain: P + "chain", notes: P + "notes", tab: sec.id }, "");
       }
     });
+  }
+
+  /* A REST catalogue tab (view kind "table"): rows { name, description, module, path, methods, actions, guide, area, url },
+     filtered by text, map module and guide. */
+  function restTable(D, P) {
+    $(P + "title").textContent = D.title; $(P + "lede").textContent = D.lede;
+    const rows0 = D.rows || [];
+    const uniq = (k) => [...new Set(rows0.map((r) => r[k]))].sort((a, b) => a === "Not on this map" ? 1 : b === "Not on this map" ? -1 : a.localeCompare(b));
+    $(P + "mod").innerHTML = `<option value="">All modules</option>` + uniq("module").map((m) => `<option>${esc(m)}</option>`).join("");
+    $(P + "src").innerHTML = `<option value="">All guides</option>` + uniq("guide").map((m) => `<option>${esc(m)}</option>`).join("");
+    const draw = () => {
+      const q = $(P + "q").value.trim().toLowerCase(), m = $(P + "mod").value, g = $(P + "src").value;
+      const rows = rows0.filter((r) => (!m || r.module === m) && (!g || r.guide === g) &&
+        (!q || [r.name, r.description, r.path, r.area, r.module, r.actions.join(" ")].join(" ").toLowerCase().includes(q)));
+      $(P + "body").innerHTML = rows.map((r) => `<tr><td><a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener noreferrer">${esc(r.name)}</a><div class="ev">${esc(r.description)}</div></td>` +
+        `<td>${esc(r.module)}</td><td class="pathcell"><code class="path">${esc(shortPath(r.path))}</code></td>` +
+        `<td>${esc(r.methods.join(" · "))}${r.actions.length ? `<div class="ev">actions: ${esc(r.actions.join(", "))}</div>` : ""}</td>` +
+        `<td>${esc(r.guide)}${r.area !== r.guide ? `<div class="ev">${esc(r.area)}</div>` : ""}</td></tr>`).join("");
+      $(P + "count").textContent = rows.length + " of " + rows0.length;
+    };
+    [P + "q", P + "mod", P + "src"].forEach((id) => $(id).addEventListener("input", draw));
+    draw();
+    $(P + "notes").innerHTML = notes(D.notes) + ((D.sources || []).length ? `<div class="note"><b>Source.</b> ${D.sources.map((s) =>
+      `<a href="${esc(safeUrl(s.url))}" target="_blank" rel="noopener noreferrer">${esc(s.title)}</a>`).join(" · ")}</div>` : "");
   }
 
   const groupOf = (lane) => groups.find((g) => g.re.test(lane || "")) || null;

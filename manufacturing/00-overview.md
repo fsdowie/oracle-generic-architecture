@@ -58,9 +58,13 @@ Mexico is the single non-US organisation. It shows how a **primary ledger**, a *
 
 Page numbers are PDF pages. Example: `[ORA26C:GL p.301]`.
 
+REST resources come from Oracle's published REST catalogues, fetched by `tools/rest_catalog.py`:
+REST API for Oracle Fusion Cloud Financials 26C, SCM 26B and Procurement 25C (docs.oracle.com).
+
 ## Files
 - `manufacturing/foundation/enterprise-structure-and-ledgers.md`: enterprise structure, chart of accounts, ledgers.
 - `manufacturing/modules/key-processes.md`: key scheduled processes per module.
 - `manufacturing/processes/procure-to-pay.md`, `plan-to-produce.md`, `order-to-cash.md`, `record-to-report.md`,
   `period-close.md`: each flow, its hand-offs and its journal entries (account types).
-- `manufacturing/integrations/open-interfaces.yaml`: the open interface tables.
+- `manufacturing/integrations/open-interfaces.yaml`: the open interface tables, each with its REST alternative.
+- `manufacturing/integrations/rest-apis.json`: the REST catalogue (generated; do not edit by hand).
