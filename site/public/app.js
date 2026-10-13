@@ -195,7 +195,10 @@
   };
 
   // ---------- diagrams (estate, dashboards, close process) ----------
-  const COL = { oic: "var(--oic)", airflow: "var(--airflow)", sched: "var(--airflow)", bulk: "var(--bulk)", extract: "var(--extract)", int: "var(--line)", ret: "var(--ext)" };
+  const COL = { oic: "var(--oic)", airflow: "var(--airflow)", sched: "var(--airflow)", bulk: "var(--bulk)", extract: "var(--extract)", int: "var(--line)", ret: "var(--ext)",
+    doc: "var(--oic)", acct: "var(--airflow)", oi: "var(--bulk)", ledger: "var(--extract)" };
+  // one journal entry card: { event, dr: [account types], cr: [account types] }
+  const je = (e) => `<div class="je"><div class="je-ev">${esc(e.event)}</div><div class="je-row"><b>Dr</b><span>${e.dr.map(esc).join("<br>")}</span></div><div class="je-row"><b>Cr</b><span>${e.cr.map(esc).join("<br>")}</span></div></div>`;
   const legendHtml = (items) => items.map((l) => `<span${l.dash ? ' class="dash"' : ""}><i style="border-color:${esc(l.color)}"></i>${esc(l.label)}</span>`).join("") + "<span>Dashed box = external system</span>";
 
   /* One clickable layered diagram. ids: box, bands, edges, detail, chips, legend, tab (section id), prefix (node element id prefix). */
@@ -239,14 +242,17 @@
       });
       const n = D.nodes.find((x) => x.id === d.sel);
       const layer = D.layers.find((L) => L.id === n.layer);
-      const nb = D.edges.filter((e) => e.from === d.sel || e.to === d.sel).map((e) => {
+      const links = D.edges.filter((e) => e.from === d.sel || e.to === d.sel);
+      const nb = links.map((e) => {
         const o = D.nodes.find((x) => x.id === (e.from === d.sel ? e.to : e.from));
-        return (e.from === d.sel ? "→ " : "← ") + o.title;
+        return (e.from === d.sel ? "→ " : "← ") + o.title + (e.label ? " · " + e.label : "");
       });
-      const labels = Object.assign({ functions: "What it does", integrations: "Interfaces" }, D.labels || {});
+      const labels = Object.assign({ functions: "What it does", integrations: "Interfaces", processes: "Key processes",
+        open_interfaces: "Open interfaces", entries: "Journal entries" }, D.labels || {});
       const tags = (a) => a.map((i) => `<span class="tag">${esc(i)}</span>`).join("");
       const list = (a, cls) => `<ul class="${cls}">${a.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`;
       const fns = n.functions || [], ifs = n.integrations || [], docs = n.docs || [], facts = n.facts || [];
+      const procs = n.processes || [], ois = n.open_interfaces || [], entries = n.entries || [];
       const docLinks = docs.filter((x) => /^https:\/\//.test(x.url))
         .map((x) => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.label)}</a></li>`).join("");
       $(ids.detail).innerHTML = `
@@ -255,8 +261,11 @@
         <dl>
           ${facts.map((f) => `<div><dt>${esc(f[0])}</dt><dd>${esc(f[1])}</dd></div>`).join("")}
           ${fns.length ? `<div><dt>${esc(labels.functions)}</dt><dd>${list(fns, "fn")}</dd></div>` : ""}
+          ${procs.length ? `<div><dt>${esc(labels.processes)}</dt><dd>${list(procs, "fn")}</dd></div>` : ""}
+          ${entries.length ? `<div><dt>${esc(labels.entries)}</dt><dd>${entries.map(je).join("")}</dd></div>` : ""}
+          ${ois.length ? `<div><dt>${esc(labels.open_interfaces)}</dt><dd>${list(ois, "ifs")}</dd></div>` : ""}
           ${ifs.length ? `<div><dt>${esc(labels.integrations)}</dt><dd>${list(ifs, "ifs")}</dd></div>` : ""}
-          ${nb.length ? `<div><dt>Connected to</dt><dd>${tags(nb)}</dd></div>` : ""}
+          ${nb.length ? `<div><dt>Connected to</dt><dd>${links.some((e) => e.label) ? list(nb, "fn") : tags(nb)}</dd></div>` : ""}
           ${docLinks ? `<div><dt>Documents</dt><dd><ul class="docs">${docLinks}</ul></dd></div>` : ""}
         </dl>
         <button type="button" class="btn ghost small cmt-btn" data-cmt>Add comment</button>`;
@@ -293,12 +302,14 @@
   const dash = makeDiagram({ box: "dbDiagram", bands: "dbBands", edges: "dbEdges", detail: "dbDetail", chips: "dbChips", legend: "dbLegend", tab: "tab-dash", prefix: "d-" });
   const closeMap = makeDiagram({ box: "cpDiagram", bands: "cpBands", edges: "cpEdges", detail: "cpDetail", chips: "cpChips", legend: "cpLegend", tab: "tab-close", prefix: "c-" });
   const DIAGRAMS = [estate, dash, closeMap];
-  function drawVisible() { DIAGRAMS.forEach((g) => g.draw()); }
+  let extraDiagrams = []; // diagrams on the current map's extra tabs (model.views)
+  function drawVisible() { DIAGRAMS.concat(extraDiagrams).forEach((g) => g.draw()); }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawVisible);
 
   // ---------- rendering ----------
   let M = null, groups = [];
-  const TABS = ["estate", "p2p", "r2r", "fnd", "dash", "onboard", "close", "ints", "admin"];
+  // every tab in the nav: the fixed tabs plus the current map's extra tabs
+  const tabIds = () => [...document.querySelectorAll("nav.tabs button")].map((b) => b.dataset.tab);
   const notes = (arr) => (arr || []).map((n) => `<div class="note"><b>${esc(n.title)}</b> ${esc(n.text)}</div>`).join("");
 
   function render(model) {
@@ -312,9 +323,8 @@
     // tabs: labels from the model; tabs without data are hidden
     const labels = Object.assign({}, DEFAULTS.tab_labels, model.tab_labels || {});
     const has = { estate: true, p2p: !!model.p2p, r2r: !!model.r2r, fnd: !!model.fnd, dash: !!model.dashboards, onboard: !!model.onboarding, close: !!model.close, ints: !!model.integrations };
-    document.querySelectorAll("nav.tabs button").forEach((b) => { if (b.dataset.tab === "admin") return; b.textContent = labels[b.dataset.tab]; b.hidden = !has[b.dataset.tab]; });
-    const current = TABS.find((k) => !$("tab-" + k).hidden) || "estate";
-    showTab(has[current] || current === "admin" ? current : "estate");
+    document.querySelectorAll("nav.tabs button:not([data-view])").forEach((b) => { if (b.dataset.tab === "admin") return; b.textContent = labels[b.dataset.tab]; b.hidden = !has[b.dataset.tab]; });
+    const current = tabIds().find((k) => $("tab-" + k) && !$("tab-" + k).hidden) || "estate";
 
     // estate diagram and register filters
     const wss = model.workstreams || DEFAULTS.workstreams;
@@ -325,20 +335,21 @@
     $("q").value = "";
 
     // stage chains: Procure to Pay, Record to Report, Foundation & controls
-    const je = (e) => `<div class="je"><div class="je-ev">${esc(e.event)}</div><div class="je-row"><b>Dr</b><span>${e.dr.map(esc).join("<br>")}</span></div><div class="je-row"><b>Cr</b><span>${e.cr.map(esc).join("<br>")}</span></div></div>`;
     const badge = (s, suffix) => s.accounting === undefined ? "" :
       `<span class="acct ${s.accounting === "none" ? "none" : ""}">${s.accounting === "none" ? "no accounting" : esc(s.accounting) + suffix}</span>`;
     function chain(p, ids, suffix) {
       if (!p) return;
       $(ids.title).textContent = p.title; $(ids.lede).textContent = p.lede;
+      if (p.badge_suffix !== undefined) suffix = p.badge_suffix;
       $(ids.chain).innerHTML = p.stages.map((s) => `<div class="stage"><span class="n">Stage ${esc(s.n)}</span><h4>${esc(s.title)}</h4><span class="sys">${esc(s.system)}</span>${badge(s, suffix)}<ul>${(s.points || [s.what]).filter(Boolean).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>${(s.entries || []).map(je).join("")}<button type="button" class="btn ghost small cmt-btn" data-stage="${esc(s.n)}" data-title="${esc(s.title)}">Add comment</button></div>`).join("");
       $(ids.chain).querySelectorAll("[data-stage]").forEach((b) => b.addEventListener("click", () =>
         openComment({ tabLabel: tabLabel(ids.tab), item_id: ids.chain + ":" + b.dataset.stage, item_title: "Stage " + b.dataset.stage + " · " + b.dataset.title })));
       $(ids.notes).innerHTML = (p.accounting_note ? `<div class="note"><b>Account types.</b> ${esc(p.accounting_note)}</div>` : "") + notes(p.notes);
     }
-    chain(model.p2p, { title: "p2pTitle", lede: "p2pLede", chain: "chain", notes: "p2pNotes" }, " via XLA");
-    chain(model.r2r, { title: "r2rTitle", lede: "r2rLede", chain: "r2rChain", notes: "r2rNotes" }, "");
-    chain(model.fnd, { title: "fndTitle", lede: "fndLede", chain: "fndChain", notes: "fndNotes" }, "");
+    chain(model.p2p, { title: "p2pTitle", lede: "p2pLede", chain: "chain", notes: "p2pNotes", tab: "tab-p2p" }, " via XLA");
+    chain(model.r2r, { title: "r2rTitle", lede: "r2rLede", chain: "r2rChain", notes: "r2rNotes", tab: "tab-r2r" }, "");
+    chain(model.fnd, { title: "fndTitle", lede: "fndLede", chain: "fndChain", notes: "fndNotes", tab: "tab-fnd" }, "");
+    renderViews(model, chain);
 
     // dashboards diagram
     const db = model.dashboards;
@@ -369,7 +380,54 @@
 
     // integrations
     $("inTitle").textContent = model.integrations.title; $("inLede").textContent = model.integrations.lede;
+    const cols = model.integrations.columns || ["Interface", "Source → Target", "Lane", "Cadence", "Workstream"];
+    $("inHead").innerHTML = cols.map((c) => `<th>${esc(c)}</th>`).join("");
+    $("q").placeholder = model.integrations.search_hint || "System or flow, e.g. Kyriba or supplier";
     renderInts();
+
+    // stay on the same tab when it exists on this map; otherwise go back to the estate
+    // a deep link to an extra tab (#v-…) only resolves now that the extra tabs exist
+    const want = (location.hash || "").slice(1);
+    const target = want.startsWith("v-") && tabIds().includes(want) ? want : current;
+    const ok = target === "admin" || (target in has ? has[target] : tabIds().includes(target));
+    showTab(ok ? target : "estate");
+  }
+
+  /* Extra tabs a map declares in model.views: [{ id, label, kind: "chain" | "diagram", after?, eyebrow?, data }].
+     Rebuilt on every render, so switching maps removes the previous map's extra tabs. */
+  function renderViews(model, chain) {
+    document.querySelectorAll("[data-view]").forEach((el) => el.remove());
+    extraDiagrams = [];
+    const nav = document.querySelector("nav.tabs"), adminBtn = nav.querySelector('[data-tab="admin"]');
+    (model.views || []).forEach((v) => {
+      const t = "v-" + v.id, P = t + "-";
+      const btn = document.createElement("button");
+      btn.setAttribute("role", "tab"); btn.setAttribute("aria-selected", "false");
+      btn.dataset.tab = t; btn.dataset.view = "1"; btn.textContent = v.label;
+      btn.addEventListener("click", () => selectTab(t));
+      const prev = v.after && nav.querySelector(`[data-tab="${v.after}"]`);
+      if (prev) prev.after(btn); else nav.insertBefore(btn, adminBtn);
+      const sec = document.createElement("section");
+      sec.id = "tab-" + t; sec.hidden = true; sec.dataset.view = "1";
+      sec.innerHTML = `<div class="eyebrow">${esc(v.eyebrow || "Flow")}</div><h2 id="${P}title"></h2><p class="lede" id="${P}lede"></p>` +
+        (v.kind === "diagram"
+          ? `<div class="estate"><div><div class="filters"><span class="eyebrow">Path</span><span id="${P}chips" class="chipset"></span></div>
+               <div class="diagram" id="${P}box"><svg class="edges" id="${P}edges" aria-hidden="true"></svg><div id="${P}bands"></div></div>
+               <div class="legend" id="${P}legend"></div></div><aside class="detail" id="${P}detail" aria-live="polite"></aside></div>`
+          : `<div class="chain" id="${P}chain"></div>`) +
+        `<div class="rail" id="${P}notes"></div>`;
+      $("tab-admin").before(sec);
+      const D = v.data;
+      if (v.kind === "diagram") {
+        $(P + "title").textContent = D.title; $(P + "lede").textContent = D.lede;
+        const g = makeDiagram({ box: P + "box", bands: P + "bands", edges: P + "edges", detail: P + "detail", chips: P + "chips", legend: P + "legend", tab: sec.id, prefix: P + "n-" });
+        g.render(D, D.chips || [], D.legend || model.legend || DEFAULTS.legend);
+        $(P + "notes").innerHTML = notes(D.notes);
+        extraDiagrams.push(g);
+      } else {
+        chain(D, { title: P + "title", lede: P + "lede", chain: P + "chain", notes: P + "notes", tab: sec.id }, "");
+      }
+    });
   }
 
   const groupOf = (lane) => groups.find((g) => g.re.test(lane || "")) || null;
@@ -379,7 +437,7 @@
     const q = $("q").value.trim().toLowerCase(), ln = $("laneSel").value, w = $("wsSel").value.toLowerCase();
     const rows = rows0.filter((i) => (!ln || (groupOf(i.lane) || {}).name === ln) &&
       (!w || String(i.workstream).toLowerCase().includes(w)) &&
-      (!q || [i.id, i.name, i.source, i.target, i.notes].join(" ").toLowerCase().includes(q)));
+      (!q || [i.id, i.label, i.source, i.target, i.notes].join(" ").toLowerCase().includes(q)));
     $("tbody").innerHTML = rows.map((i) => {
       const g = groupOf(i.lane);
       return `<tr><td>${esc(i.label || i.name)}${i.notes ? `<div class="ev">${esc(i.notes)}</div>` : ""}</td><td>${esc(i.source || "—")} → ${esc(i.target || "—")}</td><td><span class="lane-pill" style="color:${g ? esc(g.color) : "var(--muted)"}">${esc(i.lane)}</span></td><td>${esc(i.cadence || "—")}</td><td>${esc(i.workstream)}</td></tr>`;
@@ -490,14 +548,16 @@
     };
   })();
 
-  const tabs = document.querySelectorAll("nav.tabs button");
   function showTab(t) {
-    tabs.forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === t));
-    TABS.forEach((k) => { $("tab-" + k).hidden = k !== t; });
+    const ids = tabIds();
+    if (!ids.includes(t)) t = "estate";
+    document.querySelectorAll("nav.tabs button").forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === t));
+    ids.forEach((k) => { const s = $("tab-" + k); if (s) s.hidden = k !== t; });
     if (t === "admin" && me && me.is_admin) admin.start(); // refresh users, comments and log each time
     requestAnimationFrame(drawVisible);
   }
-  tabs.forEach((b) => b.addEventListener("click", () => { showTab(b.dataset.tab); try { history.replaceState(null, "", "#" + b.dataset.tab); } catch (e) {} }));
+  function selectTab(t) { showTab(t); try { history.replaceState(null, "", "#" + t); } catch (e) {} }
+  document.querySelectorAll("nav.tabs button").forEach((b) => b.addEventListener("click", () => selectTab(b.dataset.tab)));
   const h = (location.hash || "").slice(1);
-  if (TABS.includes(h)) showTab(h);
+  if (tabIds().includes(h)) showTab(h);
 })();

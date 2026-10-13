@@ -7,6 +7,7 @@ on:
       - "site/**"
       - "integrations/integration-register.yaml"
       - "insurance/**"
+      - "manufacturing/**"
       - "tools/build_map_data.py"
       - ".github/workflows/deploy-map.yml"
   workflow_dispatch:
@@ -66,7 +67,7 @@ jobs:
             *) auth=(-H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY") ;;
           esac
           # One object per map: <map>/map.json. Access is per map (see supabase/setup.sql).
-          for m in travel insurance; do
+          for m in travel insurance manufacturing; do
             status=$(curl -sS -o /tmp/upload.txt -w "%{http_code}" -X POST \
               "$SUPABASE_URL/storage/v1/object/estate-map/$m/map.json" \
               "${auth[@]}" \
@@ -87,7 +88,8 @@ jobs:
           cat > site/public/config.js <<EOF
           window.MAP_CONFIG = { url: "${SUPABASE_URL}", anonKey: "${SUPABASE_ANON_KEY}", bucket: "estate-map",
             maps: [{ id: "travel", title: "Travel Estate Map", object: "travel/map.json" },
-                   { id: "insurance", title: "Insurance Estate Map", object: "insurance/map.json" }] };
+                   { id: "insurance", title: "Insurance Estate Map", object: "insurance/map.json" },
+                   { id: "manufacturing", title: "Manufacturing Estate Map", object: "manufacturing/map.json" }] };
           EOF
 
       - name: Check nothing sensitive is in the deploy folder

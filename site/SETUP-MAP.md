@@ -84,10 +84,13 @@ npx serve site\public
 ```
 `config.js` and `build/` are git-ignored.
 
-## Several maps (Travel, Insurance)
-- Each map has its own model and register: Travel uses `site/model/map-model.json` + `integrations/integration-register.yaml`; Insurance uses `insurance/site/map-model.json` + `insurance/integrations/integration-register.yaml`.
+## Several maps (Travel, Insurance, Manufacturing)
+- Each map has its own model and register: Travel uses `site/model/map-model.json` + `integrations/integration-register.yaml`; Insurance uses `insurance/site/map-model.json` + `insurance/integrations/integration-register.yaml`; Manufacturing uses `manufacturing/site/map-model.json` + `manufacturing/integrations/open-interfaces.yaml` (rows with a `table` are shown as `<TABLE> · <name>`).
 - `python tools/build_map_data.py --map all` builds `build/<map>/map.json`; the workflow uploads each to `estate-map/<map>/map.json`, and `config.js` lists the maps.
 - After sign-in the page offers a map picker with the maps the viewer may read.
 - Access is per map: `public.map_viewers.maps` lists map ids (`'{*}'` = all). Existing projects run `supabase/migrations/002-per-map-access.sql` once.
 - Give someone one map: `insert into public.map_viewers (email, note, maps) values ('person@example.com', 'reviewer', '{insurance}');`
 - Add a new map: create its model and register, add it to `MAPS` in `tools/build_map_data.py`, to the upload loop and `config.js` in `.github/workflows/deploy-map.yml`.
+- Today access is managed in the Admin tab (per-user map checkboxes); `map_viewers` remains for legacy allow-listed users.
+- Extra tabs: a map can declare `views` in its model, `[{ id, label, kind: "chain" | "diagram", after, eyebrow, data }]`. A chain has the same shape as `p2p`; a diagram has `layers`, `nodes`, `edges`, `default_node` (like `dashboards`). `after` places the tab after an existing tab id (`p2p`, `r2r`, or another view as `v-<id>`).
+- Diagram nodes may carry `processes` (Key processes), `entries` (Dr/Cr cards) and `open_interfaces`; edges may carry a `label` shown under "Connected to". The model's `labels` renames detail headings (Manufacturing calls `integrations` "Open interfaces"); `integrations.columns` and `integrations.search_hint` rename the register table.

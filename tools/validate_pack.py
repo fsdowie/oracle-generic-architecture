@@ -62,12 +62,13 @@ for f, (d, t) in fm.items():
     if f.startswith("oracle-modules/") and "ORA26C" not in t and "evidence_gap" not in d:
         warn(f, "no ORA26C citation and no evidence_gap declared")
 
-for y in ["00-index.yaml", "integrations/integration-register.yaml", "insurance/integrations/integration-register.yaml"]:
+for y in ["00-index.yaml", "integrations/integration-register.yaml", "insurance/integrations/integration-register.yaml",
+          "manufacturing/integrations/open-interfaces.yaml"]:
     try:
         data = yaml.safe_load(open(y, encoding="utf-8"))
     except Exception as e:
         err(y, f"does not parse: {e}"); continue
-    if y.endswith("register.yaml"):
+    if y.endswith(("register.yaml", "open-interfaces.yaml")):
         seen = set()
         for g, items in data.get("groups", {}).items():
             for i in items:

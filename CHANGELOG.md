@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0 — 2026-10-13
+- **Manufacturing Estate Map** (generic reference, no client data): a mock food & beverage manufacturer (FBCo) with a US parent and one Mexican subsidiary, built from the Oracle 26C finance and supply chain guides. New `manufacturing/` pack:
+  - Estate diagram separating enterprise structure and master data from transactions; each module shows what it does, its key processes, its open interfaces and its Dr/Cr entries; connections are labelled with the hand-off (requisition → PO line, receipt → 3-way match, fulfilled line → AutoInvoice …).
+  - Flow tabs: Procure to Pay, Plan to Produce (process manufacturing, WIP costing), Order to Cash (deferred COGS, intercompany via Financial Orchestration), Record to Report; Ledgers tab (US primary, MX primary, MX secondary at subledger level with the statutory chart, MX USD reporting currency at journal level); Key processes; Period close; Open interfaces (28 tables).
+  - Items not printed in the guides provided are tagged INFERRED and listed in `manufacturing/open-questions.md`.
+- Site: maps can declare extra tabs (`views`, chain or diagram); detail panel shows key processes, journal entries and labelled connections; register table headings come from the map.
+- Fixes: "Add comment" on Procure to Pay, Record to Report and Foundation stage cards failed (missing tab id); an Insurance register row had its target cut short by an unquoted comma.
+
 ## 0.6.0 — 2026-10-08
 - Users and admin: self-registration with admin approval (status pending/active/disabled), per-user map access in `profiles`, admin role; login page explains the maps and the internal-use policy.
 - Comments: "Add comment" on every clickable map item and stage card; stored in `comments` and emailed to the admin (Reply-To the viewer) by the `estate-comment` function.

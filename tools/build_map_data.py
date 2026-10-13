@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build build/<map>/map.json for each protected estate map (travel, insurance).
+"""Build build/<map>/map.json for each protected estate map (travel, insurance, manufacturing).
 
 Merges site/model/map-model.json (layout, nodes, flows, process text) with
 integrations/integration-register.yaml (the integration table) so the map always
@@ -9,7 +9,8 @@ by .github/workflows/deploy-map.yml. It is never deployed to Vercel.
 Interfaces are shown by name ("INT · <name>"), never by number. Node `integrations`
 may list register IDs, which are replaced by their names here. Node `docs` paths are
 pack files, turned into links under the model's `docs_base`. The build fails if an
-interface number would reach the screen.
+interface number would reach the screen. Open-interface registers (rows with a `table`)
+are labelled "<TABLE> · <name>" instead.
 """
 import json, os, re, sys
 try:
@@ -18,10 +19,11 @@ except ImportError:
     sys.exit("PyYAML is required: pip install pyyaml")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# One entry per map: (model, register). Usage: build_map_data.py [--map travel|insurance|all]
+# One entry per map: (model, register). Usage: build_map_data.py [--map travel|insurance|manufacturing|all]
 MAPS = {
     "travel": ("site/model/map-model.json", "integrations/integration-register.yaml"),
     "insurance": ("insurance/site/map-model.json", "insurance/integrations/integration-register.yaml"),
+    "manufacturing": ("manufacturing/site/map-model.json", "manufacturing/integrations/open-interfaces.yaml"),
 }
 which = sys.argv[sys.argv.index("--map") + 1] if "--map" in sys.argv else "all"
 if which == "all":
@@ -36,6 +38,8 @@ reg = yaml.safe_load(open(os.path.join(ROOT, MAPS[which][1]), encoding="utf-8"))
 
 
 def label(i):
+    if i.get("table"):  # an Oracle open interface table, e.g. "AP_INVOICES_INTERFACE · Payables invoices"
+        return i["table"] + " · " + i["name"]
     return ("API" if i["id"].startswith("API") else "INT") + " · " + i["name"]
 
 
@@ -44,7 +48,7 @@ for group, items in reg["groups"].items():
     for i in items:
         row = {k: str(i.get(v, "") or "") for k, v in
                dict(id="id", name="name", source="source", target="target", direction="direction",
-                    lane="lane", cadence="cadence", workstream="workstream", notes="notes").items()}
+                    lane="lane", cadence="cadence", workstream="workstream", notes="notes", table="table").items()}
         row["group"] = group
         row["label"] = label(row)
         # pointers to pack files ("See INT955.md") are for agents, not map viewers
@@ -74,6 +78,12 @@ if model.get("dashboards"):
     diagrams.append(("dashboards", model["dashboards"]))
 if (model.get("close") or {}).get("process"):
     diagrams.append(("close.process", model["close"]["process"]))
+# extra tabs (model.views): each needs id, label, kind and data; their diagrams are checked like the others
+for v in model.get("views", []):
+    if not (v.get("id") and v.get("label") and v.get("data")) or v.get("kind") not in ("chain", "diagram"):
+        sys.exit(f"view {v.get('id')}: needs id, label, data and kind chain|diagram")
+    if v["kind"] == "diagram":
+        diagrams.append((f"views.{v['id']}", v["data"]))
 for _, dg in diagrams:
   for n in dg["nodes"]:
     seen, shown = set(), []
