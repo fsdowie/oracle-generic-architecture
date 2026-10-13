@@ -91,6 +91,10 @@
    "color": "var(--extract)"
   },
   {
+   "label": "bulk load (FBDI)",
+   "color": "var(--bulk)"
+  },
+  {
    "label": "return / external",
    "color": "var(--ext)",
    "dash": true
@@ -125,7 +129,7 @@
   {
    "id": "L6",
    "label": "Layer 6",
-   "title": "Close, report & banks"
+   "title": "Close, report, banks & integration"
   }
  ],
  "nodes": [
@@ -152,6 +156,10 @@
      "label": "Enterprise structure and ledgers",
      "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
     }
+   ],
+   "rest": [
+    "inventoryOrganizations",
+    "schedules"
    ]
   },
   {
@@ -195,6 +203,12 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "journalBatches",
+    "ledgerBalances",
+    "currencyRates",
+    "chartOfAccountsFilters"
    ]
   },
   {
@@ -231,6 +245,11 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "suppliers",
+    "supplierRegistrationRequests",
+    "procurementApprovedSupplierListEntries"
    ]
   },
   {
@@ -265,6 +284,9 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "createCustomer"
    ]
   },
   {
@@ -304,6 +326,12 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "items",
+    "itemStructures",
+    "itemCategories",
+    "unitsOfMeasure"
    ]
   },
   {
@@ -330,6 +358,12 @@
      "label": "Overview and sources",
      "path": "manufacturing/00-overview.md"
     }
+   ],
+   "rest": [
+    "cashBanks",
+    "cashBankAccounts",
+    "taxRegistrations",
+    "partyTaxProfiles"
    ]
   },
   {
@@ -359,6 +393,10 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "b2bMessages",
+    "b2bTradingPartners"
    ]
   },
   {
@@ -387,6 +425,12 @@
      "label": "Plan to Produce",
      "path": "manufacturing/processes/plan-to-produce.md"
     }
+   ],
+   "rest": [
+    "plans",
+    "supplyPlans",
+    "demandPlans",
+    "sourcingRules"
    ]
   },
   {
@@ -421,6 +465,10 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "purchaseRequisitions",
+    "requisitionProcessingRequests"
    ]
   },
   {
@@ -455,6 +503,12 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "draftPurchaseOrders",
+    "purchaseOrders",
+    "purchaseAgreements",
+    "purchaseOrderAcknowledgments"
    ]
   },
   {
@@ -480,6 +534,9 @@
      "label": "Plan to Produce",
      "path": "manufacturing/processes/plan-to-produce.md"
     }
+   ],
+   "rest": [
+    "supplyRequests"
    ]
   },
   {
@@ -513,6 +570,11 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "receivingReceiptRequests",
+    "inboundShipments",
+    "receivingTransactionsHistory"
    ]
   },
   {
@@ -561,6 +623,13 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "inventoryStagedTransactions",
+    "inventoryOnhandBalances",
+    "inventoryItemLots",
+    "transferOrders",
+    "recallNotices"
    ]
   },
   {
@@ -619,6 +688,13 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "processWorkOrders",
+    "workDefinitions",
+    "materialTransactions",
+    "operationTransactions",
+    "resourceTransactions"
    ]
   },
   {
@@ -655,6 +731,12 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "salesOrdersForOrderHub",
+    "salesOrdersForOrderHubRequests",
+    "salesOrderActionRequests",
+    "priceLists"
    ]
   },
   {
@@ -699,6 +781,11 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "shipmentTransactionRequests",
+    "shipments",
+    "pickWaves"
    ]
   },
   {
@@ -749,6 +836,12 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "invoices",
+    "payablesInterfaceInvoices",
+    "invoiceHolds",
+    "invoiceApprovalsAndNotificationsHistory"
    ]
   },
   {
@@ -787,6 +880,11 @@
      "label": "Procure to Pay",
      "path": "manufacturing/processes/procure-to-pay.md"
     }
+   ],
+   "rest": [
+    "paymentProcessRequests",
+    "payablesPayments",
+    "externalBankAccounts"
    ]
   },
   {
@@ -846,6 +944,13 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "receivablesInvoices",
+    "autoInvoiceInterfaceLines",
+    "standardReceipts",
+    "receivablesCreditMemos",
+    "receivablesAdjustments"
    ]
   },
   {
@@ -882,6 +987,10 @@
      "label": "Open interfaces",
      "path": "manufacturing/integrations/open-interfaces.yaml"
     }
+   ],
+   "rest": [
+    "cashExternalTransactions",
+    "cashBankAccountTransfers"
    ]
   },
   {
@@ -898,7 +1007,8 @@
    "functions": [
     "Mass additions from Payables asset lines (Create Mass Additions) or from Receiving",
     "Corporate book → primary ledger; MX tax book → MX secondary ledger (Perform Periodic Mass Copy)",
-    "Retirements and transfers between plants"
+    "Retirements and transfers between plants",
+    "No asset REST resources in the 26C Financials catalogue (only asset book and category lists of values); additions load through FA_MASS_ADDITIONS"
    ],
    "processes": [
     "Create Mass Additions (Payables)",
@@ -972,6 +1082,46 @@
      "label": "Procure to Pay",
      "path": "manufacturing/processes/procure-to-pay.md"
     }
+   ],
+   "rest": [
+    "expenseReports",
+    "expenses",
+    "expenseCreditCardTransactions"
+   ]
+  },
+  {
+   "id": "intg",
+   "layer": "L6",
+   "title": "Integration endpoints",
+   "subtitle": "ERP Integrations · business events · B2B",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "MDM",
+    "P2P",
+    "P2M",
+    "O2C",
+    "R2R"
+   ],
+   "description": "The REST entry points external systems use to load and extract data in bulk, follow scheduled processes and react to business events.",
+   "functions": [
+    "ERP Integrations runs FBDI: importBulkData uploads the zip to UCM, loads the interface tables and submits the import process; exportBulkData runs a job and returns its output",
+    "Other operations: uploadFileToUCM, submitESSJobRequest, loadAndImportData, extractAndPurge; callbacks and bell or email notifications when a load finishes",
+    "ERP Data Integrations: upload a file and get its status, transaction counts and exceptions",
+    "ERP Business Events: which business events are enabled; ERP Processes: process details",
+    "SCM B2B messages for EDI with customers and suppliers"
+   ],
+   "docs": [
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ],
+   "rest": [
+    "erpintegrations",
+    "files",
+    "erpBusinessEvents",
+    "erpProcesses"
    ]
   },
   {
@@ -1049,6 +1199,10 @@
      "label": "Procure to Pay",
      "path": "manufacturing/processes/procure-to-pay.md"
     }
+   ],
+   "rest": [
+    "receiptCosts",
+    "invoiceMatchingReceiptQuantityTransactions"
    ]
   },
   {
@@ -1121,6 +1275,12 @@
      "label": "Plan to Produce",
      "path": "manufacturing/processes/plan-to-produce.md"
     }
+   ],
+   "rest": [
+    "standardCosts",
+    "itemCosts",
+    "costAdjustments",
+    "costAccountingOverheadRules"
    ]
   },
   {
@@ -1170,6 +1330,10 @@
      "label": "Order to Cash",
      "path": "manufacturing/processes/order-to-cash.md"
     }
+   ],
+   "rest": [
+    "financialOrchestrationSourceTransactionEvents",
+    "financialOrchestrationTransferPrices"
    ]
   },
   {
@@ -1201,6 +1365,9 @@
      "label": "Record to Report",
      "path": "manufacturing/processes/record-to-report.md"
     }
+   ],
+   "rest": [
+    "accountingSetupMappingSets"
    ]
   },
   {
@@ -1402,6 +1569,10 @@
      "label": "Record to Report",
      "path": "manufacturing/processes/record-to-report.md"
     }
+   ],
+   "rest": [
+    "intercompanyAgreements",
+    "intercompanyTransactionSourceDocuments"
    ]
   },
   {
@@ -1425,6 +1596,9 @@
      "label": "Record to Report",
      "path": "manufacturing/processes/record-to-report.md"
     }
+   ],
+   "rest": [
+    "ledgerBalances"
    ]
   },
   {
@@ -1613,6 +1787,42 @@
    "to": "ce",
    "kind": "ret",
    "label": "bank statement"
+  },
+  {
+   "from": "intg",
+   "to": "coa",
+   "kind": "oi",
+   "label": "importBulkData → GL_INTERFACE → Import Journals"
+  },
+  {
+   "from": "intg",
+   "to": "ap",
+   "kind": "oi",
+   "label": "importBulkData → AP_INVOICES_INTERFACE → Import Payables Invoices"
+  },
+  {
+   "from": "intg",
+   "to": "ar",
+   "kind": "oi",
+   "label": "importBulkData → RA_INTERFACE_LINES_ALL → Import AutoInvoice"
+  },
+  {
+   "from": "intg",
+   "to": "om",
+   "kind": "oi",
+   "label": "importBulkData → DOO_ORDER_HEADERS_ALL_INT → Import Sales Orders"
+  },
+  {
+   "from": "intg",
+   "to": "inv",
+   "kind": "oi",
+   "label": "importBulkData → inventory transaction interface"
+  },
+  {
+   "from": "intg",
+   "to": "supp",
+   "kind": "oi",
+   "label": "importBulkData → POZ_SUPPLIERS_INT → Import Suppliers"
   },
   {
    "from": "pay",
@@ -3101,8 +3311,39 @@
      }
     ]
    }
+  },
+  {
+   "id": "rest",
+   "label": "REST APIs",
+   "kind": "table",
+   "after": "ints",
+   "eyebrow": "Connection points",
+   "data": {
+    "title": "REST APIs",
+    "lede": "Every top-level REST resource in Oracle's Financials, SCM and Procurement REST catalogues, with the module it belongs to on this map. Child resources (lines, distributions, attachments, flexfields) are reached through their parent. Any FBDI file can also be loaded through the ERP Integrations resource.",
+    "columns": [
+     "Resource",
+     "Module on the map",
+     "Path",
+     "Methods and actions",
+     "Guide"
+    ],
+    "search_hint": "Resource, path or action, e.g. invoices or applyHold",
+    "source": "rest_catalog",
+    "notes": [
+     {
+      "title": "Paths.",
+      "text": "Paths are relative to /fscmRestApi/resources/11.13.18.05 unless shown in full. Each resource name links to its page in Oracle's REST documentation."
+     },
+     {
+      "title": "Modules.",
+      "text": "Resources for areas outside this company's scope (federal, joint ventures, maintenance, channel revenue, product development, spend classification) are listed as Not on this map."
+     }
+    ]
+   }
   }
  ],
+ "rest_catalog": "manufacturing/integrations/rest-apis.json",
  "integrations": {
   "title": "Open interfaces",
   "lede": "Oracle open interface tables by module: how data is loaded and which process imports it. Names not printed in the guides provided are marked INFERRED.",

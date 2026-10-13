@@ -11,6 +11,11 @@ may list register IDs, which are replaced by their names here. Node `docs` paths
 pack files, turned into links under the model's `docs_base`. The build fails if an
 interface number would reach the screen. Open-interface registers (rows with a `table`)
 are labelled "<TABLE> · <name>" instead.
+
+A map may name a REST catalogue (`rest_catalog`, built by tools/rest_catalog.py). Node `rest`
+lists then name catalogue resources (the last segment of the resource path, e.g. "invoices"),
+a view of kind "table" with `"source": "rest_catalog"` receives the catalogue rows, and register
+rows with a `rest` value show it in their notes.
 """
 import json, os, re, sys
 try:
@@ -48,11 +53,13 @@ for group, items in reg["groups"].items():
     for i in items:
         row = {k: str(i.get(v, "") or "") for k, v in
                dict(id="id", name="name", source="source", target="target", direction="direction",
-                    lane="lane", cadence="cadence", workstream="workstream", notes="notes", table="table").items()}
+                    lane="lane", cadence="cadence", workstream="workstream", notes="notes", table="table", rest="rest").items()}
         row["group"] = group
         row["label"] = label(row)
         # pointers to pack files ("See INT955.md") are for agents, not map viewers
         row["notes"] = re.sub(r"\s*[;.]?\s*[Ss]ee [\w./-]+\.md\b\.?", "", row["notes"]).strip(" ;")
+        if row["rest"]:
+            row["notes"] = (row["notes"] + ". " if row["notes"] else "") + "REST: " + row["rest"]
         ints.append(row)
         by_id[row["id"]] = row
 
@@ -78,12 +85,24 @@ if model.get("dashboards"):
     diagrams.append(("dashboards", model["dashboards"]))
 if (model.get("close") or {}).get("process"):
     diagrams.append(("close.process", model["close"]["process"]))
+# REST catalogue: resources by the last segment of their path
+rest, cat = {}, None
+if model.get("rest_catalog"):
+    cat = json.load(open(os.path.join(ROOT, model.pop("rest_catalog")), encoding="utf-8"))
+    for r in cat["rows"]:
+        rest.setdefault(r["path"].rstrip("/").rsplit("/", 1)[-1], r)
+titles = {n["id"]: n["title"] for n in model["nodes"]}
 # extra tabs (model.views): each needs id, label, kind and data; their diagrams are checked like the others
 for v in model.get("views", []):
-    if not (v.get("id") and v.get("label") and v.get("data")) or v.get("kind") not in ("chain", "diagram"):
-        sys.exit(f"view {v.get('id')}: needs id, label, data and kind chain|diagram")
+    if not (v.get("id") and v.get("label") and v.get("data")) or v.get("kind") not in ("chain", "diagram", "table"):
+        sys.exit(f"view {v.get('id')}: needs id, label, data and kind chain|diagram|table")
     if v["kind"] == "diagram":
         diagrams.append((f"views.{v['id']}", v["data"]))
+    if v["kind"] == "table":
+        if v["data"].get("source") != "rest_catalog" or not cat:
+            sys.exit(f"view {v['id']}: a table view needs source rest_catalog and a model rest_catalog")
+        v["data"]["sources"] = cat["sources"]
+        v["data"]["rows"] = [dict(r, module=titles.get(r["module"], "Not on this map")) for r in cat["rows"]]
 for _, dg in diagrams:
   for n in dg["nodes"]:
     seen, shown = set(), []
@@ -97,6 +116,14 @@ for _, dg in diagrams:
         if not os.path.exists(os.path.join(ROOT, d["path"])):
             sys.exit(f"node {n['id']}: doc path does not exist: {d['path']}")
         d["url"] = base + d.pop("path")
+    shown_rest = []
+    for x in n.get("rest", []):
+        if x not in rest:
+            sys.exit(f"node {n['id']}: REST resource not in the catalogue: {x}")
+        r = rest[x]
+        shown_rest.append({k: r[k] for k in ("name", "path", "methods", "actions", "url")})
+    if shown_rest:
+        n["rest"] = shown_rest
     n.pop("failure_modes", None)
     n.pop("evidence", None)
 

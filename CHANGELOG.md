@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.0 — 2026-10-13
+- Manufacturing map: REST APIs from Oracle's REST catalogues (Financials 26C, SCM 26B, Procurement 25C).
+  - New **REST APIs** tab: all 822 top-level resources with the module on the map, path, methods, custom actions and a link to Oracle's page; search and filter by module or guide.
+  - Each module lists its key REST resources (e.g. Payables: invoices with validateInvoice; Order Management: salesOrdersForOrderHub with applyHold).
+  - New **Integration endpoints** node: ERP Integrations (importBulkData, exportBulkData and the other FBDI operations), ERP Data Integrations, ERP Business Events, ERP Processes; bulk-load connections to GL, Payables, Receivables, Order Management, Inventory and Suppliers.
+  - Open interfaces: each row shows its REST alternative, or that only the FBDI file through ERP Integrations applies.
+- `tools/rest_catalog.py` rebuilds `manufacturing/integrations/rest-apis.json`; the build expands node `rest` lists and fills `table` views.
+
 ## 0.7.1 — 2026-10-13
 - Manufacturing map: evidence from the Order Management, Assets and Financials getting-started guides.
   - Order to Cash: the orchestration task services (Create Shipping / Wait for Shipment, Create Billing Lines / Wait for Billing), order import through `DOO_ORDER_HEADERS_ALL_INT` or the Sales Orders for Order Hub REST API, and the Direct Sales Order Issue and COGS Recognition templates.
