@@ -1,0 +1,3061 @@
+{
+ "_about": "Generic Manufacturing Estate Map (mock food & beverage manufacturer FBCo). Source: Oracle Fusion Cloud 26C guides; see manufacturing/00-overview.md. Built by tools/build_map_data.py --map manufacturing.",
+ "docs_base": "https://github.com/fsdowie/oracle-generic-architecture/blob/main/",
+ "header": {
+  "eyebrow": "Generic reference · Oracle Fusion Cloud 26C · no client data",
+  "title": "Manufacturing Estate Map",
+  "lede": "A food and beverage manufacturer with a US parent and a Mexican subsidiary on Oracle Fusion ERP and SCM. Master data sits apart from transactions; each module shows its key processes, its open interfaces and the journal entries it creates. Select any module to see how it connects.",
+  "facts": [
+   {
+    "value": "2",
+    "label": "legal entities (US, Mexico)"
+   },
+   {
+    "value": "4",
+    "label": "ledger views (2 primary, 1 secondary, 1 reporting currency)"
+   },
+   {
+    "value": "{{integration_count}}",
+    "label": "open interfaces"
+   },
+   {
+    "value": "3",
+    "label": "inventory organisations"
+   }
+  ]
+ },
+ "footer": "Generic reference map built from the Oracle Fusion Cloud 26C implementation and user guides. FBCo is a mock company; items the guides don't cover are marked INFERRED in the knowledge pack.",
+ "tab_labels": {
+  "fnd": "Key processes",
+  "close": "Period close",
+  "ints": "Open interfaces"
+ },
+ "labels": {
+  "integrations": "Open interfaces"
+ },
+ "workstreams": [
+  {
+   "id": "MDM",
+   "label": "Master data"
+  },
+  {
+   "id": "P2P",
+   "label": "Procure to Pay"
+  },
+  {
+   "id": "P2M",
+   "label": "Plan to Produce"
+  },
+  {
+   "id": "O2C",
+   "label": "Order to Cash"
+  },
+  {
+   "id": "R2R",
+   "label": "Record to Report"
+  }
+ ],
+ "lane_groups": [
+  {
+   "name": "FBDI",
+   "match": "FBDI",
+   "color": "var(--bulk)"
+  },
+  {
+   "name": "REST",
+   "match": "REST",
+   "color": "var(--oic)"
+  },
+  {
+   "name": "Spreadsheet",
+   "match": "Spreadsheet",
+   "color": "var(--airflow)"
+  },
+  {
+   "name": "File / internal",
+   "match": ".*",
+   "color": "var(--extract)"
+  }
+ ],
+ "legend": [
+  {
+   "label": "document hand-off",
+   "color": "var(--oic)"
+  },
+  {
+   "label": "accounting event",
+   "color": "var(--airflow)"
+  },
+  {
+   "label": "ledger propagation",
+   "color": "var(--extract)"
+  },
+  {
+   "label": "return / external",
+   "color": "var(--ext)",
+   "dash": true
+  }
+ ],
+ "layers": [
+  {
+   "id": "L1",
+   "label": "Layer 1",
+   "title": "Enterprise structure & master data"
+  },
+  {
+   "id": "L2",
+   "label": "Layer 2",
+   "title": "Plan, source & order"
+  },
+  {
+   "id": "L3",
+   "label": "Layer 3",
+   "title": "Transactions"
+  },
+  {
+   "id": "L4",
+   "label": "Layer 4",
+   "title": "Accounting engine"
+  },
+  {
+   "id": "L5",
+   "label": "Layer 5",
+   "title": "Ledgers"
+  },
+  {
+   "id": "L6",
+   "label": "Layer 6",
+   "title": "Close, report & banks"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "ent",
+   "layer": "L1",
+   "title": "Enterprise structure",
+   "subtitle": "Legal entities · BUs · orgs",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "MDM",
+    "R2R"
+   ],
+   "description": "Two legal entities (FBCo US, FBCo México), a business unit each, inventory organisations for the plants and the distribution centre, and the cost organisations that value them.",
+   "functions": [
+    "Legal entities own the ledgers and the tax registrations",
+    "Business units run Payables, Receivables and Procurement; profit-centre BUs own inventory",
+    "Inventory organisations: US plant, US distribution centre, MX plant",
+    "Cost organisations and cost books value each inventory organisation"
+   ],
+   "docs": [
+    {
+     "label": "Enterprise structure and ledgers",
+     "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+    }
+   ]
+  },
+  {
+   "id": "coa",
+   "layer": "L1",
+   "title": "Chart of accounts & ledgers",
+   "subtitle": "Corporate COA · calendars · rates",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "MDM",
+    "R2R"
+   ],
+   "description": "One corporate chart of accounts for both countries, a chart of accounts mapping to the Mexican statutory chart, accounting calendars and daily rates.",
+   "functions": [
+    "Corporate chart: Company, Cost centre, Account, Product line, Intercompany, Future",
+    "Account hierarchies (trees) for reporting and allocations",
+    "Cross-validation rules stop invalid account combinations",
+    "Chart of accounts mapping: corporate → Mexican statutory chart (SAT grouping code)"
+   ],
+   "processes": [
+    "Import Segment Values and Hierarchies",
+    "Import Account Combinations",
+    "Import Chart of Accounts Mapping Rules",
+    "Import Daily Rates"
+   ],
+   "integrations": [
+    "OI-GL-SEGVAL",
+    "OI-GL-SEGHIER",
+    "OI-GL-CCID",
+    "OI-GL-CVR",
+    "OI-GL-COAMAP",
+    "OI-GL-RATES"
+   ],
+   "docs": [
+    {
+     "label": "Enterprise structure and ledgers",
+     "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "supp",
+   "layer": "L1",
+   "title": "Suppliers",
+   "subtitle": "Ingredients · packaging · MRO",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "MDM",
+    "P2P"
+   ],
+   "description": "The supplier master: suppliers, sites, contacts, bank accounts and site assignments to the business units that buy and pay.",
+   "functions": [
+    "Supplier registration and approval",
+    "Sites assigned to the procurement and invoicing business units",
+    "Bank accounts and payment methods for Payments",
+    "Tax registrations used by Tax on invoices"
+   ],
+   "processes": [
+    "Import Suppliers (sites, addresses, contacts, site assignments)"
+   ],
+   "integrations": [
+    "OI-SUPP",
+    "OI-SUPP-SITE"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "manufacturing/processes/procure-to-pay.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "cust",
+   "layer": "L1",
+   "title": "Customers",
+   "subtitle": "Retail · food service",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "MDM",
+    "O2C"
+   ],
+   "description": "Customer accounts and sites for retail chains, distributors and food-service operators, with credit profiles and payment methods.",
+   "functions": [
+    "Customer accounts, bill-to and ship-to sites",
+    "Customer profiles: payment terms, credit limits, dunning",
+    "Customer bank accounts and payment methods for automatic receipts"
+   ],
+   "processes": [
+    "Customer import"
+   ],
+   "integrations": [
+    "OI-CUST-PROF"
+   ],
+   "docs": [
+    {
+     "label": "Order to Cash",
+     "path": "manufacturing/processes/order-to-cash.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "item",
+   "layer": "L1",
+   "title": "Items, recipes & costs",
+   "subtitle": "Product Hub · work definitions",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "MDM",
+    "P2M",
+    "P2P",
+    "O2C"
+   ],
+   "description": "Items for ingredients, packaging and finished goods; work definitions (recipes) for process manufacturing; standard costs in the cost book.",
+   "functions": [
+    "Items with lot control and shelf life (expiry dates)",
+    "Work definitions: ingredients in, primary output and co-products out",
+    "Dual units of measure where needed (litres and kilograms)",
+    "Standard costs loaded into the cost book"
+   ],
+   "processes": [
+    "Item Import",
+    "Standard Cost Import"
+   ],
+   "integrations": [
+    "OI-ITEM",
+    "OI-STDCOST"
+   ],
+   "docs": [
+    {
+     "label": "Plan to Produce",
+     "path": "manufacturing/processes/plan-to-produce.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "banktax",
+   "layer": "L1",
+   "title": "Banks & tax",
+   "subtitle": "Bank accounts · US sales tax · MX VAT",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "MDM",
+    "P2P",
+    "O2C",
+    "R2R"
+   ],
+   "description": "Internal bank accounts for each legal entity, and the tax regimes Tax applies to purchases and sales: US sales and use tax, and Mexican VAT (IVA).",
+   "functions": [
+    "Bank accounts used by Payments, Receivables and Cash Management",
+    "Tax regimes, rates and rules for both countries",
+    "Recoverable and payable tax accounts per regime"
+   ],
+   "docs": [
+    {
+     "label": "Overview and sources",
+     "path": "manufacturing/00-overview.md"
+    }
+   ]
+  },
+  {
+   "id": "edi",
+   "layer": "L2",
+   "title": "Customer orders",
+   "subtitle": "EDI · customer portal",
+   "external": true,
+   "core": false,
+   "workstreams": [
+    "O2C"
+   ],
+   "description": "Retail purchase orders arrive by EDI; smaller customers order through a portal.",
+   "functions": [
+    "Sends purchase orders to Order Management",
+    "Receives order acknowledgements, ship notices and invoices"
+   ],
+   "integrations": [
+    "OI-SO"
+   ],
+   "docs": [
+    {
+     "label": "Order to Cash",
+     "path": "manufacturing/processes/order-to-cash.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "plan",
+   "layer": "L2",
+   "title": "Planning Central",
+   "subtitle": "Demand & supply plan",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2M",
+    "P2P"
+   ],
+   "description": "Plans demand from forecasts and sales orders against on-hand and open supply, and recommends what to make and what to buy.",
+   "functions": [
+    "Forecasts demand and nets it against on-hand and open supply",
+    "Creates planned orders for make and buy",
+    "Releases planned make orders as work orders and planned buy orders as requisitions"
+   ],
+   "processes": [
+    "Run plan",
+    "Release planned orders"
+   ],
+   "docs": [
+    {
+     "label": "Plan to Produce",
+     "path": "manufacturing/processes/plan-to-produce.md"
+    }
+   ]
+  },
+  {
+   "id": "req",
+   "layer": "L2",
+   "title": "Self Service Procurement",
+   "subtitle": "Requisitions",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Employees and planners request goods and services; approved requisition lines become purchase orders.",
+   "functions": [
+    "Catalogue and non-catalogue requests",
+    "Approval by amount and category",
+    "Approved lines → PO lines (automatic or by a buyer)"
+   ],
+   "processes": [
+    "Requisition approval",
+    "Import Requisitions"
+   ],
+   "integrations": [
+    "OI-REQ"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "manufacturing/processes/procure-to-pay.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "po",
+   "layer": "L2",
+   "title": "Purchasing",
+   "subtitle": "Purchase orders · agreements",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Purchase orders and agreements with ingredient and packaging suppliers; PO schedules become expected receipts.",
+   "functions": [
+    "Blanket and contract agreements with price breaks",
+    "POs from requisitions or planning",
+    "Accrue-at-receipt for inventory lines; period-end accrual for expense lines"
+   ],
+   "processes": [
+    "PO approval",
+    "Import Orders"
+   ],
+   "integrations": [
+    "OI-PO"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "manufacturing/processes/procure-to-pay.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "sco",
+   "layer": "L2",
+   "title": "Supply Chain Orchestration",
+   "subtitle": "Supply requests",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2M",
+    "O2C",
+    "P2P"
+   ],
+   "description": "Takes supply requests from planning and Order Management, creates the work order, transfer order or purchase order, and tracks it.",
+   "functions": [
+    "Creates work orders from make requests",
+    "Creates transfer orders and purchase orders from buy and transfer requests",
+    "Raises exceptions when supply changes (for example a work order on hold)"
+   ],
+   "docs": [
+    {
+     "label": "Plan to Produce",
+     "path": "manufacturing/processes/plan-to-produce.md"
+    }
+   ]
+  },
+  {
+   "id": "rcv",
+   "layer": "L3",
+   "title": "Receiving",
+   "subtitle": "Receive · inspect · put away",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Receives goods against PO schedules and ASNs, inspects them, and puts lots away into subinventories.",
+   "functions": [
+    "Receipts against POs and advance shipment notices",
+    "Inspection before delivery (food safety)",
+    "Lot numbers and expiry dates captured at receipt"
+   ],
+   "processes": [
+    "Receiving Transaction Manager"
+   ],
+   "integrations": [
+    "OI-RCV"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "manufacturing/processes/procure-to-pay.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "inv",
+   "layer": "L3",
+   "title": "Inventory",
+   "subtitle": "On hand · lots · subinventories",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P",
+    "P2M",
+    "O2C"
+   ],
+   "description": "On-hand quantities by organisation, subinventory and lot; issues, transfers, cycle counts and lot expiry.",
+   "functions": [
+    "Lot control with expiry dates; first-expiry, first-out picking",
+    "Transfers between plant and distribution centre",
+    "Cycle counts and adjustments",
+    "Sends every transaction to Cost Accounting"
+   ],
+   "processes": [
+    "Transfer Inventory Transactions to Costing",
+    "Cycle counting"
+   ],
+   "entries": [
+    {
+     "event": "Cycle count adjustment (shortage)",
+     "dr": [
+      "Inventory adjustment expense"
+     ],
+     "cr": [
+      "Inventory valuation"
+     ]
+    }
+   ],
+   "integrations": [
+    "OI-INVTXN"
+   ],
+   "docs": [
+    {
+     "label": "Plan to Produce",
+     "path": "manufacturing/processes/plan-to-produce.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "mfg",
+   "layer": "L3",
+   "title": "Manufacturing",
+   "subtitle": "Process work orders",
+   "external": false,
+   "core": true,
+   "workstreams": [
+    "P2M"
+   ],
+   "description": "Runs process work orders from the work definition: issues ingredient lots, records resources, completes finished-good lots and co-products.",
+   "functions": [
+    "Process manufacturing enabled per plant",
+    "Material issue (push or backflush) by lot",
+    "Resource transactions: labour and machine hours",
+    "Product completion with lot genealogy for recall"
+   ],
+   "processes": [
+    "Import Work Orders",
+    "Material, resource and operation transactions",
+    "Product completion"
+   ],
+   "entries": [
+    {
+     "event": "Material issue",
+     "dr": [
+      "WIP valuation"
+     ],
+     "cr": [
+      "Inventory valuation (ingredients)"
+     ]
+    },
+    {
+     "event": "Product completion",
+     "dr": [
+      "Inventory valuation (finished goods)"
+     ],
+     "cr": [
+      "WIP valuation"
+     ]
+    }
+   ],
+   "integrations": [
+    "OI-WO",
+    "OI-WO-OPTXN",
+    "OI-WO-RESTXN"
+   ],
+   "docs": [
+    {
+     "label": "Plan to Produce",
+     "path": "manufacturing/processes/plan-to-produce.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "om",
+   "layer": "L3",
+   "title": "Order Management",
+   "subtitle": "Sales orders",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "O2C"
+   ],
+   "description": "Captures sales orders, checks credit and availability, and orchestrates fulfilment through shipping and billing.",
+   "functions": [
+    "Order capture from EDI and portal",
+    "Pricing, credit check and scheduling",
+    "Fulfilment lines to Shipping; fulfilled lines to Receivables"
+   ],
+   "processes": [
+    "Import Sales Orders",
+    "Order orchestration"
+   ],
+   "integrations": [
+    "OI-SO"
+   ],
+   "docs": [
+    {
+     "label": "Order to Cash",
+     "path": "manufacturing/processes/order-to-cash.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "ship",
+   "layer": "L3",
+   "title": "Shipping",
+   "subtitle": "Pick · pack · ship",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "O2C"
+   ],
+   "description": "Picks lots from inventory, packs and confirms shipments; ship confirm issues inventory and triggers billing.",
+   "functions": [
+    "Pick waves and pick slips",
+    "Pack and ship with carrier details",
+    "Ship Confirm issues inventory and updates the order"
+   ],
+   "processes": [
+    "Ship Confirm"
+   ],
+   "entries": [
+    {
+     "event": "Ship confirm (sales order issue)",
+     "dr": [
+      "Deferred COGS"
+     ],
+     "cr": [
+      "Inventory valuation (finished goods)"
+     ]
+    }
+   ],
+   "integrations": [
+    "OI-SHIP"
+   ],
+   "docs": [
+    {
+     "label": "Order to Cash",
+     "path": "manufacturing/processes/order-to-cash.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "ap",
+   "layer": "L3",
+   "title": "Payables",
+   "subtitle": "Supplier invoices",
+   "external": false,
+   "core": true,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Records supplier invoices, matches them to purchase orders and receipts, validates and approves them, and accounts for them.",
+   "functions": [
+    "2-way match to PO; 3-way match to receipt",
+    "Validation calculates invoice price and exchange rate variances",
+    "Approval workflow",
+    "Asset lines go to Fixed Assets as mass additions"
+   ],
+   "processes": [
+    "Import Payables Invoices",
+    "Validate Payables Invoices",
+    "Initiate Invoice Approval Workflow",
+    "Create Accounting"
+   ],
+   "entries": [
+    {
+     "event": "Invoice matched to the PO",
+     "dr": [
+      "Uninvoiced receipts accrual",
+      "Invoice price variance",
+      "Recoverable tax"
+     ],
+     "cr": [
+      "Supplier liability"
+     ]
+    }
+   ],
+   "integrations": [
+    "OI-APINV"
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "manufacturing/processes/procure-to-pay.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "pay",
+   "layer": "L3",
+   "title": "Payments",
+   "subtitle": "Payment runs",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Selects due invoices, builds payments and payment files, and sends them to the bank.",
+   "functions": [
+    "Payment process requests by pay group and due date",
+    "ACH and wire files per bank",
+    "Payment accounting at issue or at clearing"
+   ],
+   "processes": [
+    "Submit Payment Process Request",
+    "Create Accounting"
+   ],
+   "entries": [
+    {
+     "event": "Payment",
+     "dr": [
+      "Supplier liability"
+     ],
+     "cr": [
+      "Cash (or cash clearing)"
+     ]
+    }
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "manufacturing/processes/procure-to-pay.md"
+    }
+   ]
+  },
+  {
+   "id": "ar",
+   "layer": "L3",
+   "title": "Receivables",
+   "subtitle": "Invoices · receipts",
+   "external": false,
+   "core": true,
+   "workstreams": [
+    "O2C"
+   ],
+   "description": "Bills customers from fulfilled order lines, recognises revenue, and applies customer payments.",
+   "functions": [
+    "AutoInvoice from fulfilled order lines",
+    "Revenue recognition",
+    "Lockbox receipts applied to invoices",
+    "Collections and credit"
+   ],
+   "processes": [
+    "Import AutoInvoice",
+    "Recognize Revenue",
+    "Process Receipts Through Lockbox",
+    "Create Receivables Accounting"
+   ],
+   "entries": [
+    {
+     "event": "Customer invoice",
+     "dr": [
+      "Receivable"
+     ],
+     "cr": [
+      "Revenue",
+      "Tax payable"
+     ]
+    },
+    {
+     "event": "Customer receipt",
+     "dr": [
+      "Cash"
+     ],
+     "cr": [
+      "Receivable"
+     ]
+    }
+   ],
+   "integrations": [
+    "OI-ARINV",
+    "OI-LOCKBOX"
+   ],
+   "docs": [
+    {
+     "label": "Order to Cash",
+     "path": "manufacturing/processes/order-to-cash.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "ce",
+   "layer": "L3",
+   "title": "Cash Management",
+   "subtitle": "Bank statements",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P",
+    "O2C",
+    "R2R"
+   ],
+   "description": "Loads bank statements and reconciles them against payments, receipts and journal entries.",
+   "functions": [
+    "Bank statements loaded daily",
+    "Automatic reconciliation by rule",
+    "Bank charges and interest accounted from statement lines"
+   ],
+   "processes": [
+    "Load and import bank statements",
+    "Autoreconcile bank statements"
+   ],
+   "integrations": [
+    "OI-CE-STMT"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "manufacturing/processes/record-to-report.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "fa",
+   "layer": "L3",
+   "title": "Fixed Assets",
+   "subtitle": "Plant equipment",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "Capitalises plant equipment from Payables invoices and depreciates it.",
+   "functions": [
+    "Mass additions from Payables asset lines",
+    "Depreciation per asset book",
+    "Retirements and transfers between plants"
+   ],
+   "processes": [
+    "Post Mass Additions",
+    "Calculate Depreciation"
+   ],
+   "entries": [
+    {
+     "event": "Capitalise from asset clearing",
+     "dr": [
+      "Asset cost"
+     ],
+     "cr": [
+      "Asset clearing"
+     ]
+    },
+    {
+     "event": "Depreciation",
+     "dr": [
+      "Depreciation expense"
+     ],
+     "cr": [
+      "Accumulated depreciation"
+     ]
+    }
+   ],
+   "integrations": [
+    "OI-FA-ADD"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "manufacturing/processes/record-to-report.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "exm",
+   "layer": "L3",
+   "title": "Expenses",
+   "subtitle": "Employee expenses",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Employee expense reports and corporate card transactions, approved and paid through Payables.",
+   "functions": [
+    "Expense reports with receipts and policy checks",
+    "Corporate card transactions",
+    "Approved reports become Payables invoices"
+   ],
+   "entries": [
+    {
+     "event": "Approved expense report",
+     "dr": [
+      "Expense"
+     ],
+     "cr": [
+      "Employee liability"
+     ]
+    }
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "manufacturing/processes/procure-to-pay.md"
+    }
+   ]
+  },
+  {
+   "id": "bank",
+   "layer": "L6",
+   "title": "Banks",
+   "subtitle": "US and MX banks",
+   "external": true,
+   "core": false,
+   "workstreams": [
+    "P2P",
+    "O2C",
+    "R2R"
+   ],
+   "description": "FBCo's banks: payment files in, lockbox and statement files out.",
+   "functions": [
+    "Receives payment files",
+    "Sends lockbox files and daily bank statements"
+   ],
+   "processes": [
+    "OI-LOCKBOX",
+    "OI-CE-STMT"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "manufacturing/processes/record-to-report.md"
+    }
+   ]
+  },
+  {
+   "id": "rcvacct",
+   "layer": "L4",
+   "title": "Receipt Accounting",
+   "subtitle": "Purchase accruals",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "P2P"
+   ],
+   "description": "Creates accrual accounting for receipts, matches receipt accruals to invoices, and clears the accrual account.",
+   "functions": [
+    "Accrue at receipt (inventory) or at period end (expense)",
+    "Matches invoices to receipt accruals",
+    "Clears accrual balances by rule"
+   ],
+   "processes": [
+    "Create Receipt Accounting Distributions",
+    "Match Receipt Accruals",
+    "Clear Receipt Accrual Balances",
+    "Create Accounting"
+   ],
+   "entries": [
+    {
+     "event": "Receipt into inspection",
+     "dr": [
+      "Receiving inspection"
+     ],
+     "cr": [
+      "Uninvoiced receipts accrual"
+     ]
+    },
+    {
+     "event": "Expense PO accrued at period end",
+     "dr": [
+      "Expense"
+     ],
+     "cr": [
+      "Uninvoiced receipts accrual"
+     ]
+    }
+   ],
+   "docs": [
+    {
+     "label": "Procure to Pay",
+     "path": "manufacturing/processes/procure-to-pay.md"
+    }
+   ]
+  },
+  {
+   "id": "cst",
+   "layer": "L4",
+   "title": "Cost Accounting",
+   "subtitle": "Valuation · WIP · COGS",
+   "external": false,
+   "core": true,
+   "workstreams": [
+    "P2M",
+    "O2C",
+    "P2P"
+   ],
+   "description": "Values every inventory and work-order transaction, absorbs overhead, recognises COGS in step with revenue, and reports gross margin.",
+   "functions": [
+    "Standard cost (US) and perpetual average cost (MX)",
+    "WIP valuation and variances by work order",
+    "Overhead absorption rules",
+    "COGS recognised when revenue is recognised"
+   ],
+   "processes": [
+    "Create Cost Accounting Distributions",
+    "Calculate Overhead Absorption",
+    "Close cost accounting periods",
+    "Analyze Product Gross Margins"
+   ],
+   "entries": [
+    {
+     "event": "Delivery to inventory",
+     "dr": [
+      "Inventory valuation",
+      "Purchase price variance (if unfavourable)"
+     ],
+     "cr": [
+      "Receiving inspection"
+     ]
+    },
+    {
+     "event": "Resource and overhead",
+     "dr": [
+      "WIP valuation"
+     ],
+     "cr": [
+      "Resource absorption",
+      "Overhead absorption"
+     ]
+    },
+    {
+     "event": "Work order close",
+     "dr": [
+      "WIP variance"
+     ],
+     "cr": [
+      "WIP valuation"
+     ]
+    },
+    {
+     "event": "COGS recognition",
+     "dr": [
+      "COGS"
+     ],
+     "cr": [
+      "Deferred COGS"
+     ]
+    }
+   ],
+   "docs": [
+    {
+     "label": "Plan to Produce",
+     "path": "manufacturing/processes/plan-to-produce.md"
+    }
+   ]
+  },
+  {
+   "id": "scfo",
+   "layer": "L4",
+   "title": "Financial Orchestration",
+   "subtitle": "Intercompany trade",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "O2C",
+    "P2P",
+    "R2R"
+   ],
+   "description": "Separates the financial flow from the physical flow when FBCo México ships to FBCo US: transfer pricing and intercompany invoices.",
+   "functions": [
+    "Financial orchestration flow MX plant → US distribution centre",
+    "Transfer price: cost plus a markup",
+    "Creates the intercompany AR invoice (MX) and AP invoice (US)"
+   ],
+   "processes": [
+    "Financial orchestration flows",
+    "Transfer pricing rules"
+   ],
+   "entries": [
+    {
+     "event": "Seller (MX)",
+     "dr": [
+      "Intercompany receivable"
+     ],
+     "cr": [
+      "Intercompany revenue"
+     ]
+    },
+    {
+     "event": "Buyer (US)",
+     "dr": [
+      "Inventory (transfer price)"
+     ],
+     "cr": [
+      "Intercompany payable"
+     ]
+    }
+   ],
+   "docs": [
+    {
+     "label": "Order to Cash",
+     "path": "manufacturing/processes/order-to-cash.md"
+    }
+   ]
+  },
+  {
+   "id": "sla",
+   "layer": "L4",
+   "title": "Subledger Accounting",
+   "subtitle": "Create Accounting",
+   "external": false,
+   "core": true,
+   "workstreams": [
+    "MDM",
+    "P2P",
+    "P2M",
+    "O2C",
+    "R2R"
+   ],
+   "description": "Turns every subledger event into journal entries using each ledger's accounting method, and transfers them to General Ledger.",
+   "functions": [
+    "Accounting methods, journal entry rule sets and account rules",
+    "Mapping sets derive accounts (for example by item category)",
+    "For Mexico writes the primary and the secondary ledger entries in one run"
+   ],
+   "processes": [
+    "Create Accounting",
+    "Transfer to General Ledger"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "manufacturing/processes/record-to-report.md"
+    }
+   ]
+  },
+  {
+   "id": "glus",
+   "layer": "L5",
+   "title": "US primary ledger",
+   "subtitle": "USD · corporate COA",
+   "external": false,
+   "core": true,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "FBCo US's main ledger: US GAAP, USD, the corporate chart of accounts.",
+   "functions": [
+    "Receives journals from Create Accounting and Import Journals",
+    "Revaluation of MXN balances",
+    "Part of the USD ledger set"
+   ],
+   "processes": [
+    "Import Journals",
+    "Post Journals",
+    "Revalue Balances"
+   ],
+   "integrations": [
+    "OI-GL-JE",
+    "OI-GL-BUD"
+   ],
+   "docs": [
+    {
+     "label": "Enterprise structure and ledgers",
+     "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "glmx",
+   "layer": "L5",
+   "title": "MX primary ledger",
+   "subtitle": "MXN · corporate COA",
+   "external": false,
+   "core": true,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "FBCo México's main ledger: MXN, the corporate chart and corporate policies.",
+   "functions": [
+    "Receives journals from Create Accounting and Import Journals",
+    "Copies journals to the secondary ledger and the USD reporting currency",
+    "Revaluation of USD balances"
+   ],
+   "processes": [
+    "Import Journals",
+    "Post Journals",
+    "Revalue Balances"
+   ],
+   "integrations": [
+    "OI-GL-JE"
+   ],
+   "docs": [
+    {
+     "label": "Enterprise structure and ledgers",
+     "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "glmx2",
+   "layer": "L5",
+   "title": "MX secondary ledger",
+   "subtitle": "MXN · statutory COA",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "The Mexican statutory books: the local chart through the chart of accounts mapping, at subledger conversion level.",
+   "functions": [
+    "Subledger level: Create Accounting writes these entries with the primary",
+    "GL journals copied at posting (journal conversion rules)",
+    "Basis for statutory and tax reporting in Mexico"
+   ],
+   "docs": [
+    {
+     "label": "Enterprise structure and ledgers",
+     "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+    }
+   ]
+  },
+  {
+   "id": "glmxr",
+   "layer": "L5",
+   "title": "MX reporting currency",
+   "subtitle": "USD · corporate COA",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "FBCo México in USD: each posted MX primary journal is converted to USD (journal level).",
+   "functions": [
+    "Same chart, calendar and method as the MX primary ledger",
+    "Converted at the daily rate when journals post",
+    "Joins the US ledger in the USD ledger set"
+   ],
+   "docs": [
+    {
+     "label": "Enterprise structure and ledgers",
+     "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+    }
+   ]
+  },
+  {
+   "id": "close",
+   "layer": "L6",
+   "title": "Period close",
+   "subtitle": "Revalue · translate · close",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "Closes the subledgers in order, then revalues, translates and closes the ledgers.",
+   "functions": [
+    "Subledger close order: inventory and cost, receipt accounting, Payables, Receivables, Assets",
+    "Revaluation to unrealized gain or loss",
+    "Translation differences to the cumulative translation adjustment",
+    "Close primary, secondary and reporting ledgers"
+   ],
+   "processes": [
+    "Revalue Balances",
+    "Translate General Ledger Account Balances",
+    "Open and Close Periods"
+   ],
+   "entries": [
+    {
+     "event": "Revaluation (loss on a foreign-currency payable)",
+     "dr": [
+      "Unrealized loss"
+     ],
+     "cr": [
+      "Payable (ledger-currency adjustment)"
+     ]
+    }
+   ],
+   "integrations": [
+    "OI-GL-HIST"
+   ],
+   "docs": [
+    {
+     "label": "Period close",
+     "path": "manufacturing/processes/period-close.md"
+    },
+    {
+     "label": "Open interfaces",
+     "path": "manufacturing/integrations/open-interfaces.yaml"
+    }
+   ]
+  },
+  {
+   "id": "ic",
+   "layer": "L6",
+   "title": "Intercompany & allocations",
+   "subtitle": "Balancing · allocations",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "Balances journals that cross companies and allocates plant overheads and shared services.",
+   "functions": [
+    "Intercompany balancing rules add due-to and due-from lines",
+    "Allocations spread overhead pools by driver"
+   ],
+   "processes": [
+    "Generate Intercompany Allocations",
+    "Generate Allocations"
+   ],
+   "entries": [
+    {
+     "event": "Journal across companies",
+     "dr": [
+      "Intercompany receivable (due from)"
+     ],
+     "cr": [
+      "Intercompany payable (due to)"
+     ]
+    }
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "manufacturing/processes/record-to-report.md"
+    }
+   ]
+  },
+  {
+   "id": "rpt",
+   "layer": "L6",
+   "title": "Reporting",
+   "subtitle": "Ledger set · FRS · Smart View",
+   "external": false,
+   "core": false,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "Consolidated USD reporting across the US ledger and the MX reporting currency, plus statutory reports from the secondary ledger.",
+   "functions": [
+    "Ledger set in USD across both companies",
+    "Financial Reporting and Smart View on the balances cubes",
+    "Statutory reports from the MX secondary ledger"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "manufacturing/processes/record-to-report.md"
+    }
+   ]
+  },
+  {
+   "id": "fccs",
+   "layer": "L6",
+   "title": "Consolidation",
+   "subtitle": "FCCS",
+   "external": true,
+   "core": false,
+   "workstreams": [
+    "R2R"
+   ],
+   "description": "Group consolidation: translation, eliminations and the consolidated statements.",
+   "functions": [
+    "Loads trial balances from both ledgers",
+    "Eliminates intercompany balances",
+    "Consolidated financial statements"
+   ],
+   "docs": [
+    {
+     "label": "Record to Report",
+     "path": "manufacturing/processes/record-to-report.md"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "from": "ent",
+   "to": "coa",
+   "kind": "ledger",
+   "label": "legal entities and BUs → ledgers"
+  },
+  {
+   "from": "supp",
+   "to": "po",
+   "kind": "doc",
+   "label": "supplier site → PO"
+  },
+  {
+   "from": "cust",
+   "to": "om",
+   "kind": "doc",
+   "label": "customer, bill-to and credit → sales order"
+  },
+  {
+   "from": "item",
+   "to": "plan",
+   "kind": "doc",
+   "label": "items, recipes, lead times → plan"
+  },
+  {
+   "from": "item",
+   "to": "mfg",
+   "kind": "doc",
+   "label": "work definition (recipe) → work order"
+  },
+  {
+   "from": "plan",
+   "to": "req",
+   "kind": "doc",
+   "label": "planned buy → requisition"
+  },
+  {
+   "from": "plan",
+   "to": "sco",
+   "kind": "doc",
+   "label": "planned make → supply request"
+  },
+  {
+   "from": "sco",
+   "to": "mfg",
+   "kind": "doc",
+   "label": "supply request → work order"
+  },
+  {
+   "from": "req",
+   "to": "po",
+   "kind": "doc",
+   "label": "approved requisition → PO line"
+  },
+  {
+   "from": "po",
+   "to": "rcv",
+   "kind": "doc",
+   "label": "PO schedule → expected receipt"
+  },
+  {
+   "from": "po",
+   "to": "ap",
+   "kind": "doc",
+   "label": "PO → 2-way match"
+  },
+  {
+   "from": "rcv",
+   "to": "ap",
+   "kind": "doc",
+   "label": "receipt → 3-way match"
+  },
+  {
+   "from": "rcv",
+   "to": "inv",
+   "kind": "doc",
+   "label": "deliver → on-hand lots"
+  },
+  {
+   "from": "inv",
+   "to": "mfg",
+   "kind": "doc",
+   "label": "ingredient lots → material issue"
+  },
+  {
+   "from": "mfg",
+   "to": "inv",
+   "kind": "doc",
+   "label": "product completion → finished-good lots"
+  },
+  {
+   "from": "edi",
+   "to": "om",
+   "kind": "doc",
+   "label": "EDI / portal order → sales order"
+  },
+  {
+   "from": "om",
+   "to": "sco",
+   "kind": "doc",
+   "label": "fulfilment line → supply request"
+  },
+  {
+   "from": "om",
+   "to": "ship",
+   "kind": "doc",
+   "label": "fulfilment line → shipment request"
+  },
+  {
+   "from": "inv",
+   "to": "ship",
+   "kind": "doc",
+   "label": "pick lots (first expiry, first out)"
+  },
+  {
+   "from": "ship",
+   "to": "om",
+   "kind": "ret",
+   "label": "ship confirm → fulfilled line"
+  },
+  {
+   "from": "om",
+   "to": "ar",
+   "kind": "doc",
+   "label": "fulfilled line → AutoInvoice"
+  },
+  {
+   "from": "ap",
+   "to": "pay",
+   "kind": "doc",
+   "label": "validated, approved invoice → payment"
+  },
+  {
+   "from": "exm",
+   "to": "ap",
+   "kind": "doc",
+   "label": "approved expense report → invoice"
+  },
+  {
+   "from": "ap",
+   "to": "fa",
+   "kind": "doc",
+   "label": "asset invoice line → mass addition"
+  },
+  {
+   "from": "pay",
+   "to": "bank",
+   "kind": "doc",
+   "label": "payment file"
+  },
+  {
+   "from": "bank",
+   "to": "ar",
+   "kind": "ret",
+   "label": "lockbox file → receipts"
+  },
+  {
+   "from": "bank",
+   "to": "ce",
+   "kind": "ret",
+   "label": "bank statement"
+  },
+  {
+   "from": "pay",
+   "to": "ce",
+   "kind": "doc",
+   "label": "payments → reconciliation"
+  },
+  {
+   "from": "ar",
+   "to": "ce",
+   "kind": "doc",
+   "label": "receipts → reconciliation"
+  },
+  {
+   "from": "rcv",
+   "to": "rcvacct",
+   "kind": "acct",
+   "label": "receipt → accrual distributions"
+  },
+  {
+   "from": "inv",
+   "to": "cst",
+   "kind": "acct",
+   "label": "Transfer Inventory Transactions to Costing"
+  },
+  {
+   "from": "mfg",
+   "to": "cst",
+   "kind": "acct",
+   "label": "material, resource, completion → WIP costing"
+  },
+  {
+   "from": "ship",
+   "to": "cst",
+   "kind": "acct",
+   "label": "sales order issue → deferred COGS"
+  },
+  {
+   "from": "ar",
+   "to": "cst",
+   "kind": "acct",
+   "label": "revenue recognised → COGS recognition"
+  },
+  {
+   "from": "ship",
+   "to": "scfo",
+   "kind": "acct",
+   "label": "MX → US shipment → intercompany event"
+  },
+  {
+   "from": "scfo",
+   "to": "ar",
+   "kind": "doc",
+   "label": "intercompany AR invoice (MX)"
+  },
+  {
+   "from": "scfo",
+   "to": "ap",
+   "kind": "doc",
+   "label": "intercompany AP invoice (US)"
+  },
+  {
+   "from": "rcvacct",
+   "to": "sla",
+   "kind": "acct",
+   "label": "receipt accounting events"
+  },
+  {
+   "from": "cst",
+   "to": "sla",
+   "kind": "acct",
+   "label": "cost accounting events"
+  },
+  {
+   "from": "ap",
+   "to": "sla",
+   "kind": "acct",
+   "label": "invoice events"
+  },
+  {
+   "from": "pay",
+   "to": "sla",
+   "kind": "acct",
+   "label": "payment events"
+  },
+  {
+   "from": "ar",
+   "to": "sla",
+   "kind": "acct",
+   "label": "invoice, receipt and revenue events"
+  },
+  {
+   "from": "ce",
+   "to": "sla",
+   "kind": "acct",
+   "label": "bank statement events"
+  },
+  {
+   "from": "fa",
+   "to": "sla",
+   "kind": "acct",
+   "label": "addition and depreciation events"
+  },
+  {
+   "from": "sla",
+   "to": "glus",
+   "kind": "acct",
+   "label": "Create Accounting → US journals"
+  },
+  {
+   "from": "sla",
+   "to": "glmx",
+   "kind": "acct",
+   "label": "Create Accounting → MX journals"
+  },
+  {
+   "from": "sla",
+   "to": "glmx2",
+   "kind": "ledger",
+   "label": "subledger level: statutory journals in the same run"
+  },
+  {
+   "from": "coa",
+   "to": "glmx2",
+   "kind": "ledger",
+   "label": "chart of accounts mapping → statutory chart"
+  },
+  {
+   "from": "glmx",
+   "to": "glmx2",
+   "kind": "ledger",
+   "label": "GL journals copied at posting"
+  },
+  {
+   "from": "glmx",
+   "to": "glmxr",
+   "kind": "ledger",
+   "label": "journal-level conversion to USD"
+  },
+  {
+   "from": "glus",
+   "to": "ic",
+   "kind": "doc",
+   "label": "cross-company journals"
+  },
+  {
+   "from": "glmx",
+   "to": "ic",
+   "kind": "doc",
+   "label": "cross-company journals"
+  },
+  {
+   "from": "glus",
+   "to": "close",
+   "kind": "doc",
+   "label": "revalue and close"
+  },
+  {
+   "from": "glmx",
+   "to": "close",
+   "kind": "doc",
+   "label": "revalue and close"
+  },
+  {
+   "from": "glus",
+   "to": "rpt",
+   "kind": "doc",
+   "label": "USD ledger set"
+  },
+  {
+   "from": "glmxr",
+   "to": "rpt",
+   "kind": "doc",
+   "label": "USD ledger set"
+  },
+  {
+   "from": "glmx2",
+   "to": "rpt",
+   "kind": "doc",
+   "label": "statutory reports"
+  },
+  {
+   "from": "rpt",
+   "to": "fccs",
+   "kind": "ret",
+   "label": "trial balances → consolidation"
+  }
+ ],
+ "default_node": "sla",
+ "p2p": {
+  "title": "Procure to Pay",
+  "badge_suffix": "",
+  "lede": "From supplier to payment for ingredients, packaging, MRO and services. Inventory items accrue at receipt; expense items accrue at period end.",
+  "stages": [
+   {
+    "n": "01",
+    "title": "Supplier",
+    "system": "Suppliers",
+    "accounting": "none",
+    "points": [
+     "Supplier, sites, contacts and bank accounts",
+     "Sites assigned to the procurement and invoicing BUs",
+     "Open interface: POZ_SUPPLIERS_INT → Import Suppliers"
+    ]
+   },
+   {
+    "n": "02",
+    "title": "Requisition",
+    "system": "Self Service Procurement · Planning",
+    "accounting": "none",
+    "points": [
+     "Requests from employees, or planned buy orders released by Planning Central",
+     "Approval by amount and category",
+     "Hand-off: approved requisition line → PO line"
+    ]
+   },
+   {
+    "n": "03",
+    "title": "Purchase order",
+    "system": "Purchasing",
+    "accounting": "none",
+    "points": [
+     "Agreements with price breaks; POs from requisitions",
+     "Accrue-at-receipt for inventory lines",
+     "Hand-off: PO schedule → expected receipt"
+    ]
+   },
+   {
+    "n": "04",
+    "title": "Receipt",
+    "system": "Receiving → Receipt Accounting",
+    "accounting": "accrual",
+    "points": [
+     "Receive against the PO or ASN; inspect for food safety",
+     "Lot number and expiry date captured",
+     "Create Receipt Accounting Distributions"
+    ],
+    "entries": [
+     {
+      "event": "Receipt into inspection",
+      "dr": [
+       "Receiving inspection (asset)"
+      ],
+      "cr": [
+       "Uninvoiced receipts accrual (liability)"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "05",
+    "title": "Deliver to inventory",
+    "system": "Inventory → Cost Accounting",
+    "accounting": "valuation",
+    "points": [
+     "Put away into the ingredient subinventory",
+     "Transfer Inventory Transactions to Costing",
+     "Purchase price variance against standard cost"
+    ],
+    "entries": [
+     {
+      "event": "Delivery",
+      "dr": [
+       "Inventory valuation",
+       "Purchase price variance"
+      ],
+      "cr": [
+       "Receiving inspection"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "06",
+    "title": "Invoice",
+    "system": "Payables",
+    "accounting": "liability",
+    "points": [
+     "Import Payables Invoices (AP_INVOICES_INTERFACE)",
+     "2-way match to PO or 3-way match to receipt",
+     "Validate, approve, Create Accounting"
+    ],
+    "entries": [
+     {
+      "event": "Invoice matched to the PO",
+      "dr": [
+       "Uninvoiced receipts accrual",
+       "Invoice price variance",
+       "Recoverable tax"
+      ],
+      "cr": [
+       "Supplier liability"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "07",
+    "title": "Accrual clearing",
+    "system": "Receipt Accounting",
+    "accounting": "accrual",
+    "points": [
+     "Match Receipt Accruals pairs invoices with receipt accruals",
+     "Clear Receipt Accrual Balances by rule",
+     "Expense POs not yet invoiced accrue at period end"
+    ],
+    "entries": [
+     {
+      "event": "Period-end accrual (expense PO)",
+      "dr": [
+       "Expense"
+      ],
+      "cr": [
+       "Uninvoiced receipts accrual"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "08",
+    "title": "Payment",
+    "system": "Payments → Cash Management",
+    "accounting": "cash",
+    "points": [
+     "Submit Payment Process Request",
+     "Payment file to the bank",
+     "Reconciled from the bank statement"
+    ],
+    "entries": [
+     {
+      "event": "Payment",
+      "dr": [
+       "Supplier liability"
+      ],
+      "cr": [
+       "Cash (or cash clearing)"
+      ]
+     }
+    ]
+   }
+  ],
+  "accounting_note": "Account types follow Receipt Accounting, Cost Accounting and Payables in the Oracle 26C guides. Inventory purchases must accrue at receipt; expense purchases may accrue at period end.",
+  "notes": [
+   {
+    "title": "Two accrual policies.",
+    "text": "Accrue at receipt credits the accrued liability when goods arrive; accrue at period end credits Payables when the invoice is processed, and Receipt Accounting accrues uninvoiced receipts at period end."
+   }
+  ]
+ },
+ "r2r": {
+  "title": "Record to Report",
+  "lede": "From subledger accounting to consolidated reporting across the US ledger and the three Mexican ledger views.",
+  "stages": [
+   {
+    "n": "01",
+    "title": "Subledger accounting",
+    "system": "Subledger Accounting",
+    "accounting": "all subledgers",
+    "points": [
+     "Create Accounting by subledger",
+     "Mexico: primary and secondary entries in one run",
+     "Transfer to General Ledger"
+    ]
+   },
+   {
+    "n": "02",
+    "title": "Journals",
+    "system": "General Ledger",
+    "accounting": "manual",
+    "points": [
+     "GL_INTERFACE → Import Journals",
+     "Spreadsheet (ADFdi) journals",
+     "Approval and Post Journals"
+    ]
+   },
+   {
+    "n": "03",
+    "title": "Intercompany",
+    "system": "General Ledger",
+    "accounting": "intercompany",
+    "points": [
+     "Intercompany balancing rules",
+     "Generate Intercompany Allocations",
+     "Reconcile due-to and due-from"
+    ],
+    "entries": [
+     {
+      "event": "Journal across companies",
+      "dr": [
+       "Intercompany receivable"
+      ],
+      "cr": [
+       "Intercompany payable"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "04",
+    "title": "Allocations",
+    "system": "General Ledger",
+    "accounting": "allocation",
+    "points": [
+     "Generate Allocations (Calculation Manager)",
+     "Plant overhead by production volume",
+     "Shared services by headcount"
+    ],
+    "entries": [
+     {
+      "event": "Allocate plant overhead",
+      "dr": [
+       "Product-line expense"
+      ],
+      "cr": [
+       "Overhead pool (allocation offset)"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "05",
+    "title": "Revaluation",
+    "system": "General Ledger",
+    "accounting": "unrealized FX",
+    "points": [
+     "Revalue Balances on foreign-currency balances",
+     "US: MXN intercompany; MX: USD supplier invoices",
+     "Converted to the reporting currency too"
+    ],
+    "entries": [
+     {
+      "event": "Revaluation loss",
+      "dr": [
+       "Unrealized loss"
+      ],
+      "cr": [
+       "Payable (ledger-currency adjustment)"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "06",
+    "title": "Secondary and reporting",
+    "system": "General Ledger",
+    "accounting": "derived ledgers",
+    "points": [
+     "Statutory journals in the MX secondary ledger",
+     "USD journals in the MX reporting currency",
+     "Statutory and USD reports"
+    ]
+   },
+   {
+    "n": "07",
+    "title": "Translation",
+    "system": "General Ledger",
+    "accounting": "CTA",
+    "points": [
+     "Translate General Ledger Account Balances",
+     "Historical rates for equity (GL_HISTORICAL_RATES_INT)",
+     "Differences to the cumulative translation adjustment"
+    ]
+   },
+   {
+    "n": "08",
+    "title": "Report and consolidate",
+    "system": "Ledger set · FRS · FCCS",
+    "accounting": "none",
+    "points": [
+     "USD ledger set: US primary + MX reporting currency",
+     "Financial Reporting and Smart View",
+     "Trial balances to FCCS for eliminations"
+    ]
+   }
+  ],
+  "accounting_note": "Revaluation, translation, intercompany and allocation entries follow the Oracle 26C General Ledger guide.",
+  "notes": []
+ },
+ "fnd": {
+  "title": "Key processes by module",
+  "lede": "The scheduled processes that move work through each module. Names are as printed in the Oracle 26C guides (Fixed Assets and Cash Management names are INFERRED).",
+  "stages": [
+   {
+    "n": "01",
+    "title": "General Ledger",
+    "system": "GL",
+    "points": [
+     "Import Journals; Post Journals",
+     "Generate Allocations; Generate Intercompany Allocations",
+     "Revalue Balances; Translate General Ledger Account Balances",
+     "Transfer Balances to Secondary Ledger; Open and Close Periods"
+    ]
+   },
+   {
+    "n": "02",
+    "title": "Subledger Accounting",
+    "system": "SLA",
+    "points": [
+     "Create Accounting (and transfer to GL)",
+     "Accounting methods and journal entry rule sets",
+     "Account rules and mapping sets"
+    ]
+   },
+   {
+    "n": "03",
+    "title": "Payables",
+    "system": "AP",
+    "points": [
+     "Import Payables Invoices",
+     "Validate Payables Invoices",
+     "Initiate Invoice Approval Workflow",
+     "Submit Payment Process Request"
+    ]
+   },
+   {
+    "n": "04",
+    "title": "Receivables",
+    "system": "AR",
+    "points": [
+     "Import AutoInvoice",
+     "Recognize Revenue",
+     "Process Receipts Through Lockbox",
+     "Create Receivables Accounting"
+    ]
+   },
+   {
+    "n": "05",
+    "title": "Receipt Accounting",
+    "system": "Cost Management",
+    "points": [
+     "Create Receipt Accounting Distributions",
+     "Match Receipt Accruals",
+     "Clear Receipt Accrual Balances"
+    ]
+   },
+   {
+    "n": "06",
+    "title": "Cost Accounting",
+    "system": "Cost Management",
+    "points": [
+     "Standard Cost Import",
+     "Create Cost Accounting Distributions",
+     "Calculate Overhead Absorption",
+     "Analyze Product Gross Margins"
+    ]
+   },
+   {
+    "n": "07",
+    "title": "Inventory",
+    "system": "Inventory Management",
+    "points": [
+     "Transfer Inventory Transactions to Costing",
+     "Cycle counting and adjustments",
+     "Lot expiry and recall"
+    ]
+   },
+   {
+    "n": "08",
+    "title": "Manufacturing",
+    "system": "Manufacturing",
+    "points": [
+     "Import Work Orders",
+     "Material, resource and operation transactions",
+     "Product completion"
+    ]
+   },
+   {
+    "n": "09",
+    "title": "Purchasing & Suppliers",
+    "system": "Procurement",
+    "points": [
+     "Import Suppliers",
+     "Requisition and PO approval",
+     "Import Orders"
+    ]
+   },
+   {
+    "n": "10",
+    "title": "Order Management & Shipping",
+    "system": "Order to Cash",
+    "points": [
+     "Import Sales Orders",
+     "Pick, pack, Ship Confirm",
+     "Order orchestration"
+    ]
+   },
+   {
+    "n": "11",
+    "title": "Planning",
+    "system": "Planning Central",
+    "points": [
+     "Run plan",
+     "Release planned orders"
+    ]
+   },
+   {
+    "n": "12",
+    "title": "Cash, Assets, Orchestration",
+    "system": "Cash Management · Fixed Assets · SCFO",
+    "points": [
+     "Load and reconcile bank statements",
+     "Post Mass Additions; Calculate Depreciation",
+     "Financial orchestration flows and transfer pricing"
+    ]
+   }
+  ],
+  "notes": []
+ },
+ "close": {
+  "title": "Period close",
+  "lede": "Subledgers close first, in dependency order; then the ledgers revalue, translate and close.",
+  "timeline": [
+   {
+    "when": "BD-2",
+    "what": "Load daily rates (MXN/USD) through GL_DAILY_RATES_INTERFACE",
+    "owner": "Treasury",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD-1",
+    "what": "Complete receiving and inventory transactions; resolve pending transactions",
+    "owner": "Plants and warehouse",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD+1",
+    "what": "Transfer Inventory Transactions to Costing; Create Cost Accounting Distributions; close work orders",
+    "owner": "Cost accounting",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD+1",
+    "what": "Create Receipt Accounting Distributions; Match Receipt Accruals; Clear Receipt Accrual Balances; accrue uninvoiced expense receipts",
+    "owner": "Cost accounting",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD+1",
+    "what": "Close the cost accounting periods",
+    "owner": "Cost accounting",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD+2",
+    "what": "Payables: validate, approve, Create Accounting, close the period",
+    "owner": "Payables",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD+2",
+    "what": "Receivables: Import AutoInvoice, Recognize Revenue, Create Receivables Accounting, close the period",
+    "owner": "Receivables",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD+2",
+    "what": "Reconcile bank statements in Cash Management",
+    "owner": "Treasury",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD+3",
+    "what": "Assets: post mass additions, depreciate, close the book",
+    "owner": "Fixed assets",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD+3",
+    "what": "Post remaining journals; intercompany; Generate Allocations",
+    "owner": "General ledger",
+    "consolidation_team": false
+   },
+   {
+    "when": "BD+4",
+    "what": "Revalue Balances (US and MX); review the MX secondary ledger and USD reporting currency",
+    "owner": "General ledger",
+    "consolidation_team": true
+   },
+   {
+    "when": "BD+4",
+    "what": "Translate where needed; close the primary, secondary and reporting ledgers",
+    "owner": "General ledger",
+    "consolidation_team": true
+   },
+   {
+    "when": "BD+5",
+    "what": "Reports on the USD ledger set; trial balances to FCCS",
+    "owner": "Consolidation",
+    "consolidation_team": true
+   }
+  ]
+ },
+ "views": [
+  {
+   "id": "p2m",
+   "label": "Plan to Produce",
+   "kind": "chain",
+   "after": "p2p",
+   "eyebrow": "Flow",
+   "data": {
+    "title": "Plan to Produce",
+    "badge_suffix": "",
+    "lede": "From plan to finished-good lots: process work orders built from the recipe, costed through work in process.",
+    "stages": [
+     {
+      "n": "01",
+      "title": "Items and recipes",
+      "system": "Product Hub · Manufacturing · Cost Accounting",
+      "accounting": "none",
+      "points": [
+       "Items with lot control and shelf life",
+       "Work definition: ingredients in, primary output and co-products out",
+       "Standard costs loaded (Standard Cost Import)"
+      ]
+     },
+     {
+      "n": "02",
+      "title": "Plan",
+      "system": "Planning Central",
+      "accounting": "none",
+      "points": [
+       "Forecast and sales orders netted against supply",
+       "Planned orders for make and buy",
+       "Hand-off: release → work order or requisition"
+      ]
+     },
+     {
+      "n": "03",
+      "title": "Work order",
+      "system": "Supply Chain Orchestration → Manufacturing",
+      "accounting": "none",
+      "points": [
+       "Supply request creates the process work order",
+       "Import Work Orders for orders from other systems",
+       "Exceptions raised when a work order goes on hold"
+      ]
+     },
+     {
+      "n": "04",
+      "title": "Material issue",
+      "system": "Manufacturing → Inventory",
+      "accounting": "WIP",
+      "points": [
+       "Ingredient lots issued, push or backflush",
+       "Lot genealogy recorded for recall",
+       "Transferred to Cost Accounting"
+      ],
+      "entries": [
+       {
+        "event": "Material issue",
+        "dr": [
+         "WIP valuation"
+        ],
+        "cr": [
+         "Inventory valuation (ingredients, packaging)"
+        ]
+       }
+      ]
+     },
+     {
+      "n": "05",
+      "title": "Resources and overhead",
+      "system": "Manufacturing → Cost Accounting",
+      "accounting": "WIP",
+      "points": [
+       "Labour and machine hours (resource transactions)",
+       "Overhead absorption rules",
+       "Charged to the work order"
+      ],
+      "entries": [
+       {
+        "event": "Resource charge",
+        "dr": [
+         "WIP valuation"
+        ],
+        "cr": [
+         "Resource absorption"
+        ]
+       },
+       {
+        "event": "Overhead",
+        "dr": [
+         "WIP valuation"
+        ],
+        "cr": [
+         "Overhead absorption"
+        ]
+       }
+      ]
+     },
+     {
+      "n": "06",
+      "title": "Product completion",
+      "system": "Manufacturing → Inventory",
+      "accounting": "valuation",
+      "points": [
+       "Finished-good and co-product lots with expiry dates",
+       "Completed into the completion subinventory",
+       "Available to Order Management"
+      ],
+      "entries": [
+       {
+        "event": "Completion",
+        "dr": [
+         "Inventory valuation (finished goods)"
+        ],
+        "cr": [
+         "WIP valuation"
+        ]
+       }
+      ]
+     },
+     {
+      "n": "07",
+      "title": "Close and variances",
+      "system": "Cost Accounting",
+      "accounting": "variance",
+      "points": [
+       "Work order closed",
+       "Remaining WIP balance to usage and efficiency variances",
+       "Gross margin analysis by product"
+      ],
+      "entries": [
+       {
+        "event": "Work order close (unfavourable)",
+        "dr": [
+         "WIP variance"
+        ],
+        "cr": [
+         "WIP valuation"
+        ]
+       }
+      ]
+     },
+     {
+      "n": "08",
+      "title": "Expiry and scrap",
+      "system": "Inventory",
+      "accounting": "adjustment",
+      "points": [
+       "Expired lots scrapped",
+       "Recalls traced by lot genealogy",
+       "Cycle count adjustments"
+      ],
+      "entries": [
+       {
+        "event": "Scrap expired lot",
+        "dr": [
+         "Scrap / inventory adjustment expense"
+        ],
+        "cr": [
+         "Inventory valuation"
+        ]
+       }
+      ]
+     }
+    ],
+    "accounting_note": "WIP, absorption, completion and variance entries follow Cost Accounting in the Oracle 26C Manufacturing and Supply Chain Materials Management guide. Scrap entries are standard practice (INFERRED).",
+    "notes": [
+     {
+      "title": "Costing method.",
+      "text": "The mock company uses standard cost in the US plant and perpetual average cost in Mexico, set in each cost organisation's cost profile."
+     }
+    ]
+   }
+  },
+  {
+   "id": "o2c",
+   "label": "Order to Cash",
+   "kind": "chain",
+   "after": "v-p2m",
+   "eyebrow": "Flow",
+   "data": {
+    "title": "Order to Cash",
+    "badge_suffix": "",
+    "lede": "From customer order to cash, including the intercompany sale from the Mexican plant to the US distribution centre.",
+    "stages": [
+     {
+      "n": "01",
+      "title": "Customer",
+      "system": "Receivables (customers)",
+      "accounting": "none",
+      "points": [
+       "Accounts, bill-to and ship-to sites",
+       "Profiles: terms, credit limit, dunning",
+       "Open interface: RA_CUSTOMER_PROFILES_INT_ALL"
+      ]
+     },
+     {
+      "n": "02",
+      "title": "Sales order",
+      "system": "Order Management",
+      "accounting": "none",
+      "points": [
+       "EDI and portal orders",
+       "Pricing, credit check and scheduling",
+       "Hand-off: fulfilment line → shipment request"
+      ]
+     },
+     {
+      "n": "03",
+      "title": "Pick, pack, ship",
+      "system": "Inventory · Shipping → Cost Accounting",
+      "accounting": "deferred COGS",
+      "points": [
+       "Lots picked first-expiry, first-out",
+       "Ship Confirm issues inventory",
+       "Hand-off: fulfilled line → AutoInvoice"
+      ],
+      "entries": [
+       {
+        "event": "Ship confirm",
+        "dr": [
+         "Deferred COGS"
+        ],
+        "cr": [
+         "Inventory valuation (finished goods)"
+        ]
+       }
+      ]
+     },
+     {
+      "n": "04",
+      "title": "Invoice",
+      "system": "Receivables",
+      "accounting": "receivable",
+      "points": [
+       "RA_INTERFACE_LINES_ALL → Import AutoInvoice",
+       "Tax calculated by Tax (US sales tax, MX VAT)",
+       "Create Receivables Accounting"
+      ],
+      "entries": [
+       {
+        "event": "Customer invoice",
+        "dr": [
+         "Receivable"
+        ],
+        "cr": [
+         "Revenue (or unearned revenue)",
+         "Tax payable"
+        ]
+       }
+      ]
+     },
+     {
+      "n": "05",
+      "title": "Revenue and COGS",
+      "system": "Receivables · Cost Accounting",
+      "accounting": "COGS",
+      "points": [
+       "Recognize Revenue",
+       "COGS recognised in step with revenue",
+       "Ship-only lines can use the order-line close date"
+      ],
+      "entries": [
+       {
+        "event": "COGS recognition",
+        "dr": [
+         "COGS"
+        ],
+        "cr": [
+         "Deferred COGS"
+        ]
+       }
+      ]
+     },
+     {
+      "n": "06",
+      "title": "Receipt",
+      "system": "Receivables",
+      "accounting": "cash",
+      "points": [
+       "Lockbox: AR_PAYMENTS_INTERFACE_ALL → Process Receipts Through Lockbox",
+       "Receipts applied to invoices",
+       "Reconciled in Cash Management"
+      ],
+      "entries": [
+       {
+        "event": "Customer receipt",
+        "dr": [
+         "Cash"
+        ],
+        "cr": [
+         "Receivable"
+        ]
+       }
+      ]
+     },
+     {
+      "n": "07",
+      "title": "Intercompany sale",
+      "system": "Financial Orchestration",
+      "accounting": "intercompany",
+      "points": [
+       "MX plant ships to the US distribution centre",
+       "Transfer price: cost plus a markup",
+       "Intercompany AR invoice in MX and AP invoice in US"
+      ],
+      "entries": [
+       {
+        "event": "Seller (MX)",
+        "dr": [
+         "Intercompany receivable"
+        ],
+        "cr": [
+         "Intercompany revenue"
+        ]
+       },
+       {
+        "event": "Buyer (US)",
+        "dr": [
+         "Inventory (transfer price)"
+        ],
+        "cr": [
+         "Intercompany payable"
+        ]
+       }
+      ]
+     }
+    ],
+    "accounting_note": "Receivables and COGS entries follow the Receivables and Cost Accounting guides. Order Management steps and the intercompany line accounts are INFERRED (no Order Management guide in the set).",
+    "notes": []
+   }
+  },
+  {
+   "id": "ledgers",
+   "label": "Ledgers",
+   "kind": "diagram",
+   "after": "r2r",
+   "eyebrow": "Ledgers",
+   "data": {
+    "title": "How the ledgers relate",
+    "lede": "FBCo US has one primary ledger. FBCo México has a primary ledger in MXN, a secondary ledger with the Mexican statutory chart, and a USD reporting currency. Select a ledger or a step to see how data reaches it.",
+    "layers": [
+     {
+      "id": "LG1",
+      "label": "Source",
+      "title": "Subledgers and journals"
+     },
+     {
+      "id": "LG2",
+      "label": "Primary",
+      "title": "Primary ledgers"
+     },
+     {
+      "id": "LG3",
+      "label": "Derived",
+      "title": "Secondary ledger and reporting currency"
+     },
+     {
+      "id": "LG4",
+      "label": "Group",
+      "title": "Consolidated view"
+     }
+    ],
+    "chips": [
+     {
+      "id": "US",
+      "label": "FBCo US"
+     },
+     {
+      "id": "MX",
+      "label": "FBCo México"
+     }
+    ],
+    "legend": [
+     {
+      "label": "Create Accounting",
+      "color": "var(--airflow)"
+     },
+     {
+      "label": "ledger propagation",
+      "color": "var(--extract)"
+     },
+     {
+      "label": "reporting",
+      "color": "var(--oic)"
+     }
+    ],
+    "default_node": "l-mx",
+    "nodes": [
+     {
+      "id": "l-sub",
+      "layer": "LG1",
+      "title": "Subledgers",
+      "subtitle": "AP · AR · Cost · Receipt · Assets",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Subledger transactions in both countries raise accounting events.",
+      "functions": [
+       "Create Accounting applies the accounting method of each ledger",
+       "For Mexico one run creates primary and secondary journals (subledger level)"
+      ],
+      "facts": [
+       [
+        "Process",
+        "Create Accounting"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "l-gli",
+      "layer": "LG1",
+      "title": "GL journals",
+      "subtitle": "Manual · spreadsheet · GL_INTERFACE",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Journals entered in GL or imported through GL_INTERFACE.",
+      "functions": [
+       "Posting in the MX primary ledger copies them to the secondary ledger (journal conversion rules)",
+       "Posting also converts them to the USD reporting currency"
+      ],
+      "facts": [
+       [
+        "Process",
+        "Import Journals, Post Journals"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "l-us",
+      "layer": "LG2",
+      "title": "US primary ledger",
+      "subtitle": "USD · corporate COA · US GAAP",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": true,
+      "description": "The main record of FBCo US.",
+      "functions": [
+       "Corporate chart of accounts, accounting calendar, USD",
+       "Revalues MXN balances (for example intercompany payables) at month end"
+      ],
+      "facts": [
+       [
+        "Currency",
+        "USD"
+       ],
+       [
+        "Chart",
+        "Corporate"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "l-mx",
+      "layer": "LG2",
+      "title": "MX primary ledger",
+      "subtitle": "MXN · corporate COA",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": true,
+      "description": "The main record of FBCo México, kept in the local currency on the corporate chart so that group reporting is consistent.",
+      "functions": [
+       "Corporate chart and corporate accounting policies",
+       "Source for the secondary ledger and the USD reporting currency",
+       "Revalues USD balances (for example supplier invoices in USD)"
+      ],
+      "facts": [
+       [
+        "Currency",
+        "MXN"
+       ],
+       [
+        "Chart",
+        "Corporate"
+       ]
+      ],
+      "entries": [
+       {
+        "event": "Revaluation (MXN weakened, USD payable)",
+        "dr": [
+         "Unrealized loss"
+        ],
+        "cr": [
+         "Payable (MXN adjustment)"
+        ]
+       }
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "l-mx2",
+      "layer": "LG3",
+      "title": "MX secondary ledger",
+      "subtitle": "MXN · statutory COA",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "The Mexican statutory books, linked to the MX primary ledger.",
+      "functions": [
+       "Data conversion level: Subledger",
+       "Different chart of accounts (Mexican statutory) through the chart of accounts mapping",
+       "Same currency as the primary (MXN), which avoids difficult reconciliations"
+      ],
+      "facts": [
+       [
+        "Conversion level",
+        "Subledger"
+       ],
+       [
+        "Currency",
+        "MXN"
+       ],
+       [
+        "Chart",
+        "Mexican statutory (mapped)"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "l-mxr",
+      "layer": "LG3",
+      "title": "MX reporting currency",
+      "subtitle": "USD · corporate COA",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "FBCo México's primary ledger restated in USD.",
+      "functions": [
+       "Currency conversion level: Journal",
+       "Shares the chart, calendar and accounting method of the MX primary ledger",
+       "Revaluation journals in the primary are converted and posted here too"
+      ],
+      "facts": [
+       [
+        "Conversion level",
+        "Journal"
+       ],
+       [
+        "Currency",
+        "USD"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "l-set",
+      "layer": "LG4",
+      "title": "USD ledger set",
+      "subtitle": "US primary + MX reporting currency",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Groups the two USD views so close processes and reports run once.",
+      "functions": [
+       "Open and close periods, revaluation and reports for both at once",
+       "Financial Reporting and Smart View in USD"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "l-cta",
+      "layer": "LG4",
+      "title": "Translation",
+      "subtitle": "Cumulative translation adjustment",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Balance-level translation of the MX ledger, for consolidation views that need period-end and historical rates.",
+      "functions": [
+       "Translate General Ledger Account Balances",
+       "Equity at historical rates; difference to the cumulative translation adjustment"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "l-fccs",
+      "layer": "LG4",
+      "title": "Consolidation",
+      "subtitle": "FCCS",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": true,
+      "core": false,
+      "description": "Group consolidation with eliminations.",
+      "functions": [
+       "Loads both companies' trial balances",
+       "Eliminates intercompany balances"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     }
+    ],
+    "edges": [
+     {
+      "from": "l-sub",
+      "to": "l-us",
+      "kind": "acct",
+      "label": "Create Accounting"
+     },
+     {
+      "from": "l-sub",
+      "to": "l-mx",
+      "kind": "acct",
+      "label": "Create Accounting"
+     },
+     {
+      "from": "l-sub",
+      "to": "l-mx2",
+      "kind": "acct",
+      "label": "Create Accounting (subledger level)"
+     },
+     {
+      "from": "l-gli",
+      "to": "l-us",
+      "kind": "acct",
+      "label": "Import and post"
+     },
+     {
+      "from": "l-gli",
+      "to": "l-mx",
+      "kind": "acct",
+      "label": "Import and post"
+     },
+     {
+      "from": "l-mx",
+      "to": "l-mx2",
+      "kind": "ledger",
+      "label": "GL journals copied at posting"
+     },
+     {
+      "from": "l-mx",
+      "to": "l-mxr",
+      "kind": "ledger",
+      "label": "journals converted to USD as they post"
+     },
+     {
+      "from": "l-us",
+      "to": "l-set",
+      "kind": "doc",
+      "label": "member"
+     },
+     {
+      "from": "l-mxr",
+      "to": "l-set",
+      "kind": "doc",
+      "label": "member"
+     },
+     {
+      "from": "l-mx",
+      "to": "l-cta",
+      "kind": "ledger",
+      "label": "balance-level translation"
+     },
+     {
+      "from": "l-set",
+      "to": "l-fccs",
+      "kind": "ret",
+      "label": "trial balances"
+     },
+     {
+      "from": "l-cta",
+      "to": "l-fccs",
+      "kind": "ret",
+      "label": "translated balances"
+     }
+    ],
+    "notes": [
+     {
+      "title": "Conversion levels.",
+      "text": "Secondary ledger: Balance, Journal, Subledger or Adjustment Only. Reporting currency: Balance, Journal or Subledger. Oracle advises journal level when a subledger-level ledger is added while transactions are in flight."
+     }
+    ]
+   }
+  }
+ ],
+ "integrations": {
+  "title": "Open interfaces",
+  "lede": "Oracle open interface tables by module: how data is loaded and which process imports it. Names not printed in the guides provided are marked INFERRED.",
+  "columns": [
+   "Open interface",
+   "Loaded from → into",
+   "Load method",
+   "Import process",
+   "Area"
+  ],
+  "search_hint": "Table or process, e.g. GL_INTERFACE or AutoInvoice"
+ }
+}

@@ -105,6 +105,7 @@ aside.detail ul.docs a::after{content:" ↗";font-size:12px}
 .je-ev{font:500 11px var(--f-mono);text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px}
 .je-row{display:grid;grid-template-columns:24px minmax(0,1fr);gap:4px;line-height:1.35}
 .je-row b{font:600 12px var(--f-mono);color:var(--accent)}
+aside.detail .je{margin:0 0 6px}
 .rail{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
 .note{background:var(--soft);border-radius:8px;padding:12px 14px;font-size:14px}
 .note b{font-family:var(--f-display);font-stretch:90%}
@@ -383,7 +384,7 @@ table.adm select{font:13px var(--f-body);background:var(--panel);color:var(--fg)
     <select id="wsSel" aria-label="Workstream"></select>
     <span class="count" id="count"></span>
   </div>
-  <div class="tablewrap"><table><thead><tr><th>Interface</th><th>Source → Target</th><th>Lane</th><th>Cadence</th><th>Workstream</th></tr></thead><tbody id="tbody"></tbody></table></div>
+  <div class="tablewrap"><table><thead><tr id="inHead"><th>Interface</th><th>Source → Target</th><th>Lane</th><th>Cadence</th><th>Workstream</th></tr></thead><tbody id="tbody"></tbody></table></div>
 </section>
 
 <section id="tab-admin" hidden>
