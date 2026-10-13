@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.1 — 2026-10-13
+- Manufacturing map: evidence from the Order Management, Assets and Financials getting-started guides.
+  - Order to Cash: the orchestration task services (Create Shipping / Wait for Shipment, Create Billing Lines / Wait for Billing), order import through `DOO_ORDER_HEADERS_ALL_INT` or the Sales Orders for Order Hub REST API, and the Direct Sales Order Issue and COGS Recognition templates.
+  - Fixed Assets: Create Mass Additions, Post Mass Additions, Calculate Depreciation, Create Accounting for Assets; asset entries now cited. Ledgers tab gains **Asset books**: the corporate book feeds the MX primary ledger and the MX tax book feeds the MX secondary ledger (Perform Periodic Mass Copy).
+  - Cash Management processes cited from the Financials guide; table names stay INFERRED (the PDF provided is the E-Business Suite 12.1 table of contents).
+  - `manufacturing/open-questions.md` shows each item's status (M-3, M-4 and M-6a resolved).
+
 ## 0.7.0 — 2026-10-13
 - **Manufacturing Estate Map** (generic reference, no client data): a mock food & beverage manufacturer (FBCo) with a US parent and one Mexican subsidiary, built from the Oracle 26C finance and supply chain guides. New `manufacturing/` pack:
   - Estate diagram separating enterprise structure and master data from transactions; each module shows what it does, its key processes, its open interfaces and its Dr/Cr entries; connections are labelled with the hand-off (requisition → PO line, receipt → 3-way match, fulfilled line → AutoInvoice …).
