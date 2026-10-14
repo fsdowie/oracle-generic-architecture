@@ -196,7 +196,7 @@
 
   // ---------- diagrams (estate, dashboards, close process) ----------
   const COL = { oic: "var(--oic)", airflow: "var(--airflow)", sched: "var(--airflow)", bulk: "var(--bulk)", extract: "var(--extract)", int: "var(--line)", ret: "var(--ext)",
-    doc: "var(--oic)", acct: "var(--airflow)", oi: "var(--bulk)", ledger: "var(--extract)" };
+    doc: "var(--oic)", acct: "var(--airflow)", oi: "var(--bulk)", ledger: "var(--extract)", goods: "var(--goods)", cash: "var(--cash)", ext: "var(--ext)" };
   // one journal entry card: { event, dr: [account types], cr: [account types] }
   // a REST resource: name linked to Oracle's page, root path, then methods and custom actions
   const safeUrl = (u) => /^https:\/\//.test(u || "") ? u : "#";
@@ -305,6 +305,134 @@
     new ResizeObserver(() => d.draw()).observe($(ids.box));
     return d;
   }
+  /* Business workflows (view kind "workflows"): scenario pills, then one swimlane diagram per scenario.
+     Lanes are modules (columns), steps are process bubbles placed in rows by `seq` (top to bottom), flows are labelled arrows.
+     data: { scenarios: [{ id, label, lede, lanes: [{id, label, external?}], steps: [{id, lane, seq, title, sub, description,
+       process: [], in: [], out: [], entries: [], impacts: [{k, text}], open_interfaces: [], rest: [], docs: [] }],
+       flows: [{from, to, kind, label}], notes: [] }], legend? } */
+  const IMPACT = { DRCR: "Dr/Cr", INV: "Inventory", COST: "Cost", ACCR: "Accrual", CASH: "Cash" };
+  const FLOW_LEGEND = [{ label: "document hand-off", color: "var(--oic)" }, { label: "goods movement", color: "var(--goods)" },
+    { label: "accounting", color: "var(--airflow)" }, { label: "cash or bank", color: "var(--cash)" },
+    { label: "external party", color: "var(--ext)", dash: true }];
+  function makeFlow(t, P, data, tabSec) {
+    const f = { sc: null, sel: null };
+    const pick = (id) => data.scenarios.find((s) => s.id === id) || data.scenarios[0];
+    $(P + "pills").innerHTML = data.scenarios.map((s, i) => `<button type="button" class="chip" data-sc="${esc(s.id)}" aria-pressed="false"><b>${i + 1}</b> ${esc(s.label)}</button>`).join("");
+    $(P + "pills").querySelectorAll("[data-sc]").forEach((b) => b.addEventListener("click", () => {
+      f.show(b.dataset.sc);
+      try { history.replaceState(null, "", "#" + t + "/" + b.dataset.sc); } catch (e) {}
+    }));
+    $(P + "legend").innerHTML = legendHtml(data.legend || FLOW_LEGEND).replace("<span>Dashed box = external system</span>", "<span>Dashed bubble = external party</span>") +
+      `<span class="bdkey">${Object.entries(IMPACT).map(([k, v]) => `<em class="bd ${k.toLowerCase()}">${k === "DRCR" ? "Dr/Cr" : k}</em> ${esc(v === "Dr/Cr" ? "journal entry" : v.toLowerCase())}`).join(" ")}</span>`;
+    f.show = function (id) {
+      const S = f.sc = pick(id);
+      f.sel = S.steps[0].id;
+      $(P + "pills").querySelectorAll("[data-sc]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.sc === S.id));
+      $(P + "sclede").textContent = S.lede || "";
+      const rows = Math.max(...S.steps.map((s) => s.seq)), n = S.lanes.length;
+      const grid = $(P + "grid");
+      grid.style.gridTemplateColumns = `repeat(${n}, minmax(96px, 1fr))`;
+      grid.style.gridTemplateRows = `auto repeat(${rows}, auto)`;
+      grid.style.minWidth = (n * 104) + "px";
+      grid.innerHTML = `<svg class="edges" id="${P}edges" aria-hidden="true"></svg><svg class="edges flabels" id="${P}labels" aria-hidden="true"></svg>` + S.lanes.map((L, c) =>
+        `<div class="wlane${L.external ? " ext" : ""}${c % 2 ? " alt" : ""}" style="grid-column:${c + 1};grid-row:1/-1"></div><div class="wlab" style="grid-column:${c + 1}">${esc(L.label)}</div>`).join("") +
+        S.steps.map((s) => {
+          const c = S.lanes.findIndex((L) => L.id === s.lane) + 1, ext = S.lanes[c - 1].external;
+          const badges = (s.entries && s.entries.length ? `<em class="bd drcr">Dr/Cr</em>` : "") + (s.impacts || []).filter((i) => i.k !== "DRCR").map((i) => `<em class="bd ${esc(i.k.toLowerCase())}">${esc(i.k)}</em>`).join("");
+          return `<button type="button" class="bubble${ext ? " ext" : ""}" id="${P}s-${esc(s.id)}" data-step="${esc(s.id)}" style="grid-column:${c};grid-row:${s.seq + 1}">` +
+            `<span class="bt">${esc(s.title)}</span>${s.sub ? `<small>${esc(s.sub)}</small>` : ""}${badges ? `<span class="bds">${badges}</span>` : ""}</button>`;
+        }).join("");
+      grid.querySelectorAll("[data-step]").forEach((b) => b.addEventListener("click", () => { f.sel = b.dataset.step; f.select(); }));
+      $(P + "notes").innerHTML = notes(S.notes);
+      f.select();
+    };
+    f.select = function () {
+      const S = f.sc, s = S.steps.find((x) => x.id === f.sel), lane = S.lanes.find((L) => L.id === s.lane);
+      S.steps.forEach((x) => { const el = $(P + "s-" + x.id); el.classList.toggle("sel", x.id === f.sel); el.setAttribute("aria-pressed", x.id === f.sel); });
+      const name = (id) => S.steps.find((x) => x.id === id).title;
+      const nb = S.flows.filter((e) => e.from === f.sel || e.to === f.sel)
+        .map((e) => (e.from === f.sel ? "→ " + name(e.to) : "← " + name(e.from)) + (e.label ? " · " + e.label : ""));
+      const list = (a, cls) => `<ul class="${cls}">${a.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`;
+      const row = (label, html) => html ? `<div><dt>${esc(label)}</dt><dd>${html}</dd></div>` : "";
+      const L = (a, cls) => (a && a.length ? list(a, cls || "fn") : "");
+      const docLinks = (s.docs || []).filter((x) => /^https:\/\//.test(x.url))
+        .map((x) => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.label)}</a></li>`).join("");
+      $(P + "detail").innerHTML = `
+        <div class="eyebrow">${esc(S.label)} · Step ${S.steps.indexOf(s) + 1} of ${S.steps.length} · ${esc(lane.label)}</div>
+        <h3>${esc(s.title)}</h3><p>${esc(s.description || "")}</p>
+        <dl>
+          ${row("Process or task", L(s.process))}
+          ${row("In", L(s.in))}
+          ${row("Out", L(s.out))}
+          ${row("Journal entries", (s.entries || []).map(je).join(""))}
+          ${row("Impact", L((s.impacts || []).map((i) => (IMPACT[i.k] || i.k) + ": " + i.text)))}
+          ${row("Open interfaces", L(s.open_interfaces, "ifs"))}
+          ${row("REST APIs", s.rest && s.rest.length ? `<ul class="docs rest">${s.rest.map(restItem).join("")}</ul>` : "")}
+          ${row("Connected to", L(nb))}
+          ${row("Documents", docLinks ? `<ul class="docs">${docLinks}</ul>` : "")}
+        </dl>
+        ${s.goto && data.scenarios.some((x) => x.id === s.goto) ? `<button type="button" class="btn small" data-goto>Open the ${esc(pick(s.goto).label)} scenario</button> ` : ""}
+        <button type="button" class="btn ghost small cmt-btn" data-cmt>Add comment</button>`;
+      $(P + "detail").querySelector("[data-cmt]").addEventListener("click", () =>
+        openComment({ tabLabel: tabLabel(tabSec), item_id: t + ":" + S.id + ":" + s.id, item_title: S.label + " › " + s.title }));
+      const go = $(P + "detail").querySelector("[data-goto]");
+      if (go) go.addEventListener("click", () => { f.show(s.goto); try { history.replaceState(null, "", "#" + t + "/" + s.goto); } catch (e) {} });
+      f.draw();
+    };
+    f.draw = function () {
+      const S = f.sc;
+      if (!S || $("app").hidden || $(tabSec).hidden) return;
+      const grid = $(P + "grid"), svg = $(P + "edges"), box = grid.getBoundingClientRect();
+      if (!box.width) return;
+      const kinds = [...new Set(S.flows.map((e) => e.kind))];
+      let out = `<defs>${kinds.map((k) => `<marker id="${P}m-${esc(k)}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:${COL[k] || "var(--line)"}"/></marker>`).join("")}</defs>`;
+      let labels = "";
+      const placed = []; // label boxes already drawn, so converging arrows don't print on top of each other
+      const step = (id) => S.steps.find((x) => x.id === id);
+      S.flows.forEach((e) => {
+        const A = $(P + "s-" + e.from), B = $(P + "s-" + e.to); if (!A || !B) return;
+        const a = A.getBoundingClientRect(), b = B.getBoundingClientRect();
+        const on = e.from === f.sel || e.to === f.sel;
+        const ax = a.left - box.left, ay = a.top - box.top, bx = b.left - box.left, by = b.top - box.top;
+        const sa = step(e.from), sb = step(e.to);
+        const skip = sa.lane === sb.lane && S.steps.some((x) => x.lane === sa.lane && x.seq > Math.min(sa.seq, sb.seq) && x.seq < Math.max(sa.seq, sb.seq));
+        let x1, y1, x2, y2, c1x, c1y, c2x, c2y, level = false;
+        if (skip) { // same lane with a step in between: bow out to the right so the arrow doesn't run behind it
+          x1 = ax + a.width; y1 = ay + a.height / 2; x2 = bx + b.width; y2 = by + b.height / 2;
+          c1x = Math.max(x1, x2) + 26; c1y = y1; c2x = c1x; c2y = y2;
+        } else if (b.top >= a.bottom - 2) { // later row: bottom edge → top edge
+          x1 = ax + a.width / 2; y1 = ay + a.height; x2 = bx + b.width / 2; y2 = by;
+          const dy = Math.max(18, (y2 - y1) / 2); c1x = x1; c1y = y1 + dy; c2x = x2; c2y = y2 - dy;
+        } else if (a.top >= b.bottom - 2) { // earlier row (a loop back): out of the right side, round, into the right side
+          x1 = ax + a.width; y1 = ay + a.height / 2; x2 = bx + b.width; y2 = by + b.height / 2;
+          c1x = Math.max(x1, x2) + 30; c1y = y1; c2x = c1x; c2y = y2;
+        } else { // same row: side to side
+          level = true; y1 = ay + a.height / 2; y2 = by + b.height / 2;
+          if (bx > ax) { x1 = ax + a.width; x2 = bx; } else { x1 = ax; x2 = bx + b.width; }
+          const dx = (x2 - x1) / 2; c1x = x1 + dx; c1y = y1; c2x = x2 - dx; c2y = y2;
+        }
+        const col = COL[e.kind] || "var(--line)";
+        out += `<path d="M${x1},${y1} C${c1x},${c1y} ${c2x},${c2y} ${x2},${y2}" fill="none" style="stroke:${col}" stroke-width="${on ? 2.4 : 1.5}" stroke-opacity="${on ? 1 : 0.55}"` +
+          `${e.kind === "ext" ? ' stroke-dasharray="5 4"' : ""} marker-end="url(#${P}m-${esc(e.kind)})"/>`;
+        if (e.label) { // on the curve's midpoint (in the gap between rows); for a side-to-side arrow, above the bubbles
+          const mx = level ? (x1 + x2) / 2 : 0.125 * x1 + 0.375 * c1x + 0.375 * c2x + 0.125 * x2;
+          let my = level ? Math.min(ay, by) - 4 : 0.125 * y1 + 0.375 * c1y + 0.375 * c2y + 0.125 * y2 + 3;
+          const w = e.label.length * 6.4 + 6;
+          while (placed.some((p) => Math.abs(p.y - my) < 12 && Math.abs(p.x - mx) < (p.w + w) / 2)) my += 12;
+          placed.push({ x: mx, y: my, w });
+          labels += `<text x="${mx}" y="${my}" text-anchor="middle" class="flabel${on ? " on" : ""}">${esc(e.label)}</text>`;
+        }
+      });
+      [svg, $(P + "labels")].forEach((g) => g.setAttribute("viewBox", `0 0 ${box.width} ${box.height}`));
+      svg.innerHTML = out;
+      $(P + "labels").innerHTML = labels;
+    };
+    new ResizeObserver(() => f.draw()).observe($(P + "grid"));
+    const h = (location.hash || "").slice(1);
+    f.show(h.startsWith(t + "/") ? h.slice(t.length + 1) : data.scenarios[0].id);
+    return f;
+  }
+
   const estate = makeDiagram({ box: "diagram", bands: "bands", edges: "edges", detail: "detail", chips: "wsChips", legend: "legend", tab: "tab-estate", prefix: "n-" });
   const dash = makeDiagram({ box: "dbDiagram", bands: "dbBands", edges: "dbEdges", detail: "dbDetail", chips: "dbChips", legend: "dbLegend", tab: "tab-dash", prefix: "d-" });
   const closeMap = makeDiagram({ box: "cpDiagram", bands: "cpBands", edges: "cpEdges", detail: "cpDetail", chips: "cpChips", legend: "cpLegend", tab: "tab-close", prefix: "c-" });
@@ -394,13 +522,13 @@
 
     // stay on the same tab when it exists on this map; otherwise go back to the estate
     // a deep link to an extra tab (#v-…) only resolves now that the extra tabs exist
-    const want = (location.hash || "").slice(1);
+    const want = (location.hash || "").slice(1).split("/")[0]; // "#v-p2p/goods" opens a workflow scenario
     const target = want.startsWith("v-") && tabIds().includes(want) ? want : current;
     const ok = target === "admin" || (target in has ? has[target] : tabIds().includes(target));
     showTab(ok ? target : "estate");
   }
 
-  /* Extra tabs a map declares in model.views: [{ id, label, kind: "chain" | "diagram", after?, eyebrow?, data }].
+  /* Extra tabs a map declares in model.views: [{ id, label, kind: "chain" | "diagram" | "workflows" | "table", after?, eyebrow?, data }].
      Rebuilt on every render, so switching maps removes the previous map's extra tabs. */
   function renderViews(model, chain) {
     document.querySelectorAll("[data-view]").forEach((el) => el.remove());
@@ -421,6 +549,11 @@
           ? `<div class="estate"><div><div class="filters"><span class="eyebrow">Path</span><span id="${P}chips" class="chipset"></span></div>
                <div class="diagram" id="${P}box"><svg class="edges" id="${P}edges" aria-hidden="true"></svg><div id="${P}bands"></div></div>
                <div class="legend" id="${P}legend"></div></div><aside class="detail" id="${P}detail" aria-live="polite"></aside></div>`
+          : v.kind === "workflows"
+          ? `<div class="filters wfpills"><span class="eyebrow">Scenario</span><span id="${P}pills" class="chipset"></span></div>
+             <p class="sclede" id="${P}sclede"></p>
+             <div class="estate"><div><div class="diagram flowbox"><div class="flowgrid" id="${P}grid"></div></div>
+               <div class="legend" id="${P}legend"></div></div><aside class="detail" id="${P}detail" aria-live="polite"></aside></div>`
           : v.kind === "table"
           ? `<div class="tools"><label class="eyebrow" for="${P}q" style="align-self:center">Search</label>
                <input id="${P}q" type="search" placeholder="${esc(v.data.search_hint || "Search")}">
@@ -437,6 +570,9 @@
         g.render(D, D.chips || [], D.legend || model.legend || DEFAULTS.legend);
         $(P + "notes").innerHTML = notes(D.notes);
         extraDiagrams.push(g);
+      } else if (v.kind === "workflows") {
+        $(P + "title").textContent = D.title; $(P + "lede").textContent = D.lede;
+        extraDiagrams.push(makeFlow(t, P, D, sec.id));
       } else if (v.kind === "table") {
         restTable(D, P);
       } else {

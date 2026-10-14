@@ -7,6 +7,8 @@ links: [MFG-OVERVIEW, MFG-FOUNDATION, MFG-CLOSE, MFG-PROCESSES]
 
 # Record to Report
 
+On the map, this flow is drawn as scenario workflows: see `manufacturing/workflows/record-to-report.md`.
+
 ## Stages
 | # | Stage | What happens | Evidence |
 |---|---|---|---|

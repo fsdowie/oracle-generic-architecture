@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.0 — 2026-10-13
+- Manufacturing map: **business workflows** replace the four stage chains. Six workstream tabs, each with scenario sub-tabs drawn as swimlanes (modules as columns, process bubbles, labelled arrows for the documents, goods, accounting and cash passed between them). Selecting a bubble shows the process, what goes in and out, the Dr/Cr entries, the inventory, cost, accrual and cash impact, its open interface and REST resources.
+  - Procure to Pay: goods requisition to payment, services and expense items, supplier return, supplier-consigned inventory, employee expenses.
+  - Make & Inventory: plan to produce, co-packer (outside processing), plant to DC transfer, cycle count and physical inventory, lot expiry, holds and recall, standard cost update.
+  - Order to Cash: standard order to cash, customer return, drop ship, intercompany sale MX → US.
+  - Record to Report: month-end sequence (each bubble opens its deep-dive), boundary journals (external payroll, treasury), intercompany, allocations, FX, consolidation in FCCS, account reconciliation in ARCS.
+  - Treasury: payments to bank (accounted at issue and clearing), bank statement to reconciliation.
+  - Assets: capital purchase to asset, transfers, MX tax book and retirement.
+- Evidence: the Data Integration, FCCS, ARCS and Using Subledger Accounting guides are added; gaps are cited from Oracle's 26C web documentation (`ORA-WEB`). New `manufacturing/workflows/*.md`, generated with the model; INFERRED lines listed in `open-questions.md` (W-1 to W-12).
+- Site: new view kind `workflows`; the build validates it.
+
 ## 0.8.0 — 2026-10-13
 - Manufacturing map: REST APIs from Oracle's REST catalogues (Financials 26C, SCM 26B, Procurement 25C).
   - New **REST APIs** tab: all 822 top-level resources with the module on the map, path, methods, custom actions and a link to Oracle's page; search and filter by module or guide.
