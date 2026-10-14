@@ -15,7 +15,7 @@ or is tagged `[INFERRED]` where the guides provided don't cover it (see `manufac
 ## The mock company
 | Entity | Country | Ledger currency | Role |
 |---|---|---|---|
-| FBCo US | United States | USD | Parent. Plant (beverages and dairy), distribution centre, sales to retail and food service |
+| FBCo US | United States | USD | Parent. Two business units: US Manufacturing (plant, beverages and dairy; buys for both) and US Distribution (distribution centre, sales to retail and food service) |
 | FBCo México | Mexico | MXN | Subsidiary. Plant producing concentrates and packaged goods, sold locally and to FBCo US |
 
 Mexico is the single non-US organisation. It shows how a **primary ledger**, a **secondary ledger** and a

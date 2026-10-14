@@ -30,7 +30,7 @@ On the map, this flow is drawn as scenario workflows: see `manufacturing/workflo
 | 5 | Resource and overhead | Manufacturing → Cost Accounting | Resource transactions (labour, machine hours) and overhead absorption rules charge the work order | `[ORA26C:MFG p.408, 448]` |
 | 6 | Product completion | Manufacturing → Inventory | Finished-good lots (with expiry dates) completed into the completion subinventory | `[ORA26C:MFG p.140, 482]` |
 | 7 | Close the work order | Cost Accounting | Remaining WIP balance goes to variances | `[ORA26C:MFG p.359]` |
-| 8 | Cost accounting | Cost Accounting → SLA → GL | *Create Cost Accounting Distributions* then *Create Accounting* (Cost Management) to the ledgers | `[ORA26C:MFG p.359]` |
+| 8 | Cost accounting | Cost Accounting → SLA → GL | *Create Cost Accounting Distributions* then *Create Accounting* (Cost Management) to the ledgers. Transfers from the US plant to the distribution centre cross profit centre BUs: an intracompany financial orchestration flow, with trade distributions instead of invoices | `[ORA26C:MFG p.359, 585, 591]` |
 | 9 | Recall and expiry | Inventory | Product Recall Management traces lots; expired lots are scrapped | `[ORA26C:MFG p.771]` |
 
 ## Journal entries (account types)

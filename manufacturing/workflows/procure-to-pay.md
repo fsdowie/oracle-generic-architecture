@@ -41,6 +41,8 @@ Hand-offs: Requisition → Purchase order (requisition line); Purchase order →
 
 **Mexico.** FBCo México uses perpetual average cost: the receipt updates the item's average cost instead of creating a purchase price variance.
 
+**Two US business units.** US Manufacturing BU is the Procurement Services BU for US Distribution BU: DC requisitions become POs there, supplier sites are assigned to both US invoicing BUs, and the DC's receipts and invoices are accounted in company 102.
+
 ## 2. Services and expense items
 
 MRO, maintenance and professional services: amount-based or expense lines that never enter inventory. They can be matched to a work confirmation or receipt, or paid on 2-way match, and accrue at period end.

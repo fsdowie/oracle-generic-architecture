@@ -14,8 +14,8 @@ On the map, this flow is drawn as scenario workflows: see `manufacturing/workflo
 |---|---|---|---|
 | 1 | Subledger accounting | Each subledger raises accounting events; *Create Accounting* applies the ledger's accounting method (journal entry rule sets, account rules, mapping sets) and transfers to GL. For the MX ledgers it writes primary and secondary journals together | `[ORA26C:SLA p.7-13]` `[ORA26C:GL p.301]` |
 | 2 | Journals | Manual, spreadsheet (ADFdi) and feeder journals through `GL_INTERFACE` → *Import Journals* → approval → *Post Journals* | `[ORA26C:GL p.568]` |
-| 3 | Intercompany | Intercompany balancing rules add due-to/due-from lines; *Generate Intercompany Allocations* | `[ORA26C:GL p.373, 389]` |
-| 4 | Allocations | *Generate Allocations* (Calculation Manager rules) spread plant overheads and shared services | `[ORA26C:GL p.559, 578]` |
+| 3 | Intercompany | Intercompany balancing rules add due-to/due-from lines between FBCo US and FBCo México; journals across US companies 101 and 102 balance through the clearing company (intracompany); *Generate Intercompany Allocations* | `[ORA26C:GL p.373-375, 389]` |
+| 4 | Allocations | *Generate Allocations* (Calculation Manager rules) spread plant overheads and shared services; US Manufacturing BU's shared services go to US Distribution BU (102) within the US ledger | `[ORA26C:GL p.559, 578]` |
 | 5 | Secondary ledger | MX statutory ledger receives subledger journals at Create Accounting and GL journals at posting (journal conversion rules) | `[ORA26C:GL p.301-302]` |
 | 6 | Revaluation | *Revalue Balances* on foreign-currency balances (USD payables in the MX ledger, MXN receivables in the US ledger) | `[ORA26C:GL p.530]` |
 | 7 | Reporting currency and translation | MX journals convert to USD as they post (journal-level reporting currency); *Translate General Ledger Account Balances* for balance-level views | `[ORA26C:GL p.533]` |
