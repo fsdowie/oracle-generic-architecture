@@ -16,7 +16,7 @@ point to Oracle's 26C web documentation; `[INFERRED]` marks lines no source stat
 
 ## 1. Standard order to cash
 
-A retail order by EDI: credit-checked, scheduled and reserved, picked first-expiry first-out, shipped, invoiced, recognised, paid by lockbox and reconciled.
+A retail order by EDI: credit-checked, scheduled and reserved, picked first-expiry first-out, shipped, invoiced, recognised, paid by lockbox and reconciled. In the US the order, shipment and invoice belong to US Distribution BU (company 102), which owns the distribution centre.
 
 | # | Step | Module | Process or task | In → Out | Dr / Cr | Impact | Evidence |
 |---|---|---|---|---|---|---|---|
@@ -72,16 +72,16 @@ Hand-offs: Sales order → Requisition and PO (drop ship line); Requisition and 
 
 ## 4. Intercompany sale MX → US
 
-The Mexican plant ships concentrates to the US distribution centre. The goods move once; Financial Orchestration creates the intercompany sale in Mexico and the purchase in the US at a transfer price.
+The Mexican plant ships concentrates to the US distribution centre. The goods move once; Financial Orchestration creates the intercompany sale in Mexico and the purchase in the US at a transfer price. The buyer is US Distribution BU (company 102).
 
 | # | Step | Module | Process or task | In → Out | Dr / Cr | Impact | Evidence |
 |---|---|---|---|---|---|---|---|
-| 1 | **Transfer request** — Planning or min-max at the US DC requests supply from the MX plant. | US DC (buyer) | Create Supply Request | Demand → Transfer order |  |  | `[ORA26C:MFG p.37]` |
+| 1 | **Transfer request** — Planning or min-max at the US DC requests supply from the MX plant. | US DC (buyer, 102) | Create Supply Request | Demand → Transfer order |  |  | `[ORA26C:MFG p.37]` |
 | 2 | **Ship from MX** — The MX plant ships the lots; the physical shipment starts the financial flow. | MX plant shipping | Ship Confirm | Transfer order → Shipment |  | Inventory: MX on hand reduced | `[ORA26C:SCFO p.3]` `[ORA26C:MFG p.44]` |
 | 3 | **Financial orchestration** — Processes the shipment event and prices it with the transfer pricing rules (cost plus a markup). | Financial Orchestration | Submit Financial Orchestration Events | Shipment event → Intercompany trade documents |  | Cost: transfer price = cost + markup | `[ORA26C:SCFO p.3]` `[ORA26C:OMU p.70]` |
 | 4 | **Intercompany AR invoice** — Mexico invoices the US entity at the transfer price. | MX Receivables | Import AutoInvoice | Trade document → Intercompany invoice | Seller (MX): Dr Intercompany receivable / Cr Intercompany revenue |  | `[ORA26C:SCFO p.3]` `[INFERRED]` |
 | 5 | **Intercompany AP invoice** — The US entity records the payable. | US Payables | Import Payables Invoices | Trade document → Intercompany payable | Buyer (US): Dr Inventory (at transfer price) / Cr Intercompany payable |  | `[ORA26C:SCFO p.3]` `[INFERRED]` |
-| 6 | **Receive at the US DC** — The DC receives and puts the lots away. | US DC (buyer) | Receive Expected Shipments | Goods in transit → Receipt |  | Inventory: US on hand increases at transfer price | `[ORA26C:MFG p.44]` |
+| 6 | **Receive at the US DC** — The DC receives and puts the lots away. | US DC (buyer, 102) | Receive Expected Shipments | Goods in transit → Receipt |  | Inventory: US on hand increases at transfer price | `[ORA26C:MFG p.44]` |
 | 7 | **Cost both sides** — Mexico relieves inventory to intercompany COGS; the US values the receipt at the transfer price. | Cost Management | Create Cost Accounting Distributions | Shipment and receipt → Cost journals | Seller cost (MX): Dr Intercompany COGS / Cr Inventory valuation |  | `[ORA26C:SCFO p.3]` `[INFERRED]` |
 
 Hand-offs: Transfer request → Ship from MX (transfer order); Ship from MX → Financial orchestration (shipment event); Financial orchestration → Intercompany AR invoice (sale); Financial orchestration → Intercompany AP invoice (purchase); Ship from MX → Receive at the US DC (in transit); Ship from MX → Cost both sides.

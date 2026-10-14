@@ -16,7 +16,7 @@ On the map, this flow is drawn as scenario workflows: see `manufacturing/workflo
 ## Stages and hand-offs
 | # | Stage | Module | Hand-off to the next stage | Evidence |
 |---|---|---|---|---|
-| 1 | Supplier onboarding | Suppliers | Supplier, sites and site assignments are available to the procurement BU and the Payables (invoicing) BU | `[ORA26C:PRC p.915]` |
+| 1 | Supplier onboarding | Suppliers | Supplier, sites and site assignments are available to the procurement BU (US Manufacturing BU in the US, the Procurement Services BU for US Distribution BU; MX BU in Mexico) and the Payables (invoicing) BUs | `[ORA26C:PRC p.915]` `[ORA26C:PRC p.203-205]` |
 | 2 | Requisition | Self Service Procurement / Planning Central | Approved requisition line, or a planned order released by planning → **PO line** | `[ORA26C:PRC p.201]` `[ORA26C:PLN p.13, 19]` |
 | 3 | Purchase order | Purchasing | Approved PO schedule → **expected receipt** in Receiving | `[ORA26C:PRC p.5]` |
 | 4 | Receipt and inspection | Receiving | Receipt → **Receipt Accounting** (accrual) and, after delivery, **Inventory** (on hand, lots with expiry dates) | `[ORA26C:RCV p.108]` `[ORA26C:MFG p.341]` |

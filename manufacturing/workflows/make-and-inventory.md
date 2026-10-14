@@ -35,7 +35,7 @@ Process manufacturing: plan, release and run a work order from the recipe (work 
 
 Hand-offs: Run plan → Release planned order (planned order); Release planned order → Supply request (supply request); Supply request → Process work order (work order); Process work order → Issue ingredients (pick list); Ingredient lots out → Issue ingredients (lots); Issue ingredients → Resources and overhead; Resources and overhead → Complete product; Complete product → Finished goods on hand (FG lots); Complete product → Cost the work order (WO txns); Complete product → Close work order; Close work order → Variances (close).
 
-**Costing methods.** Cost Management supports standard, actual and perpetual average cost. The mock company uses standard cost in the US plant and perpetual average cost in Mexico.
+**Costing methods.** Cost Management supports standard, actual and perpetual average cost. The mock company uses standard cost in the two US cost organisations (plant and distribution centre) and perpetual average cost in Mexico.
 
 ## 2. Co-packer (outside processing)
 
@@ -60,18 +60,23 @@ Hand-offs: Work order with supplier operation → Supply order (requisition requ
 
 ## 3. Plant to DC transfer
 
-Finished goods move from the US plant to the US distribution centre on a transfer order: shipped, in transit, received and put away.
+Finished goods move from the US plant (US Manufacturing BU, company 101) to the US distribution centre (US Distribution BU, company 102) on a transfer order. The two are profit centres of one legal entity, so an intracompany financial orchestration flow prices the transfer and Cost Accounting books both sides; no invoices are raised.
 
 | # | Step | Module | Process or task | In → Out | Dr / Cr | Impact | Evidence |
 |---|---|---|---|---|---|---|---|
 | 1 | **Transfer request** — Transfer requests come from planning, min-max, requisition lines, spreadsheets or the supply order service; Orchestration decides transfer order or PO. | Orchestration | Create Supply Request | Demand at the DC → Transfer order request |  |  | `[ORA26C:MFG p.37, 38]` |
 | 2 | **Transfer order** — The transfer order represents demand and supply in one document, to an inventory or expense destination. | Inventory (plant) | Create transfer order | Request → Transfer order |  |  | `[ORA26C:MFG p.37, 38]` |
-| 3 | **Pick, pack, ship** — Shipping picks and ships the lots; with the in-transit transfer type the goods are in transit until received. | Shipping | Pick, pack, Ship Confirm | Transfer order → Transfer Order Shipment |  | Inventory: plant on hand reduced; quantity in transit | `[ORA26C:MFG p.38, 44, 47]` |
-| 4 | **In-transit value** — Cost Management costs the shipment automatically. | Cost Management | Create Cost Accounting Distributions | Shipment → Cost journal | Transfer order shipment: Dr In-transit inventory / Cr Inventory valuation (plant) |  | `[ORA26C:MFG p.38]` `[INFERRED]` |
-| 5 | **Receive at the DC** — The DC receives against the transfer order using the receipt routing set for in-transit transfers, then puts away. | Receiving (DC) | Receive Expected Shipments; Put Away Receipts | Goods in transit → Transfer Order Receipt |  | Inventory: DC on hand increases | `[ORA26C:MFG p.44, 47]` |
-| 6 | **DC inventory value** — The receipt moves value from in transit into the DC. | Cost Management | Create Cost Accounting Distributions | Receipt → Cost journal | Transfer order receipt: Dr Inventory valuation (DC) / Cr In-transit inventory |  | `[ORA26C:MFG p.38]` `[INFERRED]` |
+| 3 | **Intracompany flow** — The transfer crosses profit centre business units in the same legal entity, so an intracompany financial orchestration flow applies. The transfer price comes from the transfer pricing rules for the financial route (here cost-based, at the plant's standard cost; a markup is possible). | Financial Orchestration | Financial orchestration flows; Transfer pricing rules | Transfer order (US plant → US DC) → Financial route, transfer price |  |  | `[ORA26C:MFG p.46, 585]` `[ORA26C:SCFO p.7]` `[INFERRED]` |
+| 4 | **Pick, pack, ship** — Shipping picks and ships the lots; with the in-transit transfer type the goods are in transit until received. | Shipping | Pick, pack, Ship Confirm | Transfer order → Transfer Order Shipment |  | Inventory: plant on hand reduced; quantity in transit | `[ORA26C:MFG p.38, 44, 47]` |
+| 5 | **Trade distributions** — Cost Management costs the shipment in the plant cost organisation and creates trade distributions for the receivable and payable between the two business units: an intracompany trade may not need an invoice. Intercompany balancing adds no lines because the entry already balances by company. | Cost Management | Create Cost Accounting Distributions | Shipment, Transfer price → Cost journals in companies 101 and 102 | Plant (101): shipment: Dr Intracompany receivable / Cr Inventory valuation (plant)<br>DC (102): goods in transit: Dr In-transit inventory / Cr Intracompany payable |  | `[ORA26C:MFG p.38, 591]` `[INFERRED]` |
+| 6 | **Receive at the DC** — The DC receives against the transfer order using the receipt routing set for in-transit transfers, then puts away. | Receiving (DC) | Receive Expected Shipments; Put Away Receipts | Goods in transit → Transfer Order Receipt |  | Inventory: DC on hand increases | `[ORA26C:MFG p.44, 47]` |
+| 7 | **DC inventory value** — The receipt moves value from in transit into the DC cost organisation at the transfer price. | Cost Management | Create Cost Accounting Distributions | Receipt → Cost journal (company 102) | DC (102): transfer order receipt: Dr Inventory valuation (DC) / Cr In-transit inventory |  | `[ORA26C:MFG p.38]` `[INFERRED]` |
 
-Hand-offs: Transfer request → Transfer order (transfer order); Transfer order → Pick, pack, ship (ship request); Pick, pack, ship → In-transit value (shipment); Pick, pack, ship → Receive at the DC (in transit); Receive at the DC → DC inventory value (receipt).
+Hand-offs: Transfer request → Transfer order (transfer order); Transfer order → Intracompany flow (crosses business units); Transfer order → Pick, pack, ship (ship request); Intracompany flow → Trade distributions (transfer price); Pick, pack, ship → Trade distributions (shipment); Pick, pack, ship → Receive at the DC (in transit); Receive at the DC → DC inventory value (receipt).
+
+**Two cost organisations.** Inventory organisations in one cost organisation must belong to the same profit centre business unit, so the plant and the DC are valued by separate cost organisations (both standard cost).
+
+**Within one legal entity.** The intracompany receivable and payable sit in companies 101 and 102 of the same ledger; they net to zero for FBCo US and need no consolidation elimination. Account names are INFERRED.
 
 **Mexico to US.** A transfer between FBCo México and FBCo US crosses legal entities: Financial Orchestration prices it and raises intercompany invoices (see Order to Cash › Intercompany sale).
 
@@ -113,7 +118,7 @@ Hand-offs: Inspect at receipt → Material status hold (rejected → hold); Mate
 
 ## 6. Standard cost update
 
-Once a year (and for new items) the US plant sets new standard costs in a cost scenario, rolls them up through the recipes and publishes them; on-hand and open work orders are revalued.
+Once a year (and for new items) the US cost organisations (plant and distribution centre) set new standard costs in a cost scenario, rolls them up through the recipes and publishes them; on-hand and open work orders are revalued.
 
 | # | Step | Module | Process or task | In → Out | Dr / Cr | Impact | Evidence |
 |---|---|---|---|---|---|---|---|

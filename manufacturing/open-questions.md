@@ -21,6 +21,9 @@ the matching guide when it's available.
 | M-6b | Cash Management table names (`CE_STATEMENT_HEADERS_INT`, `CE_STATEMENT_LINES_INT`) | R2R, close | **Resolved** 2026-10-13: Oracle 26C web docs, Using Payables Invoice to Pay, "How Bank Statements Import Data is Processed" |
 | M-7 | Costing method per country (US standard, MX perpetual average) | Plan to Produce | Design choice; the methods themselves are confirmed `[ORA26C:MFG p.102]` |
 | M-8 | Subledger close order (supply chain before Payables) | Period close | Open: Oracle close guidance |
+| M-9 | Company (balancing segment) values 101, 102, 201 and how a BU's transactions get its value (the guides don't define a default BSV for a BU) | Enterprise structure | Design choice (mock values), 2026-10-14 |
+| M-10 | Divisions shown as objects on the Enterprise structure tab; Oracle has no division object (management structure through BUs and the chart) `[ORA26C:GL p.13]` | Enterprise structure | Design note |
+| M-11 | Two US business units (US Manufacturing as Procurement Services BU, US Distribution); accounts on the intracompany plant → DC transfer and the 101 → 102 shared-services allocation | Enterprise structure, Make & Inventory, R2R | Design choice; account names open (Using Cost Accounting) |
 
 ## Workflow journal lines and steps tagged INFERRED (2026-10-13)
 Agreed: show standard account types on these steps, tagged INFERRED, until a source prints them. Details are in

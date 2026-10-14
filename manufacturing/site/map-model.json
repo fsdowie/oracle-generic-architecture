@@ -15,6 +15,10 @@
     "label": "ledger views (2 primary, 1 secondary, 1 reporting currency)"
    },
    {
+    "value": "3",
+    "label": "business units (2 US, 1 MX)"
+   },
+   {
     "value": "{{integration_count}}",
     "label": "open interfaces"
    },
@@ -144,12 +148,13 @@
     "MDM",
     "R2R"
    ],
-   "description": "Two legal entities (FBCo US, FBCo México), a business unit each, inventory organisations for the plants and the distribution centre, and the cost organisations that value them.",
+   "description": "Two divisions and two legal entities (FBCo US, FBCo México); three business units (US Manufacturing and US Distribution, MX); inventory organisations for the plants and the distribution centre, and the cost organisations that value them. See the Enterprise structure tab.",
    "functions": [
-    "Legal entities own the ledgers and the tax registrations",
+    "Legal entities own the ledgers and the tax registrations; company values 101 and 102 (US), 201 (MX)",
     "Business units run Payables, Receivables and Procurement; profit-centre BUs own inventory",
-    "Inventory organisations: US plant, US distribution centre, MX plant",
-    "Cost organisations and cost books value each inventory organisation"
+    "US Manufacturing BU is the Procurement Services BU for US Distribution BU",
+    "Inventory organisations: US plant, US distribution centre, MX plant; one item master organisation",
+    "Cost organisations: US plant, US DC (standard cost) and MX (average cost)"
    ],
    "docs": [
     {
@@ -176,6 +181,7 @@
    "description": "One corporate chart of accounts for both countries, a chart of accounts mapping to the Mexican statutory chart, accounting calendars and daily rates.",
    "functions": [
     "Corporate chart: Company, Cost centre, Account, Product line, Intercompany, Future",
+    "Company (balancing) values: 101 US plant, 102 US distribution, 201 Mexico (INFERRED)",
     "Account hierarchies (trees) for reporting and allocations",
     "Cross-validation rules stop invalid account combinations",
     "Chart of accounts mapping: corporate → Mexican statutory chart (SAT grouping code)"
@@ -225,7 +231,7 @@
    "description": "The supplier master: suppliers, sites, contacts, bank accounts and site assignments to the business units that buy and pay.",
    "functions": [
     "Supplier registration and approval",
-    "Sites assigned to the procurement and invoicing business units",
+    "Sites assigned to US Manufacturing BU (procurement) for both US invoicing BUs, and to the MX BU",
     "Bank accounts and payment methods for Payments",
     "Tax registrations used by Tax on invoices"
    ],
@@ -592,7 +598,7 @@
    "description": "On-hand quantities by organisation, subinventory and lot; issues, transfers, cycle counts and lot expiry.",
    "functions": [
     "Lot control with expiry dates; first-expiry, first-out picking",
-    "Transfers between plant and distribution centre",
+    "Transfers from the US plant to the distribution centre (different business units: intracompany flow)",
     "Cycle counts and adjustments",
     "Sends every transaction to Cost Accounting"
    ],
@@ -1219,9 +1225,10 @@
    ],
    "description": "Values every inventory and work-order transaction, absorbs overhead, recognises COGS in step with revenue, and reports gross margin.",
    "functions": [
-    "Standard cost (US) and perpetual average cost (MX)",
+    "Three cost organisations: US plant and US DC at standard cost, MX at perpetual average cost",
     "WIP valuation and variances by work order",
     "Overhead absorption rules",
+    "Trade distributions for the intracompany plant → DC transfer",
     "COGS recognised when revenue is recognised"
    ],
    "processes": [
@@ -1295,11 +1302,10 @@
     "P2P",
     "R2R"
    ],
-   "description": "Separates the financial flow from the physical flow when FBCo México ships to FBCo US: transfer pricing and intercompany invoices.",
+   "description": "Separates the financial flow from the physical flow when FBCo México ships to FBCo US (intercompany) and when the US plant ships to the US distribution centre (intracompany, two business units in one legal entity).",
    "functions": [
-    "Financial orchestration flow MX plant → US distribution centre",
-    "Transfer price: cost plus a markup",
-    "Creates the intercompany AR invoice (MX) and AP invoice (US)"
+    "Intercompany flow MX plant → US distribution centre: transfer price cost plus a markup; intercompany AR invoice (MX) and AP invoice (US)",
+    "Intracompany flow US plant → US distribution centre: transfer price from the financial route; no invoices, Cost Accounting trade distributions book the receivable and payable"
    ],
    "processes": [
     "Financial orchestration flows",
@@ -1380,9 +1386,10 @@
    "workstreams": [
     "R2R"
    ],
-   "description": "FBCo US's main ledger: US GAAP, USD, the corporate chart of accounts.",
+   "description": "FBCo US's main ledger: US GAAP, USD, the corporate chart of accounts. Both US business units post here.",
    "functions": [
     "Receives journals from Create Accounting and Import Journals",
+    "Company values 101 (US Manufacturing BU) and 102 (US Distribution BU)",
     "Revaluation of MXN balances",
     "Part of the USD ledger set"
    ],
@@ -1546,7 +1553,8 @@
    ],
    "description": "Balances journals that cross companies and allocates plant overheads and shared services.",
    "functions": [
-    "Intercompany balancing rules add due-to and due-from lines",
+    "Intercompany balancing rules add due-to and due-from lines between legal entities (101/102 ↔ 201)",
+    "Within FBCo US, journals across 101 and 102 are balanced through the clearing company option for intracompany journals",
     "Allocations spread overhead pools by driver"
    ],
    "processes": [
@@ -1871,6 +1879,12 @@
    "to": "scfo",
    "kind": "acct",
    "label": "MX → US shipment → intercompany event"
+  },
+  {
+   "from": "inv",
+   "to": "scfo",
+   "kind": "acct",
+   "label": "US plant → DC transfer → intracompany event"
   },
   {
    "from": "scfo",
@@ -2912,6 +2926,10 @@
        {
         "title": "Mexico.",
         "text": "FBCo México uses perpetual average cost: the receipt updates the item's average cost instead of creating a purchase price variance."
+       },
+       {
+        "title": "Two US business units.",
+        "text": "US Manufacturing BU is the Procurement Services BU for US Distribution BU: DC requisitions become POs there, supplier sites are assigned to both US invoicing BUs, and the DC's receipts and invoices are accounted in company 102."
        }
       ]
      },
@@ -4722,7 +4740,7 @@
       "notes": [
        {
         "title": "Costing methods.",
-        "text": "Cost Management supports standard, actual and perpetual average cost. The mock company uses standard cost in the US plant and perpetual average cost in Mexico."
+        "text": "Cost Management supports standard, actual and perpetual average cost. The mock company uses standard cost in the two US cost organisations (plant and distribution centre) and perpetual average cost in Mexico."
        }
       ]
      },
@@ -5173,11 +5191,15 @@
      {
       "id": "transfer",
       "label": "Plant to DC transfer",
-      "lede": "Finished goods move from the US plant to the US distribution centre on a transfer order: shipped, in transit, received and put away.",
+      "lede": "Finished goods move from the US plant (US Manufacturing BU, company 101) to the US distribution centre (US Distribution BU, company 102) on a transfer order. The two are profit centres of one legal entity, so an intracompany financial orchestration flow prices the transfer and Cost Accounting books both sides; no invoices are raised.",
       "lanes": [
        {
         "id": "sco",
         "label": "Orchestration"
+       },
+       {
+        "id": "fo",
+        "label": "Financial Orchestration"
        },
        {
         "id": "inv",
@@ -5256,6 +5278,38 @@
         ]
        },
        {
+        "id": "flow",
+        "lane": "fo",
+        "seq": 2,
+        "title": "Intracompany flow",
+        "sub": "financial route · transfer price",
+        "description": "The transfer crosses profit centre business units in the same legal entity, so an intracompany financial orchestration flow applies. The transfer price comes from the transfer pricing rules for the financial route (here cost-based, at the plant's standard cost; a markup is possible).",
+        "evidence": [
+         "MFG p.46, 585",
+         "SCFO p.7",
+         "INFERRED"
+        ],
+        "process": [
+         "Financial orchestration flows",
+         "Transfer pricing rules"
+        ],
+        "in": [
+         "Transfer order (US plant → US DC)"
+        ],
+        "out": [
+         "Financial route, transfer price"
+        ],
+        "rest": [
+         "financialOrchestrationTransferPrices"
+        ],
+        "docs": [
+         {
+          "label": "Make and inventory workflows",
+          "path": "manufacturing/workflows/make-and-inventory.md"
+         }
+        ]
+       },
+       {
         "id": "ship",
         "lane": "shp",
         "seq": 3,
@@ -5294,30 +5348,40 @@
         "id": "cst1",
         "lane": "cst",
         "seq": 4,
-        "title": "In-transit value",
-        "sub": "Cost Accounting",
-        "description": "Cost Management costs the shipment automatically.",
+        "title": "Trade distributions",
+        "sub": "plant cost org · DC cost org",
+        "description": "Cost Management costs the shipment in the plant cost organisation and creates trade distributions for the receivable and payable between the two business units: an intracompany trade may not need an invoice. Intercompany balancing adds no lines because the entry already balances by company.",
         "evidence": [
-         "MFG p.38",
+         "MFG p.38, 591",
          "INFERRED"
         ],
         "process": [
          "Create Cost Accounting Distributions"
         ],
         "in": [
-         "Shipment"
+         "Shipment",
+         "Transfer price"
         ],
         "out": [
-         "Cost journal"
+         "Cost journals in companies 101 and 102"
         ],
         "entries": [
          {
-          "event": "Transfer order shipment",
+          "event": "Plant (101): shipment",
+          "dr": [
+           "Intracompany receivable"
+          ],
+          "cr": [
+           "Inventory valuation (plant)"
+          ]
+         },
+         {
+          "event": "DC (102): goods in transit",
           "dr": [
            "In-transit inventory"
           ],
           "cr": [
-           "Inventory valuation (plant)"
+           "Intracompany payable"
           ]
          }
         ],
@@ -5369,8 +5433,8 @@
         "lane": "cst",
         "seq": 6,
         "title": "DC inventory value",
-        "sub": "",
-        "description": "The receipt moves value from in transit into the DC.",
+        "sub": "DC cost org",
+        "description": "The receipt moves value from in transit into the DC cost organisation at the transfer price.",
         "evidence": [
          "MFG p.38",
          "INFERRED"
@@ -5382,11 +5446,11 @@
          "Receipt"
         ],
         "out": [
-         "Cost journal"
+         "Cost journal (company 102)"
         ],
         "entries": [
          {
-          "event": "Transfer order receipt",
+          "event": "DC (102): transfer order receipt",
           "dr": [
            "Inventory valuation (DC)"
           ],
@@ -5412,9 +5476,21 @@
        },
        {
         "from": "to",
+        "to": "flow",
+        "kind": "doc",
+        "label": "crosses business units"
+       },
+       {
+        "from": "to",
         "to": "ship",
         "kind": "doc",
         "label": "ship request"
+       },
+       {
+        "from": "flow",
+        "to": "cst1",
+        "kind": "acct",
+        "label": "transfer price"
        },
        {
         "from": "ship",
@@ -5436,6 +5512,14 @@
        }
       ],
       "notes": [
+       {
+        "title": "Two cost organisations.",
+        "text": "Inventory organisations in one cost organisation must belong to the same profit centre business unit, so the plant and the DC are valued by separate cost organisations (both standard cost)."
+       },
+       {
+        "title": "Within one legal entity.",
+        "text": "The intracompany receivable and payable sit in companies 101 and 102 of the same ledger; they net to zero for FBCo US and need no consolidation elimination. Account names are INFERRED."
+       },
        {
         "title": "Mexico to US.",
         "text": "A transfer between FBCo México and FBCo US crosses legal entities: Financial Orchestration prices it and raises intercompany invoices (see Order to Cash › Intercompany sale)."
@@ -6126,7 +6210,7 @@
      {
       "id": "stdcost",
       "label": "Standard cost update",
-      "lede": "Once a year (and for new items) the US plant sets new standard costs in a cost scenario, rolls them up through the recipes and publishes them; on-hand and open work orders are revalued.",
+      "lede": "Once a year (and for new items) the US cost organisations (plant and distribution centre) set new standard costs in a cost scenario, rolls them up through the recipes and publishes them; on-hand and open work orders are revalued.",
       "lanes": [
        {
         "id": "ext",
@@ -6361,7 +6445,7 @@
      {
       "id": "standard",
       "label": "Standard order to cash",
-      "lede": "A retail order by EDI: credit-checked, scheduled and reserved, picked first-expiry first-out, shipped, invoiced, recognised, paid by lockbox and reconciled.",
+      "lede": "A retail order by EDI: credit-checked, scheduled and reserved, picked first-expiry first-out, shipped, invoiced, recognised, paid by lockbox and reconciled. In the US the order, shipment and invoice belong to US Distribution BU (company 102), which owns the distribution centre.",
       "lanes": [
        {
         "id": "ext",
@@ -7493,11 +7577,11 @@
      {
       "id": "intercompany",
       "label": "Intercompany sale MX → US",
-      "lede": "The Mexican plant ships concentrates to the US distribution centre. The goods move once; Financial Orchestration creates the intercompany sale in Mexico and the purchase in the US at a transfer price.",
+      "lede": "The Mexican plant ships concentrates to the US distribution centre. The goods move once; Financial Orchestration creates the intercompany sale in Mexico and the purchase in the US at a transfer price. The buyer is US Distribution BU (company 102).",
       "lanes": [
        {
         "id": "us",
-        "label": "US DC (buyer)"
+        "label": "US DC (buyer, 102)"
        },
        {
         "id": "mxs",
@@ -8009,9 +8093,9 @@
         "seq": 5,
         "title": "Intercompany",
         "sub": "balancing and allocations",
-        "description": "Intercompany balancing adds due-to and due-from lines; intercompany allocations and transactions are completed (see Intercompany).",
+        "description": "Intercompany balancing adds due-to and due-from lines between FBCo US and FBCo México, and balances journals across companies 101 and 102 inside the US ledger through the clearing company; intercompany allocations and transactions are completed (see Intercompany).",
         "evidence": [
-         "GL p.373, 389"
+         "GL p.373, 374, 389"
         ],
         "process": [
          "Generate Intercompany Allocations"
@@ -8255,9 +8339,9 @@
         "seq": 14,
         "title": "Report BS and P&L",
         "sub": "FCCS · Financial Reporting",
-        "description": "Consolidated statements from FCCS; ledger-level statements from Financial Reporting on the USD ledger set.",
+        "description": "Consolidated statements from FCCS; ledger-level statements from Financial Reporting on the USD ledger set, and by company (101, 102, 201) for each business unit. Data access sets by primary balancing segment value let each US business unit's accountants work on their own company.",
         "evidence": [
-         "GL p.135",
+         "GL p.135, 136",
          "FCCS p.585"
         ],
         "process": [
@@ -8868,12 +8952,21 @@
         "label": "balances"
        }
       ],
-      "notes": []
+      "notes": [
+       {
+        "title": "Within FBCo US.",
+        "text": "Charges between US Manufacturing BU (101) and US Distribution BU (102) are journals in one ledger. The same balancing rules apply; set the clearing company option (use the clearing company for intracompany journals) so many-to-many journals don't error. No invoices and no consolidation elimination are needed."
+       },
+       {
+        "title": "Rule levels.",
+        "text": "Balancing rules are defined by primary balancing segment value, legal entity, ledger or chart of accounts, in that order of precedence."
+       }
+      ]
      },
      {
       "id": "allocations",
       "label": "Allocations",
-      "lede": "Plant overhead spread to product lines by production volume, and shared services spread to entities by headcount.",
+      "lede": "Plant overhead spread to product lines by production volume, and shared services (procurement and finance in US Manufacturing BU) spread by headcount: to US Distribution BU within the US ledger, and to FBCo México across legal entities.",
       "lanes": [
        {
         "id": "cm",
@@ -8921,9 +9014,9 @@
         "seq": 2,
         "title": "Generate allocations",
         "sub": "Generate General Ledger Allocations",
-        "description": "Calculates the allocation and, if Post Allocations is selected, books it through Journal Import; cross-ledger lines get intercompany accounts.",
+        "description": "Calculates the allocation and, if Post Allocations is selected, books it through Journal Import. An allocation from company 101 to 102 stays in the US ledger: balancing adds the intracompany lines through the clearing company.",
         "evidence": [
-         "GL p.389, 390"
+         "GL p.374, 389, 390"
         ],
         "process": [
          "Generate General Ledger Allocations"
@@ -8943,6 +9036,17 @@
           ],
           "cr": [
            "Overhead pool (allocation offset)"
+          ]
+         },
+         {
+          "event": "Shared services 101 → 102 (INFERRED accounts)",
+          "dr": [
+           "Shared services expense (102)",
+           "Intracompany receivable (101)"
+          ],
+          "cr": [
+           "Shared services pool (101)",
+           "Intracompany payable (102)"
           ]
          }
         ],
@@ -11043,6 +11147,7 @@
       "description": "The main record of FBCo US.",
       "functions": [
        "Corporate chart of accounts, accounting calendar, USD",
+       "Both US business units post here (company values 101 and 102)",
        "Revalues MXN balances (for example intercompany payables) at month end"
       ],
       "facts": [
@@ -11053,6 +11158,10 @@
        [
         "Chart",
         "Corporate"
+       ],
+       [
+        "Company values",
+        "101, 102"
        ]
       ],
       "docs": [
@@ -11365,6 +11474,855 @@
      {
       "title": "Modules.",
       "text": "Resources for areas outside this company's scope (federal, joint ventures, maintenance, channel revenue, product development, spend classification) are listed as Not on this map."
+     }
+    ]
+   }
+  },
+  {
+   "id": "structure",
+   "label": "Enterprise structure",
+   "kind": "diagram",
+   "after": "estate",
+   "eyebrow": "Enterprise structure",
+   "data": {
+    "title": "Enterprise structure",
+    "lede": "FBCo adapted from Oracle's InFusion example: a US division and a Mexico division, one legal entity and primary ledger in each country, two business units in the US and one in Mexico, the balancing segment values that identify them, and the organisations that hold and value inventory. Select any object to see what it does.",
+    "layers": [
+     {
+      "id": "ES1",
+      "label": "Enterprise",
+      "title": "Enterprise"
+     },
+     {
+      "id": "ES2",
+      "label": "Divisions",
+      "title": "Management structure"
+     },
+     {
+      "id": "ES3",
+      "label": "Legal",
+      "title": "Legal entities and primary ledgers"
+     },
+     {
+      "id": "ES4",
+      "label": "Ledgers",
+      "title": "Secondary ledger, reporting currency, ledger set"
+     },
+     {
+      "id": "ES5",
+      "label": "BUs",
+      "title": "Business units"
+     },
+     {
+      "id": "ES6",
+      "label": "Company",
+      "title": "Balancing segment values"
+     },
+     {
+      "id": "ES7",
+      "label": "Inventory",
+      "title": "Inventory organisations"
+     },
+     {
+      "id": "ES8",
+      "label": "Cost",
+      "title": "Cost organisations and item master"
+     }
+    ],
+    "chips": [
+     {
+      "id": "US",
+      "label": "FBCo US"
+     },
+     {
+      "id": "MX",
+      "label": "FBCo México"
+     }
+    ],
+    "legend": [
+     {
+      "label": "owns or contains",
+      "color": "var(--oic)"
+     },
+     {
+      "label": "ledger and balancing",
+      "color": "var(--extract)"
+     },
+     {
+      "label": "accounting",
+      "color": "var(--airflow)"
+     },
+     {
+      "label": "goods between organisations",
+      "color": "var(--goods)"
+     }
+    ],
+    "default_node": "s-ent",
+    "nodes": [
+     {
+      "id": "s-ent",
+      "layer": "ES1",
+      "title": "FBCo",
+      "subtitle": "Enterprise · corporate chart · common set",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": true,
+      "description": "The enterprise: the top of the structure, holding what both countries share.",
+      "functions": [
+       "One corporate chart of accounts: Company, Cost centre, Account, Product line, Intercompany, Future",
+       "Shared accounting calendar and daily rates (MXN/USD)",
+       "Common reference data set for shared setup such as payment terms; BU-specific sets where data must differ (customer sites)",
+       "One item master shared by every organisation"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ],
+      "facts": [
+       [
+        "Chart",
+        "Corporate"
+       ],
+       [
+        "Reference data",
+        "Common set + BU-specific sets"
+       ]
+      ]
+     },
+     {
+      "id": "s-div-us",
+      "layer": "ES2",
+      "title": "FBCo US Division",
+      "subtitle": "Manufacturing and distribution",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "The US part of the management structure: the US plant and the US distribution centre.",
+      "functions": [
+       "A management grouping, not a legal or ledger object",
+       "Represented by business units and balancing segment values (101, 102) and rolled up in account hierarchies",
+       "Reports in USD on the US primary ledger"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "s-div-mx",
+      "layer": "ES2",
+      "title": "FBCo México Division",
+      "subtitle": "Concentrates and local sales",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "The Mexican part of the management structure: the MX plant, which also supplies concentrates to the US.",
+      "functions": [
+       "A management grouping, not a legal or ledger object",
+       "Represented by the MX business unit and balancing segment value 201",
+       "Reports in MXN and, through the reporting currency, in USD"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "s-le-us",
+      "layer": "ES3",
+      "title": "FBCo US Inc.",
+      "subtitle": "Legal entity · US primary ledger (USD)",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": true,
+      "description": "The US legal entity and its primary ledger: USD, corporate chart, US GAAP, calendar January to December.",
+      "functions": [
+       "Owns the US tax registrations, bank accounts and the US primary ledger",
+       "Balancing segment values 101 and 102 are assigned to it in the ledger",
+       "Journals between 101 and 102 stay inside this ledger: balancing lines use the clearing company option for intracompany journals",
+       "Member of the USD ledger set"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ],
+      "facts": [
+       [
+        "Currency",
+        "USD"
+       ],
+       [
+        "Accounting method",
+        "Standard Accrual (US GAAP)"
+       ],
+       [
+        "Company values",
+        "101, 102 (INFERRED)"
+       ]
+      ]
+     },
+     {
+      "id": "s-le-mx",
+      "layer": "ES3",
+      "title": "FBCo México S.A. de C.V.",
+      "subtitle": "Legal entity · MX primary ledger (MXN)",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": true,
+      "description": "The Mexican legal entity and its primary ledger: MXN, corporate chart and corporate policies.",
+      "functions": [
+       "Owns the Mexican tax registrations (VAT), bank accounts and the MX primary ledger",
+       "Balancing segment value 201 is assigned to it",
+       "Source of the MX secondary ledger and the USD reporting currency"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ],
+      "facts": [
+       [
+        "Currency",
+        "MXN"
+       ],
+       [
+        "Accounting method",
+        "Standard Accrual (US GAAP policies)"
+       ],
+       [
+        "Company value",
+        "201 (INFERRED)"
+       ]
+      ]
+     },
+     {
+      "id": "s-set",
+      "layer": "ES4",
+      "title": "USD ledger set",
+      "subtitle": "US primary + MX reporting currency",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Groups the two USD views so that period close, revaluation and reports run once.",
+      "functions": [
+       "Open and close periods and run reports for both at once",
+       "Financial Reporting and Smart View in USD"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "s-mx2",
+      "layer": "ES4",
+      "title": "MX secondary ledger",
+      "subtitle": "MXN · statutory chart · subledger level",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "The Mexican statutory books, linked to the MX primary ledger.",
+      "functions": [
+       "Mexican statutory chart (SAT grouping code) through the chart of accounts mapping",
+       "Subledger level: Create Accounting writes primary and secondary journals in one run; GL journals copied at posting",
+       "MX tax asset book assigned here"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ],
+      "facts": [
+       [
+        "Conversion level",
+        "Subledger"
+       ],
+       [
+        "Currency",
+        "MXN"
+       ]
+      ]
+     },
+     {
+      "id": "s-mxr",
+      "layer": "ES4",
+      "title": "MX reporting currency",
+      "subtitle": "USD · journal level",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "FBCo México's primary ledger restated in USD.",
+      "functions": [
+       "Each posted MX primary journal is converted to USD",
+       "Same chart, calendar and accounting method as the MX primary ledger"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ],
+      "facts": [
+       [
+        "Conversion level",
+        "Journal"
+       ],
+       [
+        "Currency",
+        "USD"
+       ]
+      ]
+     },
+     {
+      "id": "s-bu-usm",
+      "layer": "ES5",
+      "title": "US Manufacturing BU",
+      "subtitle": "Procurement services · profit centre",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Runs the US plant and buys for both US business units, like BU 4 in Oracle's example.",
+      "functions": [
+       "Business functions: Procurement, Requisitioning, Receiving, Payables invoicing and payments, Materials management, Customer payments",
+       "Procurement Services BU: processes requisitions and negotiates supplier terms for its client, US Distribution BU",
+       "Profit centre BU that owns the US plant inventory organisation",
+       "Posts to the US primary ledger; its transactions carry company value 101 (derivation INFERRED)"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ],
+      "facts": [
+       [
+        "Ledger",
+        "US primary"
+       ],
+       [
+        "Default legal entity",
+        "FBCo US Inc."
+       ],
+       [
+        "Company value",
+        "101 (INFERRED)"
+       ]
+      ]
+     },
+     {
+      "id": "s-bu-usd",
+      "layer": "ES5",
+      "title": "US Distribution BU",
+      "subtitle": "Sales · profit centre",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Runs the US distribution centre and sells to US customers.",
+      "functions": [
+       "Business functions: Requisitioning, Receiving, Payables invoicing and payments, Materials management, Billing and revenue, Customer payments",
+       "Client of US Manufacturing BU for procurement: its requisitions become POs there; supplier sites are assigned to it for invoicing",
+       "Profit centre BU that owns the US distribution centre; receives finished goods from the US plant through an intracompany flow",
+       "Posts to the US primary ledger; its transactions carry company value 102 (derivation INFERRED)"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ],
+      "facts": [
+       [
+        "Ledger",
+        "US primary"
+       ],
+       [
+        "Default legal entity",
+        "FBCo US Inc."
+       ],
+       [
+        "Company value",
+        "102 (INFERRED)"
+       ]
+      ]
+     },
+     {
+      "id": "s-bu-mx",
+      "layer": "ES5",
+      "title": "MX BU",
+      "subtitle": "All functions · profit centre",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "The single Mexican business unit: buys, makes, sells and pays.",
+      "functions": [
+       "All business functions for FBCo México",
+       "Profit centre BU that owns the MX plant",
+       "Sells concentrates to US Distribution BU through Financial Orchestration (intercompany)"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ],
+      "facts": [
+       [
+        "Ledger",
+        "MX primary"
+       ],
+       [
+        "Default legal entity",
+        "FBCo México S.A. de C.V."
+       ],
+       [
+        "Company value",
+        "201 (INFERRED)"
+       ]
+      ]
+     },
+     {
+      "id": "s-bsv-101",
+      "layer": "ES6",
+      "title": "101 · US plant",
+      "subtitle": "Company segment value",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Balancing segment value for the US plant (US Manufacturing BU). Mock value, INFERRED.",
+      "functions": [
+       "Balance sheet and P&L of the plant balance on their own",
+       "Data access set by primary balancing segment value for plant accountants"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "s-bsv-102",
+      "layer": "ES6",
+      "title": "102 · US distribution",
+      "subtitle": "Company segment value",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Balancing segment value for the US distribution centre and US sales (US Distribution BU). Mock value, INFERRED.",
+      "functions": [
+       "Journals across 101 and 102 get balancing lines through the clearing company",
+       "Data access set by primary balancing segment value for distribution accountants"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "s-bsv-201",
+      "layer": "ES6",
+      "title": "201 · Mexico",
+      "subtitle": "Company segment value",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Balancing segment value for FBCo México. Mock value, INFERRED.",
+      "functions": [
+       "Journals across 201 and a US value cross legal entities: intercompany balancing rules add intercompany receivable and payable lines"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "s-io-usp",
+      "layer": "ES7",
+      "title": "US plant",
+      "subtitle": "Inventory org · process manufacturing",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Makes finished goods from ingredients and packaging.",
+      "functions": [
+       "Process manufacturing enabled",
+       "Lot control with expiry dates",
+       "Ships finished goods to the US distribution centre on transfer orders"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "s-io-usd",
+      "layer": "ES7",
+      "title": "US distribution centre",
+      "subtitle": "Inventory org · warehouse",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Stores finished goods and ships customer orders.",
+      "functions": [
+       "Receives from the US plant (intracompany) and the MX plant (intercompany)",
+       "Picks first-expiry, first-out"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "s-io-mx",
+      "layer": "ES7",
+      "title": "MX plant",
+      "subtitle": "Inventory org · process manufacturing",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Makes concentrates and finished goods in Mexico.",
+      "functions": [
+       "Process manufacturing enabled",
+       "Ships concentrates to the US distribution centre"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "s-co-usp",
+      "layer": "ES8",
+      "title": "US plant cost org",
+      "subtitle": "Standard cost",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Values the US plant's inventory and work orders at standard cost.",
+      "functions": [
+       "Its inventory organisations must belong to one profit centre BU, so the plant and the DC have separate cost organisations",
+       "Primary cost book, standard cost; variances to the plant (101)"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "s-co-usd",
+      "layer": "ES8",
+      "title": "US DC cost org",
+      "subtitle": "Standard cost",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Values the distribution centre's inventory at standard cost.",
+      "functions": [
+       "Primary cost book, standard cost",
+       "Books the intracompany receipt from the plant at the transfer price"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "s-co-mx",
+      "layer": "ES8",
+      "title": "MX cost org",
+      "subtitle": "Perpetual average cost",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Values the MX plant's inventory at perpetual average cost.",
+      "functions": [
+       "Primary cost book, perpetual average cost"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "s-im",
+      "layer": "ES8",
+      "title": "Item master",
+      "subtitle": "Item organisation",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "One item master organisation for every item, separate from the organisations that hold stock.",
+      "functions": [
+       "Item organisation: no on-hand balances and no financial transactions",
+       "Items are assigned from here to the US plant, the US distribution centre and the MX plant"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     }
+    ],
+    "edges": [
+     {
+      "from": "s-ent",
+      "to": "s-div-us",
+      "kind": "doc",
+      "label": "division"
+     },
+     {
+      "from": "s-ent",
+      "to": "s-div-mx",
+      "kind": "doc",
+      "label": "division"
+     },
+     {
+      "from": "s-div-us",
+      "to": "s-le-us",
+      "kind": "doc",
+      "label": "legal entity"
+     },
+     {
+      "from": "s-div-mx",
+      "to": "s-le-mx",
+      "kind": "doc",
+      "label": "legal entity"
+     },
+     {
+      "from": "s-le-us",
+      "to": "s-set",
+      "kind": "ledger",
+      "label": "member"
+     },
+     {
+      "from": "s-le-mx",
+      "to": "s-mx2",
+      "kind": "ledger",
+      "label": "secondary ledger"
+     },
+     {
+      "from": "s-le-mx",
+      "to": "s-mxr",
+      "kind": "ledger",
+      "label": "reporting currency"
+     },
+     {
+      "from": "s-mxr",
+      "to": "s-set",
+      "kind": "ledger",
+      "label": "member"
+     },
+     {
+      "from": "s-le-us",
+      "to": "s-bu-usm",
+      "kind": "doc",
+      "label": "primary ledger, default legal entity"
+     },
+     {
+      "from": "s-le-us",
+      "to": "s-bu-usd",
+      "kind": "doc",
+      "label": "primary ledger, default legal entity"
+     },
+     {
+      "from": "s-le-mx",
+      "to": "s-bu-mx",
+      "kind": "doc",
+      "label": "primary ledger, default legal entity"
+     },
+     {
+      "from": "s-bu-usm",
+      "to": "s-bu-usd",
+      "kind": "doc",
+      "label": "procurement services"
+     },
+     {
+      "from": "s-bu-usm",
+      "to": "s-bsv-101",
+      "kind": "ledger",
+      "label": "company 101"
+     },
+     {
+      "from": "s-bu-usd",
+      "to": "s-bsv-102",
+      "kind": "ledger",
+      "label": "company 102"
+     },
+     {
+      "from": "s-bu-mx",
+      "to": "s-bsv-201",
+      "kind": "ledger",
+      "label": "company 201"
+     },
+     {
+      "from": "s-bsv-101",
+      "to": "s-bsv-102",
+      "kind": "ledger",
+      "label": "intracompany balancing (clearing company)"
+     },
+     {
+      "from": "s-bsv-201",
+      "to": "s-bsv-102",
+      "kind": "ledger",
+      "label": "intercompany balancing"
+     },
+     {
+      "from": "s-bu-usm",
+      "to": "s-io-usp",
+      "kind": "doc",
+      "label": "owns"
+     },
+     {
+      "from": "s-bu-usd",
+      "to": "s-io-usd",
+      "kind": "doc",
+      "label": "owns"
+     },
+     {
+      "from": "s-bu-mx",
+      "to": "s-io-mx",
+      "kind": "doc",
+      "label": "owns"
+     },
+     {
+      "from": "s-io-usp",
+      "to": "s-io-usd",
+      "kind": "goods",
+      "label": "transfer order (intracompany flow)"
+     },
+     {
+      "from": "s-io-mx",
+      "to": "s-io-usd",
+      "kind": "goods",
+      "label": "intercompany flow"
+     },
+     {
+      "from": "s-io-usp",
+      "to": "s-co-usp",
+      "kind": "acct",
+      "label": "valued by"
+     },
+     {
+      "from": "s-io-usd",
+      "to": "s-co-usd",
+      "kind": "acct",
+      "label": "valued by"
+     },
+     {
+      "from": "s-io-mx",
+      "to": "s-co-mx",
+      "kind": "acct",
+      "label": "valued by"
+     },
+     {
+      "from": "s-im",
+      "to": "s-io-usp",
+      "kind": "doc",
+      "label": "item assignment"
+     },
+     {
+      "from": "s-im",
+      "to": "s-io-usd",
+      "kind": "doc",
+      "label": "item assignment"
+     },
+     {
+      "from": "s-im",
+      "to": "s-io-mx",
+      "kind": "doc",
+      "label": "item assignment"
+     }
+    ],
+    "notes": [
+     {
+      "title": "Adapted from.",
+      "text": "Oracle's InFusion example in Implementing Enterprise Structures and General Ledger (chapter 1): divisions, legal entities with their ledgers, business units with a shared-services BU, balancing segment values, inventory organisations and a common item master."
+     },
+     {
+      "title": "Divisions.",
+      "text": "Divisions are part of the management structure. Oracle implements them through business units and the chart of accounts; there is no division object in the ledger."
+     },
+     {
+      "title": "Mock values.",
+      "text": "Company segment values 101, 102 and 201 are illustrative (INFERRED). Once one balancing segment value is assigned to a legal entity in a ledger, all of them must be."
+     },
+     {
+      "title": "Two US business units.",
+      "text": "Plant and distribution centre are separate profit centres in one legal entity: goods move through an intracompany financial orchestration flow (no intercompany invoice), and each has its own cost organisation."
      }
     ]
    }

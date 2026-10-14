@@ -25,7 +25,7 @@ The order the close runs in, from opening the period to reporting the balance sh
 | 3 | **Create Accounting** — Each subledger's Create Accounting applies the accounting method and transfers journals to GL; for Mexico it writes primary and secondary journals together. | Subledgers | Create Accounting | Accounting events → Subledger journals in GL |  |  | `[ORA26C:SLA p.7, 13]` `[ORA26C:GL p.301]` |
 | 4 | **Payroll and treasury journals** — The external payroll provider and treasury send journal files (see Boundary journals). | Boundary systems |  | Journal file |  |  | `[ORA26C:GL p.568]` |
 | 5 | **Import and post journals** — Feeder and spreadsheet journals come through GL_INTERFACE; journals are approved and posted. | General Ledger | Import Journals; Journal approval; Post Journals | Subledger and feeder journals → Posted journals |  |  | `[ORA26C:GL p.568]` |
-| 6 | **Intercompany** — Intercompany balancing adds due-to and due-from lines; intercompany allocations and transactions are completed (see Intercompany). | General Ledger | Generate Intercompany Allocations | Posted journals → Balanced intercompany |  |  | `[ORA26C:GL p.373, 389]` |
+| 6 | **Intercompany** — Intercompany balancing adds due-to and due-from lines between FBCo US and FBCo México, and balances journals across companies 101 and 102 inside the US ledger through the clearing company; intercompany allocations and transactions are completed (see Intercompany). | General Ledger | Generate Intercompany Allocations | Posted journals → Balanced intercompany |  |  | `[ORA26C:GL p.373, 374, 389]` |
 | 7 | **Allocations** — Plant overhead and shared services are allocated (see Allocations). | General Ledger | Generate General Ledger Allocations | Pools → Allocation journals |  |  | `[ORA26C:GL p.389, 559]` |
 | 8 | **Revalue** — Foreign-currency balances are revalued at the period-end rate (see FX). | General Ledger | Revalue Balances | Foreign-currency balances → Unrealised gain or loss |  |  | `[ORA26C:GL p.530]` |
 | 9 | **Secondary and reporting** — The MX secondary ledger and the USD reporting currency are complete once the primary ledger's journals and revaluation post. | MX secondary · reporting | Review the secondary ledger and reporting currency | MX primary journals → Statutory and USD views |  |  | `[ORA26C:GL p.301, 302, 533]` |
@@ -34,7 +34,7 @@ The order the close runs in, from opening the period to reporting the balance sh
 | 12 | **Load FCCS** — GL balances are loaded into FCCS (see Consolidation). | EPM (FCCS · ARCS) | Run Integration | Trial balances → FCCS data |  |  | `[ORA26C:EPMDI p.434, 435]` |
 | 13 | **Consolidate** — FCCS translates and eliminates intercompany and produces consolidated results. | EPM (FCCS · ARCS) | Consolidate | Entity data → Consolidated BS and P&L |  |  | `[ORA26C:FCCS p.585, 591]` |
 | 14 | **Reconcile accounts** — Balance-sheet reconciliations are prepared and reviewed (see Account reconciliation). | EPM (FCCS · ARCS) | Reconciliation Compliance | Balances → Reviewed reconciliations |  |  | `[ORA26C:ARCS p.69]` |
-| 15 | **Report BS and P&L** — Consolidated statements from FCCS; ledger-level statements from Financial Reporting on the USD ledger set. | EPM (FCCS · ARCS) | Financial reports | Consolidated results → Balance sheet, P&L |  |  | `[ORA26C:GL p.135]` `[ORA26C:FCCS p.585]` |
+| 15 | **Report BS and P&L** — Consolidated statements from FCCS; ledger-level statements from Financial Reporting on the USD ledger set, and by company (101, 102, 201) for each business unit. Data access sets by primary balancing segment value let each US business unit's accountants work on their own company. | EPM (FCCS · ARCS) | Financial reports | Consolidated results → Balance sheet, P&L |  |  | `[ORA26C:GL p.135, 136]` `[ORA26C:FCCS p.585]` |
 
 Hand-offs: Open the period → Close subledgers in order; Close subledgers in order → Create Accounting; Create Accounting → Import and post journals (subledger journals); Payroll and treasury journals → Import and post journals (GL_INTERFACE); Import and post journals → Intercompany; Intercompany → Allocations; Allocations → Revalue; Revalue → Secondary and reporting (propagate); Secondary and reporting → Translate; Translate → Close the periods; Close the periods → Load FCCS (balances); Load FCCS → Consolidate; Consolidate → Reconcile accounts; Reconcile accounts → Report BS and P&L.
 
@@ -70,14 +70,18 @@ Charges between FBCo US and FBCo México that are not trade (for example managem
 
 Hand-offs: Enter transaction → Receiver approves (batch); Receiver approves → Provider invoice (invoice type); Receiver approves → Receiver invoice (invoice type); Receiver approves → Or journals only (journal type); Provider invoice → Reconcile; Receiver invoice → Reconcile; Or journals only → Reconcile; Reconcile → Eliminate (balances).
 
+**Within FBCo US.** Charges between US Manufacturing BU (101) and US Distribution BU (102) are journals in one ledger. The same balancing rules apply; set the clearing company option (use the clearing company for intracompany journals) so many-to-many journals don't error. No invoices and no consolidation elimination are needed.
+
+**Rule levels.** Balancing rules are defined by primary balancing segment value, legal entity, ledger or chart of accounts, in that order of precedence.
+
 ## 4. Allocations
 
-Plant overhead spread to product lines by production volume, and shared services spread to entities by headcount.
+Plant overhead spread to product lines by production volume, and shared services (procurement and finance in US Manufacturing BU) spread by headcount: to US Distribution BU within the US ledger, and to FBCo México across legal entities.
 
 | # | Step | Module | Process or task | In → Out | Dr / Cr | Impact | Evidence |
 |---|---|---|---|---|---|---|---|
 | 1 | **Allocation rule** — Rules define the pool, the basis and the target accounts. | Calculation Manager | Define allocation rules | Pools and bases → Rule set |  |  | `[ORA26C:GL p.559, 578]` |
-| 2 | **Generate allocations** — Calculates the allocation and, if Post Allocations is selected, books it through Journal Import; cross-ledger lines get intercompany accounts. | General Ledger | Generate General Ledger Allocations | Rule set, Balances → Allocation journals | Allocate plant overhead: Dr Product-line expense / Cr Overhead pool (allocation offset) |  | `[ORA26C:GL p.389, 390]` |
+| 2 | **Generate allocations** — Calculates the allocation and, if Post Allocations is selected, books it through Journal Import. An allocation from company 101 to 102 stays in the US ledger: balancing adds the intracompany lines through the clearing company. | General Ledger | Generate General Ledger Allocations | Rule set, Balances → Allocation journals | Allocate plant overhead: Dr Product-line expense / Cr Overhead pool (allocation offset)<br>Shared services 101 → 102 (INFERRED accounts): Dr Shared services expense (102), Intracompany receivable (101) / Cr Shared services pool (101), Intracompany payable (102) |  | `[ORA26C:GL p.374, 389, 390]` |
 | 3 | **Cross-entity allocations** — Allocations across legal entities create intercompany transactions: one batch per provider, one transaction per receiver. | Intercompany | Generate Intercompany Allocations | Rule set → Intercompany transactions |  |  | `[ORA26C:GL p.389, 390]` |
 | 4 | **Post** — Allocation journals post to the ledger. | General Ledger | Post Journals | Journals → Allocated balances |  |  | `[ORA26C:GL p.389]` |
 

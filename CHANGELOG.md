@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.0 — 2026-10-14
+- Manufacturing map: new **Enterprise structure** tab (second, after Estate), adapted from Oracle's InFusion example: enterprise, US and Mexico divisions, legal entities with their primary ledgers, the MX secondary ledger, USD reporting currency and USD ledger set, business units, balancing segment values, inventory and cost organisations, and the item master.
+- FBCo US now has **two business units**: US Manufacturing BU (US plant, company 101; Procurement Services BU for the US) and US Distribution BU (distribution centre and US sales, company 102). Mexico keeps one BU (201). Values are mock (INFERRED, M-9 to M-11).
+  - Make & Inventory › Plant to DC transfer is now an intracompany financial orchestration flow: transfer price from the financial route, trade distributions in two cost organisations, no invoices.
+  - Record to Report: intracompany balancing through the clearing company (101 ↔ 102); shared-services allocation from 101 to 102; reporting and data access sets by company.
+  - Estate nodes, Ledgers tab, Procure to Pay and Order to Cash wording follow the new structure; `foundation/enterprise-structure-and-ledgers.md` gains divisions, business units and balancing segment values.
+
 ## 0.9.0 — 2026-10-13
 - Manufacturing map: **business workflows** replace the four stage chains. Six workstream tabs, each with scenario sub-tabs drawn as swimlanes (modules as columns, process bubbles, labelled arrows for the documents, goods, accounting and cash passed between them). Selecting a bubble shows the process, what goes in and out, the Dr/Cr entries, the inventory, cost, accrual and cash impact, its open interface and REST resources.
   - Procure to Pay: goods requisition to payment, services and expense items, supplier return, supplier-consigned inventory, employee expenses.
