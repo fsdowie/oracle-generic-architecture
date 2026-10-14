@@ -17,7 +17,7 @@ html,body{height:100%;margin:0}
   --bg:#F2F4F1; --panel:#FFFFFF; --fg:#1A2327; --muted:#5B676C; --line:#CDD3CF; --soft:#E6EAE6;
   --accent:#0E6A6C; --accent-soft:#D5E8E6;
   --oic:#0E6A6C; --airflow:#A8701A; --bulk:#7B4C8C; --extract:#4F6C86; --ext:#8A8F87;
-  --warn:#B4541C; --ok:#2E7D4F;
+  --warn:#B4541C; --ok:#2E7D4F; --goods:#4F6C86; --cash:#2E7D4F;
   --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
   --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -25,11 +25,11 @@ html,body{height:100%;margin:0}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#12181A; --panel:#1A2226; --fg:#E4EAE8; --muted:#97A3A6; --line:#33403F; --soft:#222C2F;
   --accent:#5EC2BF; --accent-soft:#1D3A3A; --oic:#5EC2BF; --airflow:#E0A649; --bulk:#C08BD4; --extract:#8FB0CF; --ext:#8C938C;
-  --warn:#E88A55; --ok:#6CC08D; color-scheme:dark}}
+  --warn:#E88A55; --ok:#6CC08D; --goods:#8FB0CF; --cash:#6CC08D; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#12181A; --panel:#1A2226; --fg:#E4EAE8; --muted:#97A3A6; --line:#33403F; --soft:#222C2F;
   --accent:#5EC2BF; --accent-soft:#1D3A3A; --oic:#5EC2BF; --airflow:#E0A649; --bulk:#C08BD4; --extract:#8FB0CF; --ext:#8C938C;
-  --warn:#E88A55; --ok:#6CC08D; color-scheme:dark}
+  --warn:#E88A55; --ok:#6CC08D; --goods:#8FB0CF; --cash:#6CC08D; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body)}
 .wrap{max-width:1320px;margin:0 auto;padding-inline:20px;padding-block:28px 56px}
@@ -93,6 +93,29 @@ td a,.note a{color:var(--accent);text-decoration:underline;text-underline-offset
 .mappick select{font:inherit;padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--fg)}
 #wsChips,.chipset{display:contents}
 .subhead{font-family:var(--f-display);font-stretch:90%;font-size:18px;margin:22px 0 8px}
+
+/* workflows: scenario pills, swimlane bubbles, labelled arrows, detail below */
+.wfpills .chip b{font-weight:700;color:var(--accent);margin-right:2px}
+.sclede{color:var(--fg);margin:0 0 12px;max-width:95ch}
+.flowbox{overflow-x:auto;padding:6px 8px}
+.flowgrid{position:relative;display:grid;column-gap:10px;row-gap:30px;padding-bottom:8px}
+.flowgrid svg.edges{z-index:1}
+.flowgrid svg.flabels{z-index:3}
+.wlane{border-radius:8px;margin:0 -5px;z-index:0}
+.wlane.alt{background:color-mix(in srgb,var(--soft) 60%,transparent)}
+.wlane.ext{border:1px dashed var(--line)}
+.wlab{grid-row:1;align-self:end;text-align:center;font:500 10.5px/1.25 var(--f-mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:8px 2px 0;z-index:1}
+.bubble{position:relative;z-index:2;align-self:center;margin:0;font:600 12.5px/1.2 var(--f-body);background:var(--panel);color:var(--fg);border:1.5px solid var(--accent);border-radius:18px;padding:7px 10px;cursor:pointer;text-align:center;transition:background .15s,box-shadow .15s}
+.bubble small{display:block;font:400 10.5px/1.25 var(--f-mono);color:var(--muted);margin-top:3px}
+.bubble.ext{border-style:dashed;border-color:var(--ext)}
+.bubble.sel{background:var(--accent-soft);box-shadow:0 0 0 2px var(--accent)}
+.bubble:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.bds{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-top:5px}
+.bd{font:600 9.5px/1.5 var(--f-mono);font-style:normal;padding:0 4px;border-radius:3px;background:var(--soft);color:var(--fg);border-left:3px solid var(--line)}
+.bd.drcr{border-left-color:var(--airflow)}.bd.inv{border-left-color:var(--goods)}.bd.cost{border-left-color:var(--bulk)}.bd.accr{border-left-color:var(--warn)}.bd.cash{border-left-color:var(--cash)}
+.bdkey{display:inline-flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+svg text.flabel{font:10.5px var(--f-mono);fill:var(--muted);paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round}
+svg text.flabel.on{fill:var(--fg);font-weight:600}
 
 /* p2p chain */
 .chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}

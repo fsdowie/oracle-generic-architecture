@@ -16,6 +16,10 @@ A map may name a REST catalogue (`rest_catalog`, built by tools/rest_catalog.py)
 lists then name catalogue resources (the last segment of the resource path, e.g. "invoices"),
 a view of kind "table" with `"source": "rest_catalog"` receives the catalogue rows, and register
 rows with a `rest` value show it in their notes.
+
+A view of kind "workflows" holds scenarios drawn as swimlanes: `lanes` (columns), `steps` (process bubbles placed
+in rows by `seq`) and `flows` (labelled arrows between steps). Step `ois` name register rows (shown by label), `rest` names
+catalogue resources and `docs` are pack files, as for nodes; `evidence` stays in the pack and is not published.
 """
 import json, os, re, sys
 try:
@@ -94,8 +98,8 @@ if model.get("rest_catalog"):
 titles = {n["id"]: n["title"] for n in model["nodes"]}
 # extra tabs (model.views): each needs id, label, kind and data; their diagrams are checked like the others
 for v in model.get("views", []):
-    if not (v.get("id") and v.get("label") and v.get("data")) or v.get("kind") not in ("chain", "diagram", "table"):
-        sys.exit(f"view {v.get('id')}: needs id, label, data and kind chain|diagram|table")
+    if not (v.get("id") and v.get("label") and v.get("data")) or v.get("kind") not in ("chain", "diagram", "table", "workflows"):
+        sys.exit(f"view {v.get('id')}: needs id, label, data and kind chain|diagram|table|workflows")
     if v["kind"] == "diagram":
         diagrams.append((f"views.{v['id']}", v["data"]))
     if v["kind"] == "table":
@@ -103,6 +107,58 @@ for v in model.get("views", []):
             sys.exit(f"view {v['id']}: a table view needs source rest_catalog and a model rest_catalog")
         v["data"]["sources"] = cat["sources"]
         v["data"]["rows"] = [dict(r, module=titles.get(r["module"], "Not on this map")) for r in cat["rows"]]
+
+
+def expand_rest(where, names):
+    out = []
+    for x in names:
+        if x not in rest:
+            sys.exit(f"{where}: REST resource not in the catalogue: {x}")
+        out.append({k: rest[x][k] for k in ("name", "path", "methods", "actions", "url")})
+    return out
+
+
+def expand_docs(where, docs):
+    for d in docs:
+        if not os.path.exists(os.path.join(ROOT, d["path"])):
+            sys.exit(f"{where}: doc path does not exist: {d['path']}")
+        d["url"] = base + d.pop("path")
+
+
+# workflow scenarios: lanes, steps placed by column, flows between steps
+for v in model.get("views", []):
+    if v["kind"] != "workflows":
+        continue
+    sc_ids = set()
+    for sc in v["data"]["scenarios"]:
+        w = f"view {v['id']} scenario {sc.get('id')}"
+        if not (sc.get("id") and sc.get("label")) or sc["id"] in sc_ids or not re.fullmatch(r"[a-z0-9-]+", sc["id"]):
+            sys.exit(f"{w}: needs a unique lowercase id and a label")
+        sc_ids.add(sc["id"])
+        lanes = [L["id"] for L in sc["lanes"]]
+        if len(set(lanes)) != len(lanes):
+            sys.exit(f"{w}: duplicate lane ids")
+        steps, cells = {}, set()
+        for s in sc["steps"]:
+            if s["id"] in steps or s["lane"] not in lanes or not isinstance(s.get("seq"), int) or s["seq"] < 1:
+                sys.exit(f"{w} step {s['id']}: duplicate id, unknown lane or bad seq")
+            if (s["lane"], s["seq"]) in cells:
+                sys.exit(f"{w} step {s['id']}: two steps in the same lane and row")
+            cells.add((s["lane"], s["seq"]))
+            steps[s["id"]] = s
+            unknown = [x for x in s.get("ois", []) if x not in by_id]
+            if unknown:
+                sys.exit(f"{w} step {s['id']}: open interfaces not in the register: {unknown}")
+            if s.get("ois"):
+                s["open_interfaces"] = [by_id[x]["label"] for x in s.pop("ois")]
+            if s.get("rest"):
+                s["rest"] = expand_rest(f"{w} step {s['id']}", s["rest"])
+            expand_docs(f"{w} step {s['id']}", s.get("docs", []))
+            s.pop("evidence", None)
+        bad = [f for f in sc["flows"] if f["from"] not in steps or f["to"] not in steps]
+        if bad:
+            sys.exit(f"{w}: flows reference unknown steps: {bad}")
+
 for _, dg in diagrams:
   for n in dg["nodes"]:
     seen, shown = set(), []

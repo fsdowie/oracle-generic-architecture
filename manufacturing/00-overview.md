@@ -30,8 +30,8 @@ Mexico is the single non-US organisation. It shows how a **primary ledger**, a *
 - Warehouse management is shown thin (inventory organisations, subinventories, pick, pack and ship): the guides
   provided cover it lightly.
 - Cash Management has no Fusion guide in the set (the copy provided is the E-Business Suite 12.1 table of contents).
-  Its processes come from the Financials getting-started and Receivables guides; its interface table names are
-  `[INFERRED]`.
+  Its processes and interface tables come from Oracle's 26C web documentation (Using Payables Invoice to Pay).
+- Consolidation and account reconciliation run in Oracle EPM: FCCS (fed by Data Integration) and ARCS.
 
 ## Sources (evidence keys)
 | Key | Guide (Oracle Fusion Cloud 26C) |
@@ -55,8 +55,16 @@ Mexico is the single non-US organisation. It shows how a **primary ledger**, a *
 | `FA` | Using Assets |
 | `FAI` | Implementing Assets |
 | `FIN` | Getting Started with Your Financials Implementation |
+| `SLAU` | Using Subledger Accounting |
+| `EPMDI` | Administering Data Integration (Oracle Fusion Cloud EPM) |
+| `FCCS` | Administering Financial Consolidation and Close |
+| `ARCS` | Administering Account Reconciliation |
 
 Page numbers are PDF pages. Example: `[ORA26C:GL p.301]`.
+
+Where the guides provided don't cover a step, the workflows cite Oracle's 26C web documentation as `ORA-WEB` links
+(for example Using Payables Invoice to Pay for Cash Management, Using Supply Chain Cost Management, Using Inventory
+Management). Lines no source prints are tagged `[INFERRED]`.
 
 REST resources come from Oracle's published REST catalogues, fetched by `tools/rest_catalog.py`:
 REST API for Oracle Fusion Cloud Financials 26C, SCM 26B and Procurement 25C (docs.oracle.com).
@@ -66,5 +74,8 @@ REST API for Oracle Fusion Cloud Financials 26C, SCM 26B and Procurement 25C (do
 - `manufacturing/modules/key-processes.md`: key scheduled processes per module.
 - `manufacturing/processes/procure-to-pay.md`, `plan-to-produce.md`, `order-to-cash.md`, `record-to-report.md`,
   `period-close.md`: each flow, its hand-offs and its journal entries (account types).
+- `manufacturing/workflows/*.md`: the business workflows drawn on the map (Procure to Pay, Make & Inventory, Order to
+  Cash, Record to Report, Treasury, Assets), one step table per scenario with Dr/Cr, impacts and evidence. Generated with
+  the map model; edit the generator, not these files.
 - `manufacturing/integrations/open-interfaces.yaml`: the open interface tables, each with its REST alternative.
 - `manufacturing/integrations/rest-apis.json`: the REST catalogue (generated; do not edit by hand).

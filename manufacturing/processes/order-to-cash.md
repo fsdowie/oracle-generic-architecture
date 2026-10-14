@@ -7,6 +7,8 @@ links: [MFG-OVERVIEW, MFG-P2M, MFG-R2R, MFG-PROCESSES]
 
 # Order to Cash
 
+On the map, this flow is drawn as scenario workflows: see `manufacturing/workflows/order-to-cash.md`.
+
 ## Stages and hand-offs
 | # | Stage | Module | Hand-off | Evidence |
 |---|---|---|---|---|

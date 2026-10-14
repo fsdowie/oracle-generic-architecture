@@ -11,6 +11,8 @@ FBCo buys two kinds of things, and each is accrued differently:
 - **Inventory items** (ingredients, packaging) are accrued **at receipt**, which is mandatory for inventory purchases.
 - **Expense items** (MRO, services) may be accrued **at period end** `[ORA26C:MFG p.344]`.
 
+On the map, this flow is drawn as scenario workflows: see `manufacturing/workflows/procure-to-pay.md`.
+
 ## Stages and hand-offs
 | # | Stage | Module | Hand-off to the next stage | Evidence |
 |---|---|---|---|---|

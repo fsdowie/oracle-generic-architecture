@@ -18,6 +18,8 @@ The guide lists Plan to Produce as Discrete Manufacturing, Process Manufacturing
 Contract Manufacturing and Outside Processing `[ORA26C:MFG p.122]`. Process manufacturing is enabled per plant
 (*Enable Process Manufacturing* plant parameter) `[ORA26C:MFG p.482]`.
 
+On the map, this flow is drawn as scenario workflows: see `manufacturing/workflows/make-and-inventory.md`.
+
 ## Stages and hand-offs
 | # | Stage | Module | Hand-off | Evidence |
 |---|---|---|---|---|
