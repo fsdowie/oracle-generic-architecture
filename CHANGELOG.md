@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.11.0 — 2026-10-19
+- Insurance map: two new tabs after Foundation & controls.
+  - **Taxes**: the native Oracle Tax setup as built (US_SALES_USE_TAX regime subscribed by the Mutual and Agency BUs, state, local and county taxes, inner-city jurisdictions, rates by location code, ship-to city and state rate rules, the rate-change and new-location runbooks) and its gaps (no use-tax self-assessment, recovery off, no reporting codes, rate maintenance tied to a broad admin role).
+  - **Security**: seeded job roles assigned directly plus a custom overlay, privileged roles, BU and ledger access, approvals used in place of SoD rules, logging; internal-audit and ITGC findings (broader-than-needed access, invoice approval by view-only users, S-3, CO-2, CO-9); the target model with no seeded roles on users, a custom catalogue, SoD ruleset, access lifecycle, privileged access and change control.
+  - Foundation & controls stage 04 and the Payables node point to the new tabs. New `insurance/foundation/tax-configuration.md` and `insurance/foundation/security-and-controls.md` (evidence `CO:INS-TAX`, `CO:INS-SEC`; anonymised).
+- Manufacturing map: two new tabs after Ledgers.
+  - **EB-Tax**: native Oracle Tax for FBCo US (sales tax, use tax self-assessed) and FBCo México (IVA 16% / 8% border / 0% / exempt on a cash basis with interim tax accounts; IVA and ISR withholding at payment), with Dr/Cr examples.
+  - **Security**: no seeded roles on users, custom job roles by process, data access by BU, data access set, inventory and cost organisation and asset book, 13 SoD rules, ITGC controls and Mexico specifics.
+  - Mexico nodes (Banks & tax, Payables, Receivables, MX ledgers, MX legal entity, MX BU, MX secondary ledger) link to the new tabs. New `manufacturing/foundation/ebtax-us-mx.md` and `manufacturing/foundation/security-and-controls.md`.
+
 ## 0.10.0 — 2026-10-14
 - Manufacturing map: new **Enterprise structure** tab (second, after Estate), adapted from Oracle's InFusion example: enterprise, US and Mexico divisions, legal entities with their primary ledgers, the MX secondary ledger, USD reporting currency and USD ledger set, business units, balancing segment values, inventory and cost organisations, and the item master.
 - FBCo US now has **two business units**: US Manufacturing BU (US plant, company 101; Procurement Services BU for the US) and US Distribution BU (distribution centre and US sales, company 102). Mexico keeps one BU (201). Values are mock (INFERRED, M-9 to M-11).

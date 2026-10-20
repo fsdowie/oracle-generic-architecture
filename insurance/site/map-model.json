@@ -649,7 +649,8 @@
     "Integrated Invoice Imaging (OCR): invoices by email, imported hourly to Payables",
     "OCR accuracy was weak: automatic validation was held for the Mutual and the Agency and AP validated manually",
     "Planned move to Oracle Intelligent Document Recognition (IDR), the AI-based engine for images and email",
-    "Approval by amount tier; over 250K to an approval group; PO-matched and recurring invoices auto-approve"
+    "Approval by amount tier; over 250K to an approval group; PO-matched and recurring invoices auto-approve",
+    "Sales tax from Oracle Tax by ship-to city (see the Taxes tab)"
    ],
    "integrations": [
     "INS-IMAGING",
@@ -1628,7 +1629,8 @@
      "Segment value security on cost center and account",
      "Data access sets per ledger and business-unit access for subledgers",
      "Cross-validation rules and combination sets",
-     "Custom roles trimmed from seeded job roles"
+     "Custom roles trimmed from seeded job roles",
+     "Role design as built, audit findings and the target custom-role model: see the Security tab"
     ]
    },
    {
@@ -3548,5 +3550,1253 @@
     "text": "Exceed → on-premise warehouse → OCI Data Integration → ADW; OIC turns it into GL journals and BI Publisher into static reports."
    }
   ]
- }
+ },
+ "views": [
+  {
+   "id": "tax",
+   "label": "Taxes",
+   "kind": "diagram",
+   "after": "fnd",
+   "eyebrow": "Tax configuration",
+   "data": {
+    "title": "US sales and use tax in Oracle Tax",
+    "lede": "One native Oracle Tax regime (no external tax engine) serves Payables, Purchasing and Expenses for the Mutual and Agency business units. Tax is decided by the ship-to city or state through tax rules. Select a box to see how it is set up, what it drives and the gaps found.",
+    "chips": [
+     {
+      "id": "CFG",
+      "label": "Configuration"
+     },
+     {
+      "id": "DET",
+      "label": "Determination"
+     },
+     {
+      "id": "RUN",
+      "label": "Transactions & accounting"
+     },
+     {
+      "id": "OPS",
+      "label": "Maintenance & gaps"
+     }
+    ],
+    "legend": [
+     {
+      "label": "configuration hierarchy",
+      "color": "var(--extract)"
+     },
+     {
+      "label": "determination",
+      "color": "var(--oic)"
+     },
+     {
+      "label": "transaction / accounting",
+      "color": "var(--airflow)"
+     },
+     {
+      "label": "gap / control link",
+      "color": "var(--ext)",
+      "dash": true
+     }
+    ],
+    "layers": [
+     {
+      "id": "TX1",
+      "label": "Owner",
+      "title": "Who owns the tax content"
+     },
+     {
+      "id": "TX2",
+      "label": "Regime",
+      "title": "Tax regime and taxes"
+     },
+     {
+      "id": "TX3",
+      "label": "Where",
+      "title": "Jurisdictions, statuses and rates"
+     },
+     {
+      "id": "TX4",
+      "label": "Rules",
+      "title": "Determining factors, condition sets and rules"
+     },
+     {
+      "id": "TX5",
+      "label": "Use",
+      "title": "Transactions and accounting"
+     },
+     {
+      "id": "TX6",
+      "label": "Run",
+      "title": "Maintenance, access and gaps"
+     }
+    ],
+    "default_node": "t-regime",
+    "nodes": [
+     {
+      "id": "t-owner",
+      "layer": "TX1",
+      "title": "Global configuration owner",
+      "subtitle": "One shared tax setup",
+      "workstreams": [
+       "CFG"
+      ],
+      "external": false,
+      "core": false,
+      "description": "The tax regime, taxes, rates and rules are owned by the global configuration owner, so one setup serves both business units.",
+      "functions": [
+       "Owns the regime, taxes, jurisdictions, statuses, rates and rules",
+       "Business units subscribe to it instead of keeping their own copy",
+       "Configuration owner tax options set, per application and event class, whether tax is calculated and whether manual or overridden tax lines are allowed"
+      ],
+      "facts": [
+       [
+        "Option",
+        "Common configuration with party overrides"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-bu",
+      "layer": "TX1",
+      "title": "Business unit subscriptions",
+      "subtitle": "Mutual BU · Agency BU",
+      "workstreams": [
+       "CFG"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Both business units subscribe to the regime from 01/01/2016 with common configuration and party overrides. They use the shared content and can keep BU-specific exceptions.",
+      "functions": [
+       "Mutual BU: common configuration with party overrides",
+       "Agency BU: common configuration with party overrides",
+       "The Foundation is not subscribed (not-for-profit, no taxable purchasing in Oracle)"
+      ],
+      "facts": [
+       [
+        "Effective",
+        "01/01/2016"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-regime",
+      "layer": "TX2",
+      "title": "US_SALES_USE_TAX",
+      "subtitle": "Tax regime · country level · US",
+      "workstreams": [
+       "CFG"
+      ],
+      "external": false,
+      "core": true,
+      "description": "The only tax regime. It is set at country level for the US and is named Sales & Use, but only sales tax is configured: use tax and recovery are off.",
+      "functions": [
+       "Currency USD, minimum accountable unit 0.01, precision 2, rounding Nearest",
+       "Standard non-inclusive handling; override of inclusive tax lines allowed",
+       "Multiple jurisdictions, tax exceptions and tax exemptions allowed",
+       "Tax recovery not enabled; cross-regime compounding off"
+      ],
+      "facts": [
+       [
+        "Level",
+        "Country (US)"
+       ],
+       [
+        "Start",
+        "01/01/2016"
+       ],
+       [
+        "Engine",
+        "Native Oracle Tax (no Vertex or Avalara)"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-taxes",
+      "layer": "TX2",
+      "title": "Taxes",
+      "subtitle": "State · Local · County local",
+      "workstreams": [
+       "CFG"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Three taxes under the regime: a state sales tax, a local (city) sales tax and a separate county local tax for King County cities.",
+      "functions": [
+       "STATE_SALES_TAX: state rate, decided by ship-to state",
+       "LOCAL_SALES_TAX: city rate, decided by ship-to city",
+       "KING_LOCAL_TAX: geography type City, parent County = King",
+       "Tax point basis Invoice; manual tax lines, override of calculated lines and rounding override allowed",
+       "Tax accounts method: create tax accounts; not used for withholding"
+      ],
+      "facts": [
+       [
+        "Taxes",
+        "3"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-jur",
+      "layer": "TX3",
+      "title": "Jurisdictions",
+      "subtitle": "State · city · inner-city",
+      "workstreams": [
+       "CFG",
+       "DET"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Each taxing area is a jurisdiction tied to one tax and one geography. City jurisdictions are created as inner-city jurisdictions with precedence 300; one city jurisdiction is the default for the county tax.",
+      "functions": [
+       "State jurisdictions for STATE_SALES_TAX (e.g. OR_STATE)",
+       "City jurisdictions for LOCAL_SALES_TAX and the county tax (e.g. SEATTLE_KING)",
+       "Inner-city jurisdiction flag set for city jurisdictions",
+       "A default jurisdiction answers when no rule matches"
+      ],
+      "facts": [
+       [
+        "Precedence",
+        "300 (city)"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-status",
+      "layer": "TX3",
+      "title": "Statuses",
+      "subtitle": "APPLICABLE · EXEMPT",
+      "workstreams": [
+       "CFG"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Two statuses per tax. Both allow exceptions, exemptions and rate override.",
+      "functions": [
+       "APPLICABLE carries the state and city rates",
+       "EXEMPT carries the 0% exempt rates"
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-rates",
+      "layer": "TX3",
+      "title": "Rates",
+      "subtitle": "State rates · city rates by location code",
+      "workstreams": [
+       "CFG",
+       "OPS"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Percentage rates with effective dates. City rates are named by the 4-digit state location code plus the city; county cities carry a -KING suffix. Rate changes end-date the old rate and add a new one.",
+      "functions": [
+       "WA state rate 6.5% (default rate from 01/01/2016)",
+       "OR state rate 0% to 12/31/2020, then 10% from 01/01/2021 (the worked rate-change example)",
+       "City rates such as 1715-KENT, 1706-BOTHELL, 3213-SPOKANE, AUBURN-KING RATE",
+       "Exempt rates (EXEMPT CLASS, WA 0% RATE) under status EXEMPT",
+       "Ad hoc rate allowed; ad hoc adjustment on taxable basis",
+       "Tax classification code set assigned to Order to Cash, Procure to Pay and Expenses"
+      ],
+      "facts": [
+       [
+        "Type",
+        "Percentage"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-dfs",
+      "layer": "TX4",
+      "title": "Determining factor sets",
+      "subtitle": "SHIP TO CITY · SHIP TO STATE",
+      "workstreams": [
+       "DET"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Two factor sets read the ship-to address geography: one at city level, one at state level.",
+      "functions": [
+       "SHIP TO CITY: Geography · Ship to · City",
+       "SHIP TO STATE: Geography · Ship to · State"
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-cond",
+      "layer": "TX4",
+      "title": "Condition sets",
+      "subtitle": "One per city or state",
+      "workstreams": [
+       "DET"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Each condition set names one ship-to city or state value, for example SHIP TO CITY KENT or SHIP TO CITY AUBURN-KING.",
+      "functions": [
+       "City condition sets use the SHIP TO CITY factor set",
+       "State condition sets use SHIP TO STATE"
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-rules",
+      "layer": "TX4",
+      "title": "Tax rate rules",
+      "subtitle": "City · State · County",
+      "workstreams": [
+       "DET"
+      ],
+      "external": false,
+      "core": true,
+      "description": "Three Tax Rate rules, effective 01/01/2020, map each condition set to a rate. The city rule holds about 39 ordered conditions.",
+      "functions": [
+       "SHIP TO CITY on LOCAL_SALES_TAX (about 39 conditions)",
+       "SHIP TO STATE on STATE_SALES_TAX",
+       "SHIP TO CITY KING on KING_LOCAL_TAX",
+       "Order matters: the first condition that matches gives the rate; no match falls back to the default rate"
+      ],
+      "facts": [
+       [
+        "Rule type",
+        "Tax Rate Rules"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-txn",
+      "layer": "TX5",
+      "title": "Payables, Purchasing & Expenses",
+      "subtitle": "Tax lines on documents",
+      "workstreams": [
+       "RUN"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Requisitions, purchase orders, supplier invoices and expense reports calculate tax from the ship-to location. Users can enter manual tax lines or override calculated ones, within the tax options.",
+      "functions": [
+       "Purchasing estimates tax on the PO; Payables recalculates on the invoice",
+       "Supplier-billed sales tax is kept as charged when it matches",
+       "Expenses use the same classification code set"
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-acct",
+      "layer": "TX5",
+      "title": "Tax accounting",
+      "subtitle": "Non-recoverable · expensed",
+      "workstreams": [
+       "RUN"
+      ],
+      "external": false,
+      "core": false,
+      "description": "With recovery off, sales tax paid is non-recoverable. It is charged with the invoice distribution (expense, asset or the tax expense account) by Subledger Accounting.",
+      "entries": [
+       {
+        "event": "Supplier invoice with sales tax",
+        "dr": [
+         "Expense / asset (incl. non-recoverable tax)"
+        ],
+        "cr": [
+         "Payables liability"
+        ]
+       }
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-sop",
+      "layer": "TX6",
+      "title": "Rate maintenance",
+      "subtitle": "Two runbooks",
+      "workstreams": [
+       "OPS"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Two runbooks keep rates current. Rate change: Manage Tax Rates and Tax Recovery Rates, end-date the old rate, add the new rate (and make it default if needed). New location: jurisdiction, then rate, then condition set, then add the condition to the rule and submit it.",
+      "processes": [
+       "Rate change: Manage Tax Rates and Tax Recovery Rates → edit → end-date → add rate",
+       "New location: Manage Tax Jurisdictions → Manage Tax Rates → Manage Tax Condition Sets → Manage Tax Rules (enable, submit)"
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     },
+     {
+      "id": "t-access",
+      "layer": "TX6",
+      "title": "Who can change tax",
+      "subtitle": "Financial structures admin role",
+      "workstreams": [
+       "OPS"
+      ],
+      "external": false,
+      "core": false,
+      "description": "A business user keeps the rates current. To reach Manage Tax Rates they hold the custom financial-structures administrator role, which also opens chart of accounts and other configuration. Internal audit rated this broader than needed (see the Security tab).",
+      "functions": [
+       "Same role covers COA values, asset categories, calendars and delegation",
+       "Changes are tracked by ticket and last-updated-by columns only"
+      ],
+      "facts": [
+       [
+        "Finding",
+        "Broader-than-needed access (medium)"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "t-gaps",
+      "layer": "TX6",
+      "title": "Gaps",
+      "subtitle": "Use tax · reporting · recovery",
+      "workstreams": [
+       "OPS"
+      ],
+      "external": false,
+      "core": false,
+      "description": "What the regime name promises but the setup doesn't do, and what to add.",
+      "functions": [
+       "Use tax: no self-assessment. Add a first-party registration with Set as self-assessment (reverse charge) so Payables accrues use tax when a supplier doesn't charge it",
+       "Rates are keyed by hand from the state's quarterly rate tables; consider the rapid setup spreadsheets or tax content upload",
+       "No tax reporting types or codes, so returns are prepared outside Oracle",
+       "Rate maintenance needs a narrower role (tax manager duty only)"
+      ],
+      "docs": [
+       {
+        "label": "Tax configuration",
+        "path": "insurance/foundation/tax-configuration.md"
+       }
+      ]
+     }
+    ],
+    "edges": [
+     {
+      "from": "t-owner",
+      "to": "t-regime",
+      "kind": "ledger",
+      "label": "owns"
+     },
+     {
+      "from": "t-bu",
+      "to": "t-owner",
+      "kind": "ledger",
+      "label": "subscribes"
+     },
+     {
+      "from": "t-regime",
+      "to": "t-taxes",
+      "kind": "ledger"
+     },
+     {
+      "from": "t-taxes",
+      "to": "t-jur",
+      "kind": "ledger"
+     },
+     {
+      "from": "t-taxes",
+      "to": "t-status",
+      "kind": "ledger"
+     },
+     {
+      "from": "t-status",
+      "to": "t-rates",
+      "kind": "ledger"
+     },
+     {
+      "from": "t-dfs",
+      "to": "t-cond",
+      "kind": "doc"
+     },
+     {
+      "from": "t-cond",
+      "to": "t-rules",
+      "kind": "doc"
+     },
+     {
+      "from": "t-rules",
+      "to": "t-rates",
+      "kind": "doc",
+      "label": "result = rate"
+     },
+     {
+      "from": "t-jur",
+      "to": "t-rules",
+      "kind": "doc"
+     },
+     {
+      "from": "t-rules",
+      "to": "t-txn",
+      "kind": "acct",
+      "label": "tax lines"
+     },
+     {
+      "from": "t-txn",
+      "to": "t-acct",
+      "kind": "acct",
+      "label": "Create Accounting"
+     },
+     {
+      "from": "t-sop",
+      "to": "t-rates",
+      "kind": "ret",
+      "label": "rate change"
+     },
+     {
+      "from": "t-sop",
+      "to": "t-rules",
+      "kind": "ret",
+      "label": "new location"
+     },
+     {
+      "from": "t-access",
+      "to": "t-sop",
+      "kind": "ret"
+     },
+     {
+      "from": "t-gaps",
+      "to": "t-regime",
+      "kind": "ret"
+     }
+    ],
+    "notes": [
+     {
+      "title": "Why rules and not just jurisdictions.",
+      "text": "Oracle can pick a rate from the jurisdiction alone. Here the rate comes from explicit Tax Rate rules on the ship-to city, so adding a location always means four steps: jurisdiction, rate, condition set, rule."
+     },
+     {
+      "title": "Sales vs use tax.",
+      "text": "Sales tax is charged by the supplier and paid with the invoice. Use tax is owed by the buyer when the supplier doesn't charge it; Oracle handles that with self-assessment on Payables invoices, which isn't set up here."
+     },
+     {
+      "title": "Anonymised.",
+      "text": "Business units are shown as Mutual and Agency; people are omitted. Tax codes and geography are as configured."
+     }
+    ]
+   }
+  },
+  {
+   "id": "security",
+   "label": "Security",
+   "kind": "diagram",
+   "after": "v-tax",
+   "eyebrow": "Security & controls",
+   "data": {
+    "title": "Role-based access: as built, audit findings and target",
+    "lede": "At go-live the seeded Oracle job roles were assigned directly, with a layer of custom view-only and admin roles on top; SoD relied on approval limits. Internal audit and the external ITGC audit found gaps. The target removes seeded roles from users and runs a custom role catalogue under SOX/ITGC controls. Use the chips to follow one stage.",
+    "chips": [
+     {
+      "id": "ASIS",
+      "label": "As built (2020–2023)"
+     },
+     {
+      "id": "AUD",
+      "label": "Audit findings"
+     },
+     {
+      "id": "TGT",
+      "label": "Target"
+     }
+    ],
+    "legend": [
+     {
+      "label": "provisioning / role hierarchy",
+      "color": "var(--extract)"
+     },
+     {
+      "label": "data access",
+      "color": "var(--oic)"
+     },
+     {
+      "label": "control / evidence",
+      "color": "var(--airflow)"
+     },
+     {
+      "label": "finding → remediation",
+      "color": "var(--ext)",
+      "dash": true
+     }
+    ],
+    "layers": [
+     {
+      "id": "SC1",
+      "label": "Identity",
+      "title": "Users and provisioning"
+     },
+     {
+      "id": "SC2",
+      "label": "Roles",
+      "title": "Roles as built"
+     },
+     {
+      "id": "SC3",
+      "label": "Data",
+      "title": "Data access"
+     },
+     {
+      "id": "SC4",
+      "label": "Controls",
+      "title": "Controls in place"
+     },
+     {
+      "id": "SC5",
+      "label": "Findings",
+      "title": "Audit findings"
+     },
+     {
+      "id": "SC6",
+      "label": "Target",
+      "title": "Target security model"
+     }
+    ],
+    "default_node": "s-seeded",
+    "nodes": [
+     {
+      "id": "s-users",
+      "layer": "SC1",
+      "title": "Users",
+      "subtitle": "~540 users · HCM-driven",
+      "workstreams": [
+       "ASIS"
+      ],
+      "external": false,
+      "core": false,
+      "description": "About 540 users, most outside finance (claims, customer service, IT). Every employee gets requisitioning and the financials view-only role; finance, procurement and IT users get job roles.",
+      "functions": [
+       "Users created from Oracle HCM; sign-on through the corporate identity provider",
+       "Auto-provisioned to all: Employee (seeded abstract), INS Employee Requester, INS Financials View Only",
+       "Auto-provisioned to managers: INS Requisition View All (~100 users)",
+       "Finance and procurement job roles requested and assigned by IT in the Security Console"
+      ],
+      "facts": [
+       [
+        "Role codes in use",
+        "200 (143 seeded ORA_*, 57 custom)"
+       ],
+       [
+        "Corporate Accounting users",
+        "7"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "s-seeded",
+      "layer": "SC2",
+      "title": "Seeded job roles",
+      "subtitle": "ORA_* assigned directly",
+      "workstreams": [
+       "ASIS"
+      ],
+      "external": false,
+      "core": true,
+      "description": "Finance and procurement users hold Oracle's predefined job roles as shipped: Accounts Payable Manager, Supervisor and Specialist, General Accountant, General Accounting Manager, Cash Manager, Asset Accountant, Buyer, Procurement Manager and others. Oracle changes these roles every quarter, so access drifts without a design decision.",
+      "functions": [
+       "AP Manager: 359 privileges (invoice processing, period close, disbursements, SLA)",
+       "AP Specialist: 98 · General Accountant: 252 · Cash Manager: 342",
+       "Financial Application Administrator: 1,093 privileges (tax, cash, withholding, enterprise structures)",
+       "Application Implementation Consultant: 3,490 privileges"
+      ],
+      "facts": [
+       [
+        "Seeded role codes assigned",
+        "143"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "s-custom",
+      "layer": "SC2",
+      "title": "Custom overlay roles",
+      "subtitle": "INS_* view-only · inquiry · admin",
+      "workstreams": [
+       "ASIS"
+      ],
+      "external": false,
+      "core": false,
+      "description": "About 40 custom roles, built by combining seeded duty roles. Most are view-only or narrow additions; they sit beside the seeded job roles rather than replacing them.",
+      "functions": [
+       "INS_FIN_VIEW_ONLY_ABSTRACT: financials view for all employees",
+       "INS_AP_INQUIRY_JOB: Payables invoice inquiry, balance analysis, transaction review, image view, supplier profile inquiry",
+       "INS View All (controllers), INS AP Invoice View, INS Supplier View All, INS Audit Report View",
+       "INS Period Close Management: open and close GL periods (141 privileges)",
+       "INS_REQ_VIEW_ALL, INS Employee Requester, INS Central Receiving Agent",
+       "INS_ESS_MONITOR_FINANCE_PROCESSES, INS_OIC_INTEGRATION_ROLE, INS_REST_API_ACCESS"
+      ],
+      "facts": [
+       [
+        "Pattern",
+        "Seeded duties + data security policies (BU, ledger, subledger)"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "s-priv",
+      "layer": "SC2",
+      "title": "Privileged roles",
+      "subtitle": "AIC · IT Security Manager · structures admin",
+      "workstreams": [
+       "ASIS"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Administrative access. At go-live every initial user (consultants, IT and finance leads) held Application Implementation Consultant and IT Security Manager. Later, three users kept each, and four business users held a custom financial-structures administrator role.",
+      "functions": [
+       "Application Implementation Consultant: 3 users",
+       "IT Security Manager: 3 users",
+       "INS_FIN_APP_ADMIN_FIN_STRUCTURES: 4 business users (tax rates, COA values and hierarchies, asset categories and calendars, delegations)",
+       "Structures admin role: ~900 privileges, including ~125 tax and ~14 security privileges"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "s-bu",
+      "layer": "SC3",
+      "title": "Business-unit access",
+      "subtitle": "Mutual BU · Agency BU",
+      "workstreams": [
+       "ASIS"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Subledger roles get their data through Manage Data Access for Users, loaded by spreadsheet (ADFdi) per business unit. Procurement agents are set per procurement BU (Mutual, Agency, Foundation).",
+      "functions": [
+       "Data access granted by BU for Payables, Procurement and Expenses",
+       "Procurement agent setup: all actions allowed for admin agents; full access to others' requisitions, POs and agreements",
+       "Production assignments copied to test with the same spreadsheet"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "s-gl",
+      "layer": "SC3",
+      "title": "Ledger access",
+      "subtitle": "Data access sets · segment security",
+      "workstreams": [
+       "ASIS"
+      ],
+      "external": false,
+      "core": false,
+      "description": "General Ledger roles get a data access set per ledger. Segment value security restricts cost centre and account values (see Foundation & controls).",
+      "functions": [
+       "Data access set per ledger (Mutual, Agency, Foundation)",
+       "Segment value security on cost centre and account",
+       "Cross-validation rules on account combinations"
+      ],
+      "docs": [
+       {
+        "label": "Foundation and controls",
+        "path": "insurance/foundation/coa-hierarchies-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "s-appr",
+      "layer": "SC4",
+      "title": "Approvals instead of SoD rules",
+      "subtitle": "Job-level limits",
+      "workstreams": [
+       "ASIS"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Segregation of duties came from approval workflow, not from role design. There was no SoD ruleset or tool.",
+      "functions": [
+       "Requisitions approved by job level: L3 to $5K, L4 to $50K, L5–L6 to $100K, L7 to $250K, L9 above $250K",
+       "POs from approved requisitions are auto-approved",
+       "Payment process requests approved by the Controller (payments restricted to Controller, financial reporting director, CFO)",
+       "Supplier registration approved by workflow; spend authorisation and bank changes approved by finance leads",
+       "Journal approval rule per ledger; 2-way and 3-way match; duplicate-invoice check"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "s-audit",
+      "layer": "SC4",
+      "title": "Logging & evidence",
+      "subtitle": "OPSS audit · role snapshots",
+      "workstreams": [
+       "ASIS"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Security changes were logged and evidence was kept as point-in-time role matrices.",
+      "functions": [
+       "Audit policy: OPSS set to Low (role membership and permission changes); once lowered from High it can't go back above Low",
+       "Audit Reports for RoleMembershipAdd / Remove and PermissionSetGrant events",
+       "User Role Membership Report (active users)",
+       "Role matrix snapshots: CRP 10/2020, go-live 01/2021, auditors 10/2021, 01/2022, OAC matrix 12/2022",
+       "Configuration changes ticketed in the IT tracker; last-updated-by columns"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "f-broad",
+      "layer": "SC5",
+      "title": "Broader-than-needed access",
+      "subtitle": "Internal audit · medium",
+      "workstreams": [
+       "AUD"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Business users who keep tax rates, COA values and asset categories hold the structures admin role, which also lets them change IT configuration, and their changes aren't tracked. Management agreed to apply least privilege.",
+      "functions": [
+       "Remediation planned: periodic snapshots of setup objects to compare, per-module audit trail where performance allows",
+       "Constraint noted: business tasks and IT configuration share the same Oracle pages"
+      ],
+      "facts": [
+       [
+        "Rating",
+        "Medium"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "f-approve",
+      "layer": "SC5",
+      "title": "Invoice approval by view-only users",
+      "subtitle": "~550 holders",
+      "workstreams": [
+       "AUD"
+      ],
+      "external": false,
+      "core": false,
+      "description": "The financials view-only role, given to every employee, also allows invoice approval. Only the job-level approval limits restrict it, and no role restricts invoice matching.",
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "f-uar",
+      "layer": "SC5",
+      "title": "S-3 · Access review",
+      "subtitle": "External ITGC audit · medium",
+      "workstreams": [
+       "AUD"
+      ],
+      "external": false,
+      "core": false,
+      "description": "The Oracle user access review was not formally documented and business owners weren't involved.",
+      "functions": [
+       "Action: annual review with the extract script, the role matrix and manager approvals kept in a review folder"
+      ],
+      "facts": [
+       [
+        "Rating",
+        "Medium"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "f-ess",
+      "layer": "SC5",
+      "title": "CO-2 · Scheduled jobs",
+      "subtitle": "External ITGC audit · low",
+      "workstreams": [
+       "AUD"
+      ],
+      "external": false,
+      "core": false,
+      "description": "No annual review of scheduled (ESS) jobs.",
+      "functions": [
+       "Action: annual review of the scheduled job list and owners"
+      ],
+      "facts": [
+       [
+        "Rating",
+        "Low"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "f-soc",
+      "layer": "SC5",
+      "title": "CO-9 · SOC reports",
+      "subtitle": "External ITGC audit · medium",
+      "workstreams": [
+       "AUD"
+      ],
+      "external": false,
+      "core": false,
+      "description": "SOC 1/2 reports for Oracle Cloud and the data centres were not reviewed and complementary user entity controls (CUECs) were not mapped.",
+      "functions": [
+       "Action: annual SOC review with CUECs mapped to internal controls"
+      ],
+      "facts": [
+       [
+        "Rating",
+        "Medium"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "t-cat",
+      "layer": "SC6",
+      "title": "Custom role catalogue",
+      "subtitle": "No ORA_* roles on users",
+      "workstreams": [
+       "TGT"
+      ],
+      "external": false,
+      "core": true,
+      "description": "Every business role is a custom copy. Seeded job roles are removed from all users; a monthly check on the User Role Membership Report (role code ORA_%) proves it.",
+      "functions": [
+       "Job roles copied with Copy top role (keeps Oracle's duty updates); duty roles that break SoD copied with inherited roles and trimmed",
+       "Naming: INS_<module>_<function>_JOB / _DUTY / _ABSTRACT, set once in Security Console administration",
+       "Separate approver role without view-all; view-only role without approval",
+       "Structures admin split: INS tax rate maintainer (tax duty only), INS COA maintainer, INS asset setup",
+       "Quarterly update review: compare seeded vs custom roles from the release notes, retest SoD, then promote"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "t-sod",
+      "layer": "SC6",
+      "title": "SoD ruleset",
+      "subtitle": "Preventive + detective",
+      "workstreams": [
+       "TGT"
+      ],
+      "external": false,
+      "core": false,
+      "description": "A written SoD ruleset, checked before a role is granted and monthly on actual assignments (Advanced Access Controls or a third-party tool).",
+      "functions": [
+       "Supplier and supplier bank maintenance vs invoice entry vs payment",
+       "Invoice entry vs payment approval",
+       "Requisition vs PO vs receipt",
+       "Journal entry vs journal approval and period close",
+       "Bank account maintenance vs payments and bank reconciliation",
+       "Security or setup administration vs any transaction role"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "t-life",
+      "layer": "SC6",
+      "title": "Access lifecycle",
+      "subtitle": "Request · review · revoke",
+      "workstreams": [
+       "TGT"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Access follows a documented lifecycle with evidence for each step.",
+      "functions": [
+       "Auto-provision only low-risk abstract roles from HCM; job roles by ticket with manager and role-owner approval",
+       "Termination: roles revoked through HCM and the daily Send Pending LDAP Requests; non-HCM accounts within the agreed SLA",
+       "Access review quarterly for privileged and financial roles, at least annual for the rest, signed off by business owners",
+       "Review population from the User Role Membership Report and data access, with run parameters kept"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "t-privc",
+      "layer": "SC6",
+      "title": "Privileged access & change",
+      "subtitle": "Break-glass · config control",
+      "workstreams": [
+       "TGT"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Admin roles are few, separate from transaction roles and monitored; configuration changes are made in test and promoted with evidence.",
+      "functions": [
+       "AIC and IT Security Manager only on break-glass accounts, used against a ticket and reviewed",
+       "Audit policies on key setup objects; setup snapshots compared between periods and environments",
+       "Annual review of scheduled jobs and their owners",
+       "Annual SOC 1 Type II review with CUECs mapped and a bridge letter"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "insurance/foundation/security-and-controls.md"
+       }
+      ]
+     }
+    ],
+    "edges": [
+     {
+      "from": "s-users",
+      "to": "s-seeded",
+      "kind": "ledger",
+      "label": "assigned"
+     },
+     {
+      "from": "s-users",
+      "to": "s-custom",
+      "kind": "ledger",
+      "label": "auto-provisioned"
+     },
+     {
+      "from": "s-users",
+      "to": "s-priv",
+      "kind": "ledger"
+     },
+     {
+      "from": "s-seeded",
+      "to": "s-bu",
+      "kind": "doc"
+     },
+     {
+      "from": "s-custom",
+      "to": "s-bu",
+      "kind": "doc"
+     },
+     {
+      "from": "s-seeded",
+      "to": "s-gl",
+      "kind": "doc"
+     },
+     {
+      "from": "s-bu",
+      "to": "s-appr",
+      "kind": "acct"
+     },
+     {
+      "from": "s-priv",
+      "to": "s-audit",
+      "kind": "acct"
+     },
+     {
+      "from": "s-priv",
+      "to": "f-broad",
+      "kind": "ret"
+     },
+     {
+      "from": "s-custom",
+      "to": "f-approve",
+      "kind": "ret"
+     },
+     {
+      "from": "s-audit",
+      "to": "f-uar",
+      "kind": "ret"
+     },
+     {
+      "from": "s-audit",
+      "to": "f-ess",
+      "kind": "ret"
+     },
+     {
+      "from": "s-audit",
+      "to": "f-soc",
+      "kind": "ret"
+     },
+     {
+      "from": "f-broad",
+      "to": "t-cat",
+      "kind": "ret",
+      "label": "split admin role"
+     },
+     {
+      "from": "f-approve",
+      "to": "t-cat",
+      "kind": "ret",
+      "label": "separate approver role"
+     },
+     {
+      "from": "s-appr",
+      "to": "t-sod",
+      "kind": "ret",
+      "label": "add SoD rules"
+     },
+     {
+      "from": "f-uar",
+      "to": "t-life",
+      "kind": "ret"
+     },
+     {
+      "from": "f-ess",
+      "to": "t-privc",
+      "kind": "ret"
+     },
+     {
+      "from": "f-soc",
+      "to": "t-privc",
+      "kind": "ret"
+     },
+     {
+      "from": "t-cat",
+      "to": "t-sod",
+      "kind": "acct"
+     },
+     {
+      "from": "t-sod",
+      "to": "t-life",
+      "kind": "acct"
+     }
+    ],
+    "notes": [
+     {
+      "title": "Why seeded roles come off users.",
+      "text": "Predefined ORA_ roles can't be edited and Oracle changes them every quarter, so a user holding them gains new privileges with no approval. Copies are under the customer's control and can be tested for SoD before each update reaches production."
+     },
+     {
+      "title": "Copy top role or copy the hierarchy.",
+      "text": "Copy top role links to Oracle's duty roles and keeps their updates; copying the inherited roles insulates the copy but makes the customer maintain every duty. Most designs copy job roles shallow and deep-copy only the duties they trim."
+     },
+     {
+      "title": "Anonymised.",
+      "text": "Custom role codes are shown with an INS_ prefix; entities as Mutual, Agency and Foundation; people, auditors and consultants are omitted."
+     }
+    ]
+   }
+  }
+ ]
 }

@@ -357,7 +357,9 @@
    "functions": [
     "Bank accounts used by Payments, Receivables and Cash Management",
     "Tax regimes, rates and rules for both countries",
-    "Recoverable and payable tax accounts per regime"
+    "Recoverable and payable tax accounts per regime",
+    "US: sales tax on customer invoices, use tax self-assessed on supplier invoices (EB-Tax tab)",
+    "MX: IVA on a cash basis (tax point Payment) and IVA and ISR withholding at payment (EB-Tax tab)"
    ],
    "docs": [
     {
@@ -809,7 +811,8 @@
     "2-way match to PO; 3-way match to receipt",
     "Validation calculates invoice price and exchange rate variances",
     "Approval workflow",
-    "Asset lines go to Fixed Assets as mass additions"
+    "Asset lines go to Fixed Assets as mass additions",
+    "Tax lines from Oracle Tax: US use tax self-assessed; MX IVA held in an interim account until paid, retentions withheld at payment (EB-Tax tab)"
    ],
    "processes": [
     "Import Payables Invoices",
@@ -908,7 +911,8 @@
     "AutoInvoice from fulfilled order lines",
     "Revenue recognition",
     "Lockbox receipts applied to invoices",
-    "Collections and credit"
+    "Collections and credit",
+    "Tax from Oracle Tax: US sales tax by ship-to; MX IVA owed when the receipt is applied (EB-Tax tab)"
    ],
    "processes": [
     "Import AutoInvoice",
@@ -1427,7 +1431,9 @@
    "functions": [
     "Receives journals from Create Accounting and Import Journals",
     "Copies journals to the secondary ledger and the USD reporting currency",
-    "Revaluation of USD balances"
+    "Revaluation of USD balances",
+    "IVA interim and final accounts and retention liabilities (EB-Tax tab)",
+    "Data access set: MX accountants only (Security tab)"
    ],
    "processes": [
     "Import Journals",
@@ -1462,7 +1468,9 @@
    "functions": [
     "Subledger level: Create Accounting writes these entries with the primary",
     "GL journals copied at posting (journal conversion rules)",
-    "Basis for statutory and tax reporting in Mexico"
+    "Basis for statutory and tax reporting in Mexico",
+    "IVA and retention entries reach the statutory chart in the same Create Accounting run (EB-Tax tab)",
+    "Read/write only for the MX statutory accountant (Security tab)"
    ],
    "docs": [
     {
@@ -11229,7 +11237,8 @@
       "functions": [
        "Data conversion level: Subledger",
        "Different chart of accounts (Mexican statutory) through the chart of accounts mapping",
-       "Same currency as the primary (MXN), which avoids difficult reconciliations"
+       "Same currency as the primary (MXN), which avoids difficult reconciliations",
+       "IVA and retention entries reach the statutory chart in the same run (EB-Tax tab); MX statutory accountant only (Security tab)"
       ],
       "facts": [
        [
@@ -11692,7 +11701,8 @@
       "functions": [
        "Owns the Mexican tax registrations (VAT), bank accounts and the MX primary ledger",
        "Balancing segment value 201 is assigned to it",
-       "Source of the MX secondary ledger and the USD reporting currency"
+       "Source of the MX secondary ledger and the USD reporting currency",
+       "RFC registration under MX IVA; withholding registration with buckets at legal entity level (EB-Tax tab)"
       ],
       "docs": [
        {
@@ -11752,7 +11762,8 @@
       "functions": [
        "Mexican statutory chart (SAT grouping code) through the chart of accounts mapping",
        "Subledger level: Create Accounting writes primary and secondary journals in one run; GL journals copied at posting",
-       "MX tax asset book assigned here"
+       "MX tax asset book assigned here",
+       "Read/write only for the MX statutory accountant (Security tab)"
       ],
       "docs": [
        {
@@ -11893,7 +11904,9 @@
       "functions": [
        "All business functions for FBCo México",
        "Profit centre BU that owns the MX plant",
-       "Sells concentrates to US Distribution BU through Financial Orchestration (intercompany)"
+       "Sells concentrates to US Distribution BU through Financial Orchestration (intercompany)",
+       "Subscribes to MX IVA (cash basis); Payables withholds IVA and ISR at payment (EB-Tax tab)",
+       "Data access for MX staff only, through Manage Data Access for Users (Security tab)"
       ],
       "docs": [
        {
@@ -12323,6 +12336,1527 @@
      {
       "title": "Two US business units.",
       "text": "Plant and distribution centre are separate profit centres in one legal entity: goods move through an intracompany financial orchestration flow (no intercompany invoice), and each has its own cost organisation."
+     }
+    ]
+   }
+  },
+  {
+   "id": "ebtax",
+   "label": "EB-Tax",
+   "kind": "diagram",
+   "after": "v-ledgers",
+   "eyebrow": "Tax",
+   "data": {
+    "title": "Transaction tax for FBCo US and FBCo México",
+    "lede": "Native Oracle Tax (EB-Tax) for both countries: US sales and use tax, Mexican IVA on a cash basis, and Mexican IVA and ISR withholding on supplier payments. Select a box to see the setup, the rules and the journal entries. Use the chips to follow one country.",
+    "chips": [
+     {
+      "id": "US",
+      "label": "FBCo US"
+     },
+     {
+      "id": "MX",
+      "label": "FBCo México"
+     }
+    ],
+    "legend": [
+     {
+      "label": "configuration",
+      "color": "var(--extract)"
+     },
+     {
+      "label": "determination",
+      "color": "var(--oic)"
+     },
+     {
+      "label": "transaction / accounting",
+      "color": "var(--airflow)"
+     },
+     {
+      "label": "cash (payment / receipt)",
+      "color": "var(--cash)"
+     },
+     {
+      "label": "authority / external",
+      "color": "var(--ext)",
+      "dash": true
+     }
+    ],
+    "layers": [
+     {
+      "id": "EB1",
+      "label": "Parties",
+      "title": "Configuration owner, first-party and third-party tax profiles"
+     },
+     {
+      "id": "EB2",
+      "label": "Regimes",
+      "title": "Tax regimes"
+     },
+     {
+      "id": "EB3",
+      "label": "Rates",
+      "title": "Taxes, statuses, rates and recovery rates"
+     },
+     {
+      "id": "EB4",
+      "label": "Rules",
+      "title": "Tax determination"
+     },
+     {
+      "id": "EB5",
+      "label": "Use",
+      "title": "Transactions"
+     },
+     {
+      "id": "EB6",
+      "label": "Books",
+      "title": "Accounting, settlement and reporting"
+     }
+    ],
+    "default_node": "x-mxiva",
+    "nodes": [
+     {
+      "id": "x-owner",
+      "layer": "EB1",
+      "title": "Global configuration owner",
+      "subtitle": "BU subscriptions",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "One global tax configuration. US Manufacturing BU and US Distribution BU subscribe to the US regime; MX BU subscribes to MX IVA, and the MX legal entity to the withholding regimes.",
+      "functions": [
+       "Common configuration with party overrides for each BU",
+       "Configuration owner tax options per event class: tax calculated, manual and overridden lines, default tax point basis",
+       "Withholding options (Payables standard and prepayment invoices): apply withholding, calculation point, tax invoice creation point"
+      ],
+      "facts": [
+       [
+        "US BUs",
+        "US Manufacturing BU · US Distribution BU"
+       ],
+       [
+        "MX BU",
+        "MX BU"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-1p",
+      "layer": "EB1",
+      "title": "First-party registrations",
+      "subtitle": "US nexus states · MX RFC",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Tax registrations sit on the legal reporting unit of each legal entity. FBCo México S.A. de C.V. holds the RFC (company format, 12 characters, validated as ORA_MX_RFC:COMPANY). FBCo US Inc. holds state registrations where it has nexus.",
+      "functions": [
+       "US: registration per nexus state; one marked Set as self-assessment (reverse charge) for use tax",
+       "MX: RFC registration under MX IVA; tax point basis Payment can also be set here",
+       "MX: withholding registration on the legal reporting unit; withholding buckets at legal entity level"
+      ],
+      "facts": [
+       [
+        "MX RFC format",
+        "3 letters + yymmdd + 3-char homoclave"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-3p",
+      "layer": "EB1",
+      "title": "Supplier & customer tax profiles",
+      "subtitle": "RFC · fiscal classifications",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Third-party tax profiles carry the registration and the party fiscal classifications that the rules read.",
+      "functions": [
+       "MX supplier person type: legal entity (PM), individual (PF), individual in RESICO",
+       "MX supplier RFC (individuals: 13 characters, ORA_MX_RFC:INDIVIDUAL); foreign suppliers ORA_MX_RFC:FOREIGN",
+       "US supplier registration status: Registered or Not Registered (drives use-tax self-assessment)",
+       "US customer exemptions (resale certificates) on the customer site"
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-ussut",
+      "layer": "EB2",
+      "title": "US SALES AND USE TAX",
+      "subtitle": "Transaction tax · geography based",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": true,
+      "description": "One country-level regime with state, county and city taxes. Jurisdictions follow the US geography (state, county, city, postal code). Tax point basis Invoice.",
+      "functions": [
+       "Taxes: STATE, COUNTY, CITY (DISTRICT where needed)",
+       "Built with the Tax Configuration Workbook (rapid setup spreadsheets); rate content kept current by upload",
+       "Sales tax on Receivables invoices; use tax self-assessed on Payables invoices",
+       "Recovery not used: US sales and use tax isn't recoverable, so it is cost"
+      ],
+      "facts": [
+       [
+        "Tax point basis",
+        "Invoice"
+       ],
+       [
+        "Engine",
+        "Native Oracle Tax"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-mxiva",
+      "layer": "EB2",
+      "title": "MX IVA",
+      "subtitle": "Transaction tax · cash basis",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": true,
+      "description": "Mexican value added tax (IVA). One country-level regime and tax, with tax point basis Payment: IVA is recognised when the supplier is paid or the customer pays, not when the invoice is posted.",
+      "functions": [
+       "Tax MX IVA with statuses STANDARD, BORDER, ZERO and EXEMPT",
+       "Tax point basis Payment on the tax, so every rate inherits it",
+       "Interim tax account required on the tax and on each rate",
+       "Recovery enabled: IVA paid (acreditable) offsets IVA charged (trasladado)"
+      ],
+      "facts": [
+       [
+        "Tax point basis",
+        "Payment"
+       ],
+       [
+        "Currency",
+        "MXN"
+       ],
+       [
+        "Owner",
+        "FBCo México S.A. de C.V."
+       ]
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-mxwht",
+      "layer": "EB2",
+      "title": "MX withholding",
+      "subtitle": "Withholding tax regimes · IVA RET · ISR RET",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Two withholding regimes (regime type Withholding tax, country level): IVA retention and ISR retention on payments to certain suppliers. The withheld amount is paid to SAT, not to the supplier.",
+      "functions": [
+       "MX IVA RET and MX ISR RET, calculation point Payment (retention is due when the supplier is paid)",
+       "Regime determination set WHTTAXREGIME (rule-based)",
+       "Tax authority (SAT) set up as a supplier; withholding invoices raised at payment",
+       "Withholding is enabled for transactions only (no simulation)"
+      ],
+      "facts": [
+       [
+        "Calculation point",
+        "Payment"
+       ],
+       [
+        "Buckets",
+        "Legal entity"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-usrates",
+      "layer": "EB3",
+      "title": "US rates",
+      "subtitle": "State · county · city",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Percentage rates per jurisdiction with effective dates. Maintained by the tax team from the rate content upload or the workbook; changes end-date the old rate.",
+      "functions": [
+       "One rate per jurisdiction and status",
+       "Exempt status for resale and manufacturing exemptions",
+       "No recovery rates"
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-mxrates",
+      "layer": "EB3",
+      "title": "IVA rates",
+      "subtitle": "16% · 8% border · 0% · exempt",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Four rates. 0% and exempt are kept apart: IVA on purchases linked to 0% sales is creditable, IVA linked to exempt sales isn't.",
+      "functions": [
+       "STANDARD: MX IVA 16 (default)",
+       "BORDER: MX IVA 8, northern and southern border region stimulus (seller registered in the region); decree in force to 31-Dec-2025, renewal to confirm",
+       "ZERO: MX IVA 0, exports and zero-rated foods",
+       "EXEMPT: MX IVA EXENTO"
+      ],
+      "facts": [
+       [
+        "Default",
+        "16%"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-mxrec",
+      "layer": "EB3",
+      "title": "IVA recovery rates",
+      "subtitle": "100% · 0%",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Recovery rates decide how much purchase IVA is creditable. The recoverable account sits on the recovery rate.",
+      "functions": [
+       "MX IVA REC 100: standard, fully creditable",
+       "MX IVA REC 0: non-deductible use (intended use rule)",
+       "Recovery settlement deferred (cash basis): interim first, recoverable on payment"
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-whtrates",
+      "layer": "EB3",
+      "title": "Withholding rates",
+      "subtitle": "IVA 10.6667% · 4% · ISR 10% · 1.25%",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Withholding rates under the two regimes. The 6% IVA retention on personnel services was repealed in 2021 and isn't set up.",
+      "functions": [
+       "IVA RET 10.6667% (two thirds of 16%): professional fees and leasing from individuals",
+       "IVA RET 4%: land freight",
+       "ISR RET 10%: professional fees and rent from individuals",
+       "ISR RET 1.25%: payments to RESICO individuals, on the amount before IVA"
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-usrules",
+      "layer": "EB4",
+      "title": "US rules",
+      "subtitle": "Ship-to geography · registration",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "The jurisdiction comes from the ship-to address (ship to, use bill to if not found). A Determine Tax Registration rule switches to the first party when the supplier is Not Registered, which triggers self-assessment.",
+      "functions": [
+       "Place of supply: ship to",
+       "Tax registration rule: supplier Not Registered or blank → first-party registration (self-assess)",
+       "Applicability exceptions for exempt items (raw materials consumed in manufacturing, resale)",
+       "Perform additional applicability for imported documents on, so imported invoices self-assess too"
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-mxrules",
+      "layer": "EB4",
+      "title": "IVA rules",
+      "subtitle": "Border zone · export · product",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "A determining factor set reads the ship-from and ship-to geography, the product fiscal classification and the intended use. Status and rate rules pick the IVA rate; recovery rules pick the recovery rate.",
+      "functions": [
+       "Applicability: ship-from or bill-to country MX",
+       "Status rule: ship-to country not MX → ZERO (export)",
+       "Status rule: product fiscal classification zero-rated food → ZERO",
+       "Status rule: seller establishment in the border zone and registered → BORDER",
+       "Recovery rule: intended use non-deductible → MX IVA REC 0"
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-whtrules",
+      "layer": "EB4",
+      "title": "Withholding rules",
+      "subtitle": "Supplier person type × service",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Withholding rules combine the supplier's fiscal classification (PF, PF RESICO, PM) with what is bought (intended use or product category: fees, rent, freight).",
+      "functions": [
+       "PF + fees or rent → IVA RET 10.6667% and ISR RET 10%",
+       "PF RESICO → ISR RET 1.25% (plus IVA RET where it applies)",
+       "Any supplier + land freight → IVA RET 4%",
+       "PM (legal entity) supplier → no withholding (except freight)"
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-usap",
+      "layer": "EB5",
+      "title": "US supplier invoice",
+      "subtitle": "Use tax self-assessed",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "A Payables invoice from an out-of-state supplier that charges no tax. Tax is calculated but not added to the amount owed to the supplier; it is self-assessed and owed to the state.",
+      "entries": [
+       {
+        "event": "Invoice accounted (use tax self-assessed)",
+        "dr": [
+         "Expense / inventory (incl. use tax)"
+        ],
+        "cr": [
+         "Payables liability (net of tax)",
+         "Use tax liability"
+        ]
+       }
+      ],
+      "facts": [
+       [
+        "Example",
+        "$10,000 MRO parts, 8.25% use tax → $825 to the state"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-usar",
+      "layer": "EB5",
+      "title": "US customer invoice",
+      "subtitle": "Sales tax on AutoInvoice",
+      "workstreams": [
+       "US"
+      ],
+      "external": false,
+      "core": false,
+      "description": "US Distribution BU bills customers through AutoInvoice; tax is calculated from the ship-to address unless the customer has a resale exemption.",
+      "entries": [
+       {
+        "event": "Invoice accounted",
+        "dr": [
+         "Receivable"
+        ],
+        "cr": [
+         "Revenue",
+         "Sales tax liability"
+        ]
+       }
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-mxap",
+      "layer": "EB5",
+      "title": "MX supplier invoice & payment",
+      "subtitle": "Cash-basis IVA · withholding",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": true,
+      "description": "Purchase IVA waits in an interim account until the invoice is paid. At payment the paid share moves to IVA recoverable, and for individuals' fees, rent or freight the retentions are withheld and owed to SAT.",
+      "entries": [
+       {
+        "event": "Invoice accounted (MXN 100,000 fees from a PF + 16% IVA)",
+        "dr": [
+         "Expense 100,000",
+         "IVA acreditable pendiente (interim) 16,000"
+        ],
+        "cr": [
+         "Payables liability 116,000"
+        ]
+       },
+       {
+        "event": "Payment accounted (withholding at payment)",
+        "dr": [
+         "Payables liability 116,000",
+         "IVA acreditable pagado (recoverable) 16,000"
+        ],
+        "cr": [
+         "Cash 95,333.33",
+         "IVA retenido por pagar 10,666.67",
+         "ISR retenido por pagar 10,000",
+         "IVA acreditable pendiente (interim) 16,000"
+        ]
+       }
+      ],
+      "facts": [
+       [
+        "Withholding invoice",
+        "Raised to the SAT supplier at payment"
+       ]
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-mxar",
+      "layer": "EB5",
+      "title": "MX customer invoice & receipt",
+      "subtitle": "Cash-basis IVA",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Sales IVA is charged on the invoice but owed to SAT only when the customer pays: interim (trasladado no cobrado) until the receipt is applied, then the liability (trasladado cobrado). Intercompany sales of concentrates to the US are exports at 0%.",
+      "entries": [
+       {
+        "event": "Invoice accounted (domestic, 16%)",
+        "dr": [
+         "Receivable"
+        ],
+        "cr": [
+         "Revenue",
+         "IVA trasladado no cobrado (interim)"
+        ]
+       },
+       {
+        "event": "Receipt applied",
+        "dr": [
+         "Cash",
+         "IVA trasladado no cobrado (interim)"
+        ],
+        "cr": [
+         "Receivable",
+         "IVA trasladado cobrado (liability)"
+        ]
+       }
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-accts",
+      "layer": "EB6",
+      "title": "Tax accounts",
+      "subtitle": "Interim · recoverable · liability",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Tax accounts default from the tax to its rates and jurisdictions, per ledger and optionally per BU. Subledger Accounting can override them.",
+      "functions": [
+       "US: sales tax liability; separate use tax liability account so self-assessed tax is visible",
+       "MX: interim and final accounts for purchase IVA (pendiente / pagado) and sales IVA (no cobrado / cobrado)",
+       "MX: IVA and ISR retention liability accounts on the withholding taxes",
+       "Once an interim account is set on a rate, its recovery settlement can't go back to Immediate"
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     },
+     {
+      "id": "x-mxbooks",
+      "layer": "EB6",
+      "title": "MX statutory books",
+      "subtitle": "MX primary · MX secondary ledger",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "IVA and retention entries are created in the MX primary ledger and, because the secondary ledger is at subledger level, in the MX secondary ledger on the Mexican statutory chart in the same Create Accounting run.",
+      "functions": [
+       "Statutory IVA accounts mapped to the SAT grouping codes",
+       "Monthly IVA return: IVA cobrado minus IVA pagado, less retentions",
+       "Retentions paid to SAT by the 17th of the following month"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "x-sat",
+      "layer": "EB6",
+      "title": "Tax authorities",
+      "subtitle": "SAT · US states",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": true,
+      "core": false,
+      "description": "Payments to the authorities go through Payables: the SAT supplier for retentions and the monthly IVA balance, state revenue departments for sales and use tax.",
+      "functions": [
+       "MX withholding certificates and returns are prepared outside Oracle from the Payables Withholding Tax Report",
+       "US returns from the Tax Register and the use tax liability account"
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     }
+    ],
+    "edges": [
+     {
+      "from": "x-owner",
+      "to": "x-ussut",
+      "kind": "ledger"
+     },
+     {
+      "from": "x-owner",
+      "to": "x-mxiva",
+      "kind": "ledger"
+     },
+     {
+      "from": "x-owner",
+      "to": "x-mxwht",
+      "kind": "ledger"
+     },
+     {
+      "from": "x-1p",
+      "to": "x-mxiva",
+      "kind": "ledger",
+      "label": "RFC"
+     },
+     {
+      "from": "x-1p",
+      "to": "x-ussut",
+      "kind": "ledger",
+      "label": "nexus · self-assessment"
+     },
+     {
+      "from": "x-3p",
+      "to": "x-whtrules",
+      "kind": "doc",
+      "label": "person type"
+     },
+     {
+      "from": "x-3p",
+      "to": "x-usrules",
+      "kind": "doc",
+      "label": "registration status"
+     },
+     {
+      "from": "x-ussut",
+      "to": "x-usrates",
+      "kind": "ledger"
+     },
+     {
+      "from": "x-mxiva",
+      "to": "x-mxrates",
+      "kind": "ledger"
+     },
+     {
+      "from": "x-mxiva",
+      "to": "x-mxrec",
+      "kind": "ledger"
+     },
+     {
+      "from": "x-mxwht",
+      "to": "x-whtrates",
+      "kind": "ledger"
+     },
+     {
+      "from": "x-usrules",
+      "to": "x-usrates",
+      "kind": "doc"
+     },
+     {
+      "from": "x-mxrules",
+      "to": "x-mxrates",
+      "kind": "doc"
+     },
+     {
+      "from": "x-mxrules",
+      "to": "x-mxrec",
+      "kind": "doc"
+     },
+     {
+      "from": "x-whtrules",
+      "to": "x-whtrates",
+      "kind": "doc"
+     },
+     {
+      "from": "x-usrules",
+      "to": "x-usap",
+      "kind": "acct"
+     },
+     {
+      "from": "x-usrules",
+      "to": "x-usar",
+      "kind": "acct"
+     },
+     {
+      "from": "x-mxrules",
+      "to": "x-mxap",
+      "kind": "acct"
+     },
+     {
+      "from": "x-mxrules",
+      "to": "x-mxar",
+      "kind": "acct"
+     },
+     {
+      "from": "x-whtrules",
+      "to": "x-mxap",
+      "kind": "cash",
+      "label": "at payment"
+     },
+     {
+      "from": "x-usap",
+      "to": "x-accts",
+      "kind": "acct"
+     },
+     {
+      "from": "x-usar",
+      "to": "x-accts",
+      "kind": "acct"
+     },
+     {
+      "from": "x-mxap",
+      "to": "x-mxbooks",
+      "kind": "acct",
+      "label": "Create Accounting"
+     },
+     {
+      "from": "x-mxar",
+      "to": "x-mxbooks",
+      "kind": "acct",
+      "label": "Create Accounting"
+     },
+     {
+      "from": "x-mxap",
+      "to": "x-sat",
+      "kind": "ret",
+      "label": "withholding invoice"
+     },
+     {
+      "from": "x-accts",
+      "to": "x-sat",
+      "kind": "ret",
+      "label": "returns"
+     }
+    ],
+    "notes": [
+     {
+      "title": "Cash basis in Oracle.",
+      "text": "Tax point basis Payment: invoice accounting debits (or credits) an interim tax account; payment or receipt accounting moves the paid share to the final account and reports it as of that date. Partial payments move a proportionate amount."
+     },
+     {
+      "title": "Why withhold at payment.",
+      "text": "Mexican IVA and ISR retentions arise when the supplier is paid, so the calculation point is Payment and the tax authority invoice is created at payment."
+     },
+     {
+      "title": "Not in scope.",
+      "text": "CFDI e-invoicing (including the payment complement and the retention CFDI) and IEPS excise are handled outside this view; they need a PAC partner and are not drawn."
+     },
+     {
+      "title": "To verify.",
+      "text": "Renewal of the border-region 8% decree beyond 2025, and partial-payment behaviour when withholding at payment combines with cash-basis IVA (test in the test environment)."
+     }
+    ]
+   }
+  },
+  {
+   "id": "security",
+   "label": "Security",
+   "kind": "diagram",
+   "after": "v-ebtax",
+   "eyebrow": "Security & controls",
+   "data": {
+    "title": "Role-based access for FBCo: custom roles, data scope, SoD and ITGC",
+    "lede": "No seeded Oracle job role is assigned to a user. Users get custom job roles by process, and data access by business unit, ledger, inventory and cost organisation and asset book. SoD rules are checked before a role is granted and monthly after. ITGC controls give auditors the evidence. Use the chips to see what is scoped to FBCo US or FBCo México.",
+    "chips": [
+     {
+      "id": "US",
+      "label": "FBCo US"
+     },
+     {
+      "id": "MX",
+      "label": "FBCo México"
+     }
+    ],
+    "legend": [
+     {
+      "label": "role hierarchy / provisioning",
+      "color": "var(--extract)"
+     },
+     {
+      "label": "data access",
+      "color": "var(--oic)"
+     },
+     {
+      "label": "control / evidence",
+      "color": "var(--airflow)"
+     },
+     {
+      "label": "external",
+      "color": "var(--ext)",
+      "dash": true
+     }
+    ],
+    "layers": [
+     {
+      "id": "MS1",
+      "label": "Identity",
+      "title": "Identity and provisioning"
+     },
+     {
+      "id": "MS2",
+      "label": "Roles",
+      "title": "Custom job roles by process"
+     },
+     {
+      "id": "MS3",
+      "label": "Data",
+      "title": "Data access (security contexts)"
+     },
+     {
+      "id": "MS4",
+      "label": "SoD",
+      "title": "Segregation of duties"
+     },
+     {
+      "id": "MS5",
+      "label": "ITGC",
+      "title": "IT general controls and evidence"
+     }
+    ],
+    "default_node": "m-principle",
+    "nodes": [
+     {
+      "id": "m-idp",
+      "layer": "MS1",
+      "title": "Identity provider",
+      "subtitle": "SSO · MFA",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": true,
+      "core": false,
+      "description": "Users sign in through the corporate identity provider (SAML single sign-on with MFA). Local Oracle passwords are disabled except for break-glass accounts.",
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "m-hcm",
+      "layer": "MS1",
+      "title": "Provisioning",
+      "subtitle": "HCM-driven · role mappings",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Worker records create and end user accounts. Role provisioning rules auto-provision only low-risk abstract roles; job roles are requested, approved and SoD-checked.",
+      "functions": [
+       "Auto-provisioned: FBC_EMPLOYEE_ABSTRACT, FBC_LINE_MANAGER_ABSTRACT (by assignment)",
+       "Requested: every job role, with manager and role-owner approval and a preventive SoD check",
+       "Daily Send Pending LDAP Requests; Autoprovision Roles for All Users after mapping changes",
+       "Termination ends the assignment and revokes roles the same day"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "m-principle",
+      "layer": "MS1",
+      "title": "No seeded roles on users",
+      "subtitle": "Design principle",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": true,
+      "description": "Predefined ORA_ roles are templates only. Each business role is a custom copy (FBC_ prefix) so that Oracle's quarterly role changes never reach users without review.",
+      "functions": [
+       "Job roles: Copy top role (keeps Oracle's duty updates for new features)",
+       "Duty roles that break SoD: copy with inherited roles, then trim",
+       "Naming: FBC_<module>_<function>_JOB / _DUTY / _ABSTRACT",
+       "Monthly check: no user holds a role code like ORA_%",
+       "Quarterly: review release notes for seeded-role changes, retest SoD, promote after regression testing"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "r-p2p",
+      "layer": "MS2",
+      "title": "Procure to Pay roles",
+      "subtitle": "Requester · buyer · receiver · AP",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Roles along the purchasing chain, split so no one creates the supplier, the PO, the receipt and the payment.",
+      "functions": [
+       "FBC_POR_REQUESTER_JOB",
+       "FBC_PO_BUYER_JOB",
+       "FBC_RCV_RECEIVING_AGENT_JOB",
+       "FBC_POZ_SUPPLIER_MANAGER_JOB",
+       "FBC_AP_INVOICE_SPECIALIST_JOB",
+       "FBC_AP_PAYMENT_SPECIALIST_JOB",
+       "FBC_AP_MANAGER_JOB (no supplier bank maintenance)"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "r-make",
+      "layer": "MS2",
+      "title": "Make & Inventory roles",
+      "subtitle": "Planner · production · inventory · cost",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Plant roles, scoped to the inventory and cost organisations where the user works.",
+      "functions": [
+       "FBC_PLANNER_JOB",
+       "FBC_PRODUCTION_SUPERVISOR_JOB",
+       "FBC_INV_MANAGER_JOB",
+       "FBC_CST_COST_ACCOUNTANT_JOB (standard cost updates)",
+       "FBC_PRODUCT_DATA_STEWARD_JOB (item master)"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "r-o2c",
+      "layer": "MS2",
+      "title": "Order to Cash roles",
+      "subtitle": "Order entry · shipping · billing · cash",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Customer, order, billing and receipt roles kept apart.",
+      "functions": [
+       "FBC_DOO_ORDER_MANAGER_JOB",
+       "FBC_SHIPPING_MANAGER_JOB",
+       "FBC_AR_BILLING_SPECIALIST_JOB",
+       "FBC_AR_CASH_SPECIALIST_JOB",
+       "FBC_AR_CUSTOMER_DATA_STEWARD_JOB",
+       "FBC_AR_CREDIT_MANAGER_JOB"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "r-r2r",
+      "layer": "MS2",
+      "title": "Record to Report roles",
+      "subtitle": "Accountant · controller · close",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Journal entry and journal approval are different roles; period open and close is its own role.",
+      "functions": [
+       "FBC_GL_ACCOUNTANT_JOB",
+       "FBC_GL_CONTROLLER_JOB (journal approval, period close)",
+       "FBC_IC_ACCOUNTANT_JOB",
+       "FBC_GL_REPORTING_ABSTRACT (view and report only)",
+       "FBC_MX_STATUTORY_ACCOUNTANT_JOB (MX secondary ledger)"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "r-tre",
+      "layer": "MS2",
+      "title": "Treasury & Assets roles",
+      "subtitle": "Cash · bank · assets",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Bank account maintenance is separate from payments and reconciliation; asset additions separate from retirements and depreciation.",
+      "functions": [
+       "FBC_CE_BANK_ADMIN_JOB (bank accounts only)",
+       "FBC_CE_CASH_MANAGER_JOB (reconciliation, positioning)",
+       "FBC_FA_ASSET_ACCOUNTANT_JOB",
+       "FBC_FA_ASSET_MANAGER_JOB (retire, depreciate, close book)"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "r-admin",
+      "layer": "MS2",
+      "title": "Admin & setup roles",
+      "subtitle": "Security · setup · tax · audit",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Narrow admin roles instead of Application Implementation Consultant. Tax setup has its own roles per country.",
+      "functions": [
+       "FBC_SECURITY_ADMIN_JOB (users and roles; no transactions)",
+       "FBC_FIN_SETUP_ADMIN_JOB (enterprise structures, COA; change-ticket only)",
+       "FBC_TAX_ADMIN_US_JOB and FBC_TAX_ADMIN_MX_JOB (tax rates, rules, registrations, withholding)",
+       "FBC_ESS_SCHEDULER_JOB (schedule and monitor jobs)",
+       "FBC_AUDITOR_ABSTRACT (read-only, audit reports)",
+       "Break-glass accounts with AIC and IT Security Manager, vaulted"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "d-bu",
+      "layer": "MS3",
+      "title": "Business units",
+      "subtitle": "US Mfg BU · US Dist BU · MX BU",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Payables, Receivables, Procurement, Expenses and Order Management roles are scoped by business unit through Manage Data Access for Users, so one role serves all three BUs.",
+      "functions": [
+       "US Manufacturing BU (also the Procurement Services BU for the US)",
+       "US Distribution BU",
+       "MX BU: Mexico staff only; US shared services read-only where needed",
+       "Procurement agents set per procurement BU with limited actions"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "d-ledger",
+      "layer": "MS3",
+      "title": "Ledgers & data access sets",
+      "subtitle": "US · MX primary · MX secondary · reporting",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "General Ledger roles are scoped by data access set: full or read-only, by ledger or by balancing segment value.",
+      "functions": [
+       "US primary: read/write by company 101 or 102",
+       "MX primary: read/write for MX accountants (company 201)",
+       "MX secondary ledger: read/write only for the MX statutory accountant (adjustment journals)",
+       "USD ledger set and MX reporting currency: read-only for group reporting"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "d-org",
+      "layer": "MS3",
+      "title": "Inventory & cost orgs",
+      "subtitle": "US plant · US DC · MX plant",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Plant roles see only their inventory organisation and cost organisation.",
+      "functions": [
+       "US plant and US DC (standard cost)",
+       "MX plant (perpetual average cost)",
+       "Item master: product data stewards only"
+      ],
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "d-book",
+      "layer": "MS3",
+      "title": "Asset books",
+      "subtitle": "US corporate · MX corporate · MX tax",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Asset roles are scoped by asset book; the MX tax book only for MX asset accountants.",
+      "docs": [
+       {
+        "label": "Enterprise structure and ledgers",
+        "path": "manufacturing/foundation/enterprise-structure-and-ledgers.md"
+       }
+      ]
+     },
+     {
+      "id": "sod-rules",
+      "layer": "MS4",
+      "title": "SoD ruleset",
+      "subtitle": "13 rules · scoped by BU",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": true,
+      "description": "The conflicts no user may hold in the same business unit or ledger.",
+      "functions": [
+       "Supplier and supplier bank maintenance vs AP invoice entry",
+       "Supplier maintenance vs payments",
+       "AP invoice entry vs payment",
+       "Requisition vs requisition approval or PO",
+       "PO vs receipt",
+       "PO vs AP invoice entry or matching",
+       "Bank account maintenance vs payments or bank reconciliation",
+       "Journal entry vs journal approval or posting",
+       "COA, calendar and ledger setup vs journal entry",
+       "Customer maintenance vs receipts or credit memos",
+       "AR receipts vs bank reconciliation or write-off approval",
+       "Asset additions vs retirements or depreciation",
+       "Security or setup administration (incl. tax setup) vs any transaction role"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "sod-check",
+      "layer": "MS4",
+      "title": "SoD checks",
+      "subtitle": "Preventive · detective",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Advanced Access Controls (or a third-party tool) simulates a role request before it is granted, and reports actual conflicts monthly. Accepted conflicts get a documented mitigating control.",
+      "functions": [
+       "Preventive: simulation at role design and at each request",
+       "Detective: monthly conflict report to role owners",
+       "Mitigation: e.g. review of supplier bank changes when one person must cover two duties"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "c-uar",
+      "layer": "MS5",
+      "title": "Access review",
+      "subtitle": "Quarterly · semi-annual",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Role and data access reviewed by business owners: quarterly for privileged and financially significant roles, semi-annually for the rest.",
+      "functions": [
+       "Population: User Role Membership Report plus data access, with run parameters kept",
+       "Sign-off by manager and role owner; removals ticketed and re-checked",
+       "Terminations reconciled monthly against active users"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "c-priv",
+      "layer": "MS5",
+      "title": "Privileged access",
+      "subtitle": "Few holders · break-glass",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Admin roles held by few named users who don't transact; break-glass use is ticketed, time-boxed and reviewed within two business days.",
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "c-change",
+      "layer": "MS5",
+      "title": "Change management",
+      "subtitle": "Config · quarterly updates",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Configuration is changed in test and promoted (setup export/import or configuration set migration) against an approved ticket. Oracle's quarterly updates are covered by the SOC report plus FBCo's regression and role review.",
+      "functions": [
+       "Audit policies on key setup objects (incl. tax rates and rules)",
+       "Setup compared between environments and periods",
+       "Quarterly update: regression test, seeded vs custom role review"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "c-ess",
+      "layer": "MS5",
+      "title": "Jobs, logs & SOC",
+      "subtitle": "ESS · OPSS audit · CUECs",
+      "workstreams": [
+       "US",
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Evidence controls auditors test every year.",
+      "functions": [
+       "Scheduled jobs inventoried and reviewed annually; only the scheduler role can schedule or cancel",
+       "OPSS audit at Low: role and membership changes, reported in Security – Audit Real Time",
+       "User and Role Access Audit Report for what each role can do",
+       "SOC 1 Type II for Oracle Cloud reviewed annually, CUECs mapped, bridge letter to year end"
+      ],
+      "docs": [
+       {
+        "label": "Security and controls",
+        "path": "manufacturing/foundation/security-and-controls.md"
+       }
+      ]
+     },
+     {
+      "id": "c-mx",
+      "layer": "MS5",
+      "title": "Mexico specifics",
+      "subtitle": "Statutory books · tax · personal data",
+      "workstreams": [
+       "MX"
+      ],
+      "external": false,
+      "core": false,
+      "description": "Controls specific to FBCo México.",
+      "functions": [
+       "MX tax setup (IVA, retentions, RFC registrations) only through FBC_TAX_ADMIN_MX_JOB, under change control",
+       "Statutory chart mapping and secondary-ledger adjustments only by the MX statutory accountant",
+       "RFC, CURP and bank details of MX suppliers and employees restricted (Mexican personal data law)"
+      ],
+      "docs": [
+       {
+        "label": "EB-Tax for US and Mexico",
+        "path": "manufacturing/foundation/ebtax-us-mx.md"
+       }
+      ]
+     }
+    ],
+    "edges": [
+     {
+      "from": "m-idp",
+      "to": "m-hcm",
+      "kind": "ret"
+     },
+     {
+      "from": "m-hcm",
+      "to": "m-principle",
+      "kind": "ledger"
+     },
+     {
+      "from": "m-principle",
+      "to": "r-p2p",
+      "kind": "ledger"
+     },
+     {
+      "from": "m-principle",
+      "to": "r-make",
+      "kind": "ledger"
+     },
+     {
+      "from": "m-principle",
+      "to": "r-o2c",
+      "kind": "ledger"
+     },
+     {
+      "from": "m-principle",
+      "to": "r-r2r",
+      "kind": "ledger"
+     },
+     {
+      "from": "m-principle",
+      "to": "r-tre",
+      "kind": "ledger"
+     },
+     {
+      "from": "m-principle",
+      "to": "r-admin",
+      "kind": "ledger"
+     },
+     {
+      "from": "r-p2p",
+      "to": "d-bu",
+      "kind": "doc"
+     },
+     {
+      "from": "r-o2c",
+      "to": "d-bu",
+      "kind": "doc"
+     },
+     {
+      "from": "r-make",
+      "to": "d-org",
+      "kind": "doc"
+     },
+     {
+      "from": "r-r2r",
+      "to": "d-ledger",
+      "kind": "doc"
+     },
+     {
+      "from": "r-tre",
+      "to": "d-book",
+      "kind": "doc"
+     },
+     {
+      "from": "r-tre",
+      "to": "d-bu",
+      "kind": "doc"
+     },
+     {
+      "from": "d-bu",
+      "to": "sod-rules",
+      "kind": "acct",
+      "label": "rules scoped by BU"
+     },
+     {
+      "from": "d-ledger",
+      "to": "sod-rules",
+      "kind": "acct"
+     },
+     {
+      "from": "sod-rules",
+      "to": "sod-check",
+      "kind": "acct"
+     },
+     {
+      "from": "sod-check",
+      "to": "c-uar",
+      "kind": "acct"
+     },
+     {
+      "from": "r-admin",
+      "to": "c-priv",
+      "kind": "acct"
+     },
+     {
+      "from": "r-admin",
+      "to": "c-change",
+      "kind": "acct"
+     },
+     {
+      "from": "c-change",
+      "to": "c-ess",
+      "kind": "acct"
+     },
+     {
+      "from": "r-admin",
+      "to": "c-mx",
+      "kind": "acct"
+     }
+    ],
+    "notes": [
+     {
+      "title": "One role, many scopes.",
+      "text": "Roles say what a user can do; data access says where. An AP specialist role is the same in the US Distribution BU and the MX BU, with different data access assignments. Avoid one role per BU."
+     },
+     {
+      "title": "Role codes are illustrative.",
+      "text": "FBC_ codes show the naming convention, not a delivered catalogue; each is a copy of the matching Oracle job role, trimmed where an SoD rule requires it."
      }
     ]
    }
