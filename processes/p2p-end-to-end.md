@@ -88,6 +88,24 @@ PPR against template per LE + bank account → file to Kyriba. Standard auto-app
 ### 08 Settlement — Kyriba → bank → Oracle
 Two mappings in Kyriba; H2H transmission; INT955 hourly acks; INT955B records rejections on payment DFFs; rejected payments voided manually; INT246 Kyriba → GL; INT819/820 statements. Failure: **stuck in Draft** (silent); file not integrated (field length, e.g. payment reason); bank rejects (BIC vs ABA, branch/routing/convenio); account not H2H-enabled; missing statements. `[CO:02 §4 Stage 08]` → `payments-settlement-and-returns.md`
 
+## Subledger Accounting rules (P2P only)
+The map's Procure to Pay tab shows these as the **XLA** card between Payment and Settlement.
+
+| Area | What is configured | Created or changed | Evidence |
+|---|---|---|---|
+| Accounting method | Custom `CORP_GAAP_SLAM` for every subledger, including Purchasing/Receipt Accounting, Payables and Payments. Entries post to the primary ledger and the STAT secondary ledger | Created at implementation (a company-specific method, not the predefined Standard Accrual) `[INFERRED]` | `[CO:01 §1, §4]` `[CO:02 §1]` `[USER:2026-10-06]` |
+| Payables account rules | Liability, expense, tax and withholding derivation, maintained in *Manage Account Rules* and recorded in the Payables configuration record | Custom; the configuration record wasn't located, so individual rules can't be listed | `[CO:02 §2, §7]` |
+| Purchasing mapping sets | Spend category → charge account, with a separate France set; maintained in *Manage Mapping Sets* | Custom; changed through tickets when Oracle derived the wrong natural account | `[CO:02 §3, §7]` |
+| Receipt accrual | Period-end accrual and next-period reversal through the same method | Behaviour confirmed; rule detail not documented | `[CO:02 §4 Stage 05]` `[USER:2026-10-06]` |
+| Payment | Accounted once at *Payment Created*, straight to Cash; no cash clearing journal line, no *Payment Clearing* event | Behaviour confirmed by an accounting trace | `[DATA:XLA trace of one cleared payment, 6-Oct-2026]` |
+
+**Change path.** A wrong charge account has two possible fixes: the Zip lookup (wrong sub-account proposed) or the
+mapping set or account rule (wrong natural account derived from a correct sub-account) `[CO:02 §3]`. Any change to a rule
+component leaves the accounting method *Incomplete* until it is validated again `[ORA26C:implementing-subledger-accounting p.16]`.
+
+**Open.** The category → account mapping sets may sit in Transaction Account Builder (default accounts on requisitions
+and POs) rather than in the accounting rules (Q-TAB-1, see `oracle-modules/suppliers-and-procurement.md`).
+
 ## Cross-cutting processes
 - **Invoice tolerance maintenance** (monthly, FTG). `[CO:02 §5]`
 - **Approval continuity** — delegation/reassignment across Oracle, Zip, Ramp, Magnit, Upwork (separate matrices). `[CO:02 §5]`

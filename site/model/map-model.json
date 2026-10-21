@@ -1286,7 +1286,7 @@
  ],
  "default_node": "xla",
  "p2p": {
-  "title": "Procure to Pay: eight stages",
+  "title": "Procure to Pay: eight stages and the accounting rules",
   "lede": "Zip orchestrates, Oracle decides. The first four stages move a commitment without touching the ledger. Receipts not yet invoiced are accrued at period end; invoice and payment create accounting through Subledger Accounting under CORP_GAAP_SLAM. Settlement changes status only: bank outcomes return hourly and a rejected payment is voided manually.",
   "stages": [
    {
@@ -1429,6 +1429,21 @@
        "Discount taken, if any"
       ]
      }
+    ]
+   },
+   {
+    "n": "XLA",
+    "title": "Subledger Accounting rules",
+    "system": "Subledger Accounting · CORP_GAAP_SLAM",
+    "accounting": "rules for receipt, invoice and payment",
+    "points": [
+     "One custom accounting method, CORP_GAAP_SLAM, for every P2P subledger; entries land in the primary ledger and its STAT secondary ledger",
+     "Payables: custom account rules (Manage Account Rules) derive the liability, expense, tax and withholding accounts; the Payables configuration record holds them",
+     "Purchasing: spend category → charge account mapping sets, with a separate set for France; Oracle re-derives what Zip proposed and cross-validation rules gate the result",
+     "Receipt: the period-end accrual and its next-period reversal use the same rule stack",
+     "Payment: one journal line set at issue (Payment Created) straight to Cash; no cash clearing line and no Payment Clearing event",
+     "Change path: a mis-posting is fixed either in the Zip lookup or in the mapping set or account rule; any rule change leaves the method Incomplete until it is validated again",
+     "Open: whether category → account derivation sits in mapping sets on the accounting side or in Transaction Account Builder"
     ]
    },
    {

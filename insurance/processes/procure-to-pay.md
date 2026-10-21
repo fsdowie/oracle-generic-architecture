@@ -30,6 +30,25 @@ links: [INS-FOUNDATION, INS-R2R, INS-DATA]
 
 The accrual process chain: *Transfer Costs to Cost Management* → *Transfer Transactions from Receiving to Costing* → *Create Uninvoiced Receipt Accruals* → report. Only receipts with received amount greater than invoiced amount accrue; POs drop off the report only when **finally closed** `[CO:INS-NB p.559–560]`.
 
+## Subledger Accounting rules: multiperiod accounting
+The map's Procure to Pay tab shows this as the **XLA** card between Invoice and Payment.
+
+| Item | Detail | Evidence |
+|---|---|---|
+| Customization | Multiperiod accounting rules on the Payables *Invoices* event class, so prepaid invoices (insurance, software subscriptions, maintenance contracts) are deferred at invoice and expensed across the service period | `[USER:2026-10-21]` |
+| Invoice data | Each distribution carries the multiperiod start date, end date and accrual account (`DEF_ACCTG_START_DATE`, `DEF_ACCTG_END_DATE`, `DEF_ACCTG_ACCRUAL_CCID`) | `[ORA26C:implementing-payables-invoice-to-pay p.139, 155, 161]` |
+| Rule components | Multiperiod class (Manage Subledger Accounting Lookups); non-multiperiod journal line rule for the deferral with that class; multiperiod journal line rule for the recognition with the same class; deferral and expense account rules; sources on the Multiperiod Start Date and End Date accounting attributes | `[ORA26C:using-subledger-accounting p.49–52]` |
+| Method | Predefined rule sets can't be edited, so the invoice rule set is copied and the copy assigned to the ledger's accounting method; the method is *Incomplete* until activated | `[ORA26C:implementing-subledger-accounting p.16, 19]` |
+| Schedule | *Create Accounting* every 4 hours from 2 AM for all subledgers; *Create Multiperiod Accounting* for Payables, run for each ledger (Mutual, Agency), hourly or daily still to be decided by the AP lead | `[CO:INS-ERP p.149–151]` |
+| Rest of P2P | No other custom accounting rules are documented; receipt accrual, invoice and payment use Oracle's standard rules | `[INFERRED]` |
+
+| Event | Debit | Credit |
+|---|---|---|
+| Invoice with a multiperiod date range | Prepaid expense (multiperiod accrual account); tax | Liability |
+| Each period in the range | Expense | Prepaid expense |
+
+Oracle requires *Create Multiperiod Accounting* to run after *Create Accounting* `[ORA26C:using-subledger-accounting p.52]`.
+
 ## Bank A file set `[CO:INS-NB p.165–167, 334]`
 - ACH file built in Oracle and sent straight to the bank's SFTP (no middleware), plus an ACH control-totals file.
 - Positive Pay file for printed checks.

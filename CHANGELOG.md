@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.0 — 2026-10-21
+- Procure to Pay now shows the Subledger Accounting rules on all three maps (P2P only; other workstreams unchanged).
+  - **Travel**: new **XLA** card between Payment and Settlement: the custom `CORP_GAAP_SLAM` method on the primary and STAT secondary ledgers, Payables account rules, spend category → charge account mapping sets (separate France set), period-end receipt accrual, payment accounted once at issue, the change path and the open TAB question. Evidence in `processes/p2p-end-to-end.md`.
+  - **Insurance**: new **XLA** card between Invoice and Payment for the multiperiod accounting customization (prepaid invoices deferred and expensed monthly; multiperiod class, deferral and recognition line rules; Create Multiperiod Accounting after Create Accounting for each ledger). Evidence in `insurance/processes/procure-to-pay.md`.
+  - **Manufacturing**: new Procure to Pay scenario **Accounting rules (SLA)**: Transaction Account Builder defaults, tax accounts (MX interim IVA and withholding stay in tax setup), Receipt Accounting and Payables events, a copy of Standard Accrual, custom rule sets, the typical account rule and mapping set customizations, multiperiod prepaid spread, activation and draft testing, journals by ledger. New section 6 in `manufacturing/workflows/procure-to-pay.md`.
+
 ## 0.11.0 — 2026-10-19
 - Insurance map: two new tabs after Foundation & controls.
   - **Taxes**: the native Oracle Tax setup as built (US_SALES_USE_TAX regime subscribed by the Mutual and Agency BUs, state, local and county taxes, inner-city jurisdictions, rates by location code, ship-to city and state rate rules, the rate-change and new-location runbooks) and its gaps (no use-tax self-assessment, recovery off, no reporting codes, rate maintenance tied to a broad admin role).

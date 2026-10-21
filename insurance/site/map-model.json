@@ -1231,7 +1231,7 @@
  ],
  "default_node": "gl",
  "p2p": {
-  "title": "Procure to Pay: eight stages",
+  "title": "Procure to Pay: eight stages and the accounting rules",
   "lede": "Suppliers are registered and qualified, requisitions and invoices are approved by amount tier, and payments leave as bank files. Accounting starts with the period-end accrual; invoice and payment follow through Subledger Accounting.",
   "stages": [
    {
@@ -1345,6 +1345,40 @@
       ],
       "cr": [
        "Cash, or Cash clearing (option not documented)"
+      ]
+     }
+    ]
+   },
+   {
+    "n": "XLA",
+    "title": "Subledger Accounting rules: multiperiod accounting",
+    "system": "Subledger Accounting · Payables",
+    "accounting": "prepaid deferral and monthly recognition",
+    "points": [
+     "Customization on the Payables Invoices event class: prepaid invoices (insurance, software subscriptions, maintenance contracts) are deferred at invoice and expensed over the service period",
+     "The invoice distribution carries the multiperiod start date, end date and accrual (prepaid) account",
+     "Rule components: a multiperiod class (SLA lookup), a non-multiperiod journal line rule for the deferral, a multiperiod journal line rule for the recognition, a deferral account rule and an expense account rule, in a copied journal entry rule set on the ledger's accounting method",
+     "Create Multiperiod Accounting runs after Create Accounting (every 4 hours from 2 AM), for each ledger: Mutual and Agency; hourly or daily was left to the AP lead",
+     "No other custom accounting rules are documented: receipt accrual, invoice and payment use Oracle's standard rules"
+    ],
+    "entries": [
+     {
+      "event": "Invoice with a multiperiod date range",
+      "dr": [
+       "Prepaid expense (multiperiod accrual account)",
+       "Tax"
+      ],
+      "cr": [
+       "Liability (trade payables)"
+      ]
+     },
+     {
+      "event": "Each period in the range (Create Multiperiod Accounting)",
+      "dr": [
+       "Expense"
+      ],
+      "cr": [
+       "Prepaid expense"
       ]
      }
     ]
