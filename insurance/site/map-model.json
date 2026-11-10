@@ -863,7 +863,8 @@
     "Financial Consolidation and Close used as the month-end close checklist (consolidation planned)",
     "Account Reconciliation (2021/22) and Narrative Reporting packages (about 200 reports)",
     "Enterprise Data Management (future); Financial Reporting & Compliance for model-audit-rule and internal-audit controls",
-    "Migrated to the Enterprise EPM bundle in 2022"
+    "Migrated to the Enterprise EPM bundle in 2022",
+    "Financials cube carries the statutory allocations (View members ALLOC … ALLOC10; Allocations tab)"
    ],
    "integrations": [
     "INS-GL-PLANNING-TB",
@@ -879,6 +880,10 @@
     {
      "label": "ADW, integrations and reporting",
      "path": "insurance/data-and-reporting.md"
+    },
+    {
+     "label": "Statutory allocations",
+     "path": "insurance/processes/statutory-allocations.md"
     }
    ]
   },
@@ -930,7 +935,8 @@
     "Dynamic reporting: BI dashboards, Data Visualization and Smart View analytics",
     "OAC Essbase cubes: Financials, Revenue Planning, Analytics, Foundation",
     "Transactional dashboards from OTBI datasets and ADW through DV data flows",
-    "Static reporting for non-Essbase data with BI Publisher, against ADW and the on-premise warehouse"
+    "Static reporting for non-Essbase data with BI Publisher, against ADW and the on-premise warehouse",
+    "Financials cube carries the statutory allocations (View members ALLOC … ALLOC10; Allocations tab)"
    ],
    "integrations": [
     "INS-PLANNING-ESSBASE",
@@ -943,6 +949,10 @@
     {
      "label": "ADW, integrations and reporting",
      "path": "insurance/data-and-reporting.md"
+    },
+    {
+     "label": "Statutory allocations",
+     "path": "insurance/processes/statutory-allocations.md"
     }
    ]
   },
@@ -2482,7 +2492,8 @@
      "functions": [
       "About six allocation rules a month: run, validate, deploy",
       "Payroll and payroll-accrual allocations post by state",
-      "Monthly shared-services billing from the Mutual to the Agency"
+      "Monthly shared-services billing from the Mutual to the Agency",
+      "Statutory allocations by class, state, product and channel run later in the Financials Essbase cube (Allocations tab)"
      ],
      "integrations": [
       "INS-ALLOC-GL",
@@ -2496,6 +2507,10 @@
       {
        "label": "Record to Report",
        "path": "insurance/processes/record-to-report.md"
+      },
+      {
+       "label": "Statutory allocations",
+       "path": "insurance/processes/statutory-allocations.md"
       }
      ],
      "facts": [
@@ -4828,6 +4843,1978 @@
      {
       "title": "Anonymised.",
       "text": "Custom role codes are shown with an INS_ prefix; entities as Mutual, Agency and Foundation; people, auditors and consultants are omitted."
+     }
+    ]
+   }
+  },
+  {
+   "id": "alloc",
+   "label": "Allocations",
+   "kind": "workflows",
+   "after": "close",
+   "eyebrow": "Statutory allocations",
+   "data": {
+    "title": "Statutory allocations: class, state, product and channel",
+    "lede": "How the Mutual's management P&L becomes a statutory P&L by class, state, line of business and sales channel. Pick a scenario for the four stages, each allocation in the Financials Essbase cube, the premium and loss split at the Planning load, or the checks and improvements. Select a bubble for the details.",
+    "legend": [
+     {
+      "label": "data / load",
+      "color": "var(--extract)"
+     },
+     {
+      "label": "rates",
+      "color": "var(--oic)"
+     },
+     {
+      "label": "allocation run",
+      "color": "var(--airflow)"
+     },
+     {
+      "label": "check → improvement",
+      "color": "var(--ext)",
+      "dash": true
+     }
+    ],
+    "scenarios": [
+     {
+      "id": "overview",
+      "label": "The four stages",
+      "lede": "Revenue, losses and expenses reach the statutory P&L by class, state, line of business and sales channel in four stages. Most of the coding happens at source or in the GL; what is still uncoded when the books close is allocated in the Financials Essbase cube, and premium and losses get their channel when they load into Planning.",
+      "lanes": [
+       {
+        "id": "src",
+        "label": "Exceed & Payables",
+        "external": true
+       },
+       {
+        "id": "gl",
+        "label": "Fusion GL"
+       },
+       {
+        "id": "rates",
+        "label": "Rate workbooks"
+       },
+       {
+        "id": "cube",
+        "label": "Financials cube"
+       },
+       {
+        "id": "plan",
+        "label": "Planning"
+       },
+       {
+        "id": "rpt",
+        "label": "Statutory reporting"
+       }
+      ],
+      "steps": [
+       {
+        "id": "direct",
+        "lane": "src",
+        "seq": 1,
+        "title": "Stage 1 · Direct coding",
+        "sub": "AP and Exceed journals",
+        "description": "Premium, losses, commissions and some department expenses (for example reports & surveys) are coded with product, state or channel where they are entered: in Payables, or in the Exceed policy and claims system, whose journals reach the GL through the financial integrator.",
+        "evidence": [
+         "CO:INS-ALLOC"
+        ],
+        "process": [
+         "Payables invoice distributions",
+         "Exceed financial-integrator journals"
+        ],
+        "in": [
+         "Invoices",
+         "Premium, loss and commission activity"
+        ],
+        "out": [
+         "GL lines with product, state or channel"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "acctg",
+        "lane": "gl",
+        "seq": 2,
+        "title": "Stage 2 · Accounting journals",
+        "sub": "GWP allocation entries",
+        "description": "Variable expenses that arrive without state, product or channel are caught by Accounting at month end and re-coded with GWP allocation journals.",
+        "evidence": [
+         "CO:INS-ALLOC"
+        ],
+        "process": [
+         "WA premium taxes",
+         "OR business taxes",
+         "Direct agent commissions (from the payroll journal, coded at the accrual)",
+         "Contingent commissions"
+        ],
+        "in": [
+         "GWP by state and product",
+         "New & renewal commissions and GWP by channel report"
+        ],
+        "out": [
+         "Re-coded GL lines"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         },
+         {
+          "label": "Close process and scheduled processes",
+          "path": "insurance/processes/close-process.md"
+         }
+        ]
+       },
+       {
+        "id": "close",
+        "lane": "gl",
+        "seq": 3,
+        "title": "Management books closed",
+        "sub": "no state · no product · no class",
+        "description": "After the GL close the management ledger still holds most department expense on the No State, No Product, No Class and no-channel members. In December 2021, 75% of year-to-date other insurance expense sat on No Product.",
+        "evidence": [
+         "CO:INS-ALLOC-PL",
+         "CO:INS-ALLOC"
+        ],
+        "process": [
+         "GL close (business day 6)"
+        ],
+        "in": [],
+        "out": [
+         "Trial balance by department, product, state"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         },
+         {
+          "label": "Close process and scheduled processes",
+          "path": "insurance/processes/close-process.md"
+         }
+        ]
+       },
+       {
+        "id": "mgmt",
+        "lane": "cube",
+        "seq": 4,
+        "title": "Management view",
+        "sub": "View = BU10000",
+        "description": "The trial balance loads into the Financials cube on the Management View member (BU10000). The allocations never change it: each one writes its own View member, so the unallocated and allocated P&L sit side by side.",
+        "evidence": [
+         "CO:INS-FIN-CUBE"
+        ],
+        "process": [
+         "Trial balance load to the cube"
+        ],
+        "in": [
+         "GL balances"
+        ],
+        "out": [
+         "BU10000 · Management View"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "rates",
+        "lane": "rates",
+        "seq": 4,
+        "title": "Monthly rates",
+        "sub": "Smart View calc and push sheets",
+        "description": "FP&A builds the month's rates in Smart View workbooks from current-month GWP in the cube (state, product, channel, marketing split) or from the department time study (class), then submits them to the rate accounts.",
+        "evidence": [
+         "CO:INS-ALLOC-RATES"
+        ],
+        "process": [
+         "Calc sheets: rate = GWP of the member ÷ GWP of the total",
+         "Push sheets: submit to the rate accounts"
+        ],
+        "in": [
+         "Current-month GWP",
+         "Time study by department"
+        ],
+        "out": [
+         "Class, State, Product, Sales Channel, Marketing and CSD allocation rates"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "class",
+        "lane": "cube",
+        "seq": 5,
+        "title": "Stage 3a · Class",
+        "sub": "ALLOC · ALLOC2",
+        "description": "Every expense gets a statutory class (LAE, acquisition, underwriting, investment): fixed accounts go straight to underwriting, the rest is spread by the department time study.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "Class allocation calc script"
+        ],
+        "in": [
+         "Management view"
+        ],
+        "out": [
+         "Statutory 1, Statutory 2"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "state",
+        "lane": "cube",
+        "seq": 6,
+        "title": "Stage 3b · State",
+        "sub": "ALLOC3 · ALLOC4",
+        "description": "Expense on No State is spread to the states by current-month GWP.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "State allocation calc script"
+        ],
+        "in": [
+         "Statutory 2"
+        ],
+        "out": [
+         "Statutory 3"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "product",
+        "lane": "cube",
+        "seq": 7,
+        "title": "Stage 3c · Product",
+        "sub": "ALLOC5",
+        "description": "Expense on No Product is spread to the products by current-month GWP.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "Product allocation calc script"
+        ],
+        "in": [
+         "Statutory 3"
+        ],
+        "out": [
+         "Statutory 4"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "channel",
+        "lane": "cube",
+        "seq": 8,
+        "title": "Stage 3d · Channel",
+        "sub": "ALLOC6 – ALLOC10",
+        "description": "Department expense without a channel is moved to the four sales channels: overhead by new & renewal GWP, marketing by the direct/digital GWP split, and 25% of customer service to the community agents.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "Channel (department) allocation calc script"
+        ],
+        "in": [
+         "Statutory 4"
+        ],
+        "out": [
+         "Statutory (Allocated) View"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "prem",
+        "lane": "plan",
+        "seq": 5,
+        "title": "Stage 4 · Premium & losses",
+        "sub": "channel at load",
+        "description": "Premium and losses come into the GL with state and product but no channel. When FP&A loads the financials into Planning, the load script splits them by channel using contract-type rates.",
+        "evidence": [
+         "CO:INS-ALLOC",
+         "CO:INS-FIN-CUBE"
+        ],
+        "process": [
+         "Planning data load with allocation"
+        ],
+        "in": [
+         "Contract-type rates from the policy warehouse and claims statistics"
+        ],
+        "out": [
+         "Premium and losses by channel"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         },
+         {
+          "label": "ADW, integrations and reporting",
+          "path": "insurance/data-and-reporting.md"
+         }
+        ]
+       },
+       {
+        "id": "stat",
+        "lane": "rpt",
+        "seq": 9,
+        "title": "Statutory P&L",
+        "sub": "state × line × channel",
+        "description": "The Statutory (Allocated) View adds the management view and every allocation member. It gives a statutory P&L by state, statutory line of business and channel that rolls back up to the annual statement (Yellow Book) and the AM Best reporting.",
+        "evidence": [
+         "CO:INS-ALLOC",
+         "CO:INS-FIN-CUBE"
+        ],
+        "process": [
+         "Statutory reports from the cube"
+        ],
+        "in": [
+         "Statutory (Allocated) View"
+        ],
+        "out": [
+         "Statutory P&L by state, line of business and channel"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "checks",
+        "lane": "rpt",
+        "seq": 10,
+        "title": "Checks",
+        "sub": "zero-sum by view",
+        "description": "A check sheet pulls every View member for the year: each allocation member must net to zero at total, and the allocated underwriting result must equal the unallocated one (2021: equal to within $2 of rounding).",
+        "evidence": [
+         "CO:INS-ALLOC-RATES",
+         "CO:INS-ALLOC-PL"
+        ],
+        "process": [
+         "Master allocation check workbook",
+         "Allocated vs unallocated P&L"
+        ],
+        "in": [
+         "All View members"
+        ],
+        "out": [
+         "Sign-off"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       }
+      ],
+      "flows": [
+       {
+        "from": "direct",
+        "to": "acctg",
+        "kind": "ledger",
+        "label": "GL lines"
+       },
+       {
+        "from": "acctg",
+        "to": "close",
+        "kind": "ledger"
+       },
+       {
+        "from": "close",
+        "to": "mgmt",
+        "kind": "ledger",
+        "label": "TB load"
+       },
+       {
+        "from": "mgmt",
+        "to": "rates",
+        "kind": "doc",
+        "label": "GWP"
+       },
+       {
+        "from": "rates",
+        "to": "class",
+        "kind": "doc",
+        "label": "rates"
+       },
+       {
+        "from": "mgmt",
+        "to": "class",
+        "kind": "acct"
+       },
+       {
+        "from": "class",
+        "to": "state",
+        "kind": "acct"
+       },
+       {
+        "from": "state",
+        "to": "product",
+        "kind": "acct"
+       },
+       {
+        "from": "product",
+        "to": "channel",
+        "kind": "acct"
+       },
+       {
+        "from": "close",
+        "to": "prem",
+        "kind": "ledger",
+        "label": "Planning load"
+       },
+       {
+        "from": "channel",
+        "to": "stat",
+        "kind": "acct"
+       },
+       {
+        "from": "prem",
+        "to": "stat",
+        "kind": "acct",
+        "label": "premium & losses"
+       },
+       {
+        "from": "stat",
+        "to": "checks",
+        "kind": "ext"
+       }
+      ],
+      "notes": [
+       {
+        "title": "Allocations live in the cube, not the GL.",
+        "text": "The Fusion GL keeps the management view; the statutory dimensions are added in the Financials Essbase cube on separate View members. The GL's own allocation rules (payroll by state, in the Close process tab) are a different, smaller set."
+       },
+       {
+        "title": "Order matters.",
+        "text": "Each step reads the subtotal the step before it wrote (Statutory 1 to 4), so class runs first, then state, product and channel. Re-running one step means re-running the ones after it."
+       },
+       {
+        "title": "Anonymised.",
+        "text": "Companies are shown as the Mutual and the Agency, and people are left out. Department, account and product codes are shown as they were configured."
+       }
+      ]
+     },
+     {
+      "id": "class",
+      "label": "Class",
+      "lede": "Statutory class splits each expense into LAE (Class_60), acquisition (Class_70), underwriting (Class_80) and investment (Class_90), the buckets of the statutory expense exhibit. Two passes: fixed accounts first, then the time study.",
+      "lanes": [
+       {
+        "id": "rates",
+        "label": "Rates"
+       },
+       {
+        "id": "src",
+        "label": "Source"
+       },
+       {
+        "id": "calc",
+        "label": "Calc script"
+       },
+       {
+        "id": "out",
+        "label": "Result"
+       }
+      ],
+      "steps": [
+       {
+        "id": "src",
+        "lane": "src",
+        "seq": 1,
+        "title": "Management view",
+        "sub": "No Class",
+        "description": "The loaded GL balances: everything not coded to a class sits on No Class.",
+        "evidence": [
+         "CO:INS-FIN-CUBE"
+        ],
+        "process": [],
+        "in": [
+         "BU10000 · No Class"
+        ],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "direct",
+        "lane": "calc",
+        "seq": 2,
+        "title": "Fixed accounts to underwriting",
+        "sub": "ALLOC",
+        "description": "Accounts that statutory rules put in underwriting are moved there in full, for the underwriting departments and every product and state.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "Advertising 730100–730450",
+         "Reports & surveys 740100",
+         "Political and sponsorship 750100–750300",
+         "Boards & bureaus 761150",
+         "Regulatory fees 616150",
+         "Licenses, interest and taxes 770100–770300"
+        ],
+        "in": [
+         "Management view"
+        ],
+        "out": [
+         "ALLOC on Class_80 and the offset on No Class"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ],
+        "entries": [
+         {
+          "event": "ALLOC (View member)",
+          "dr": [
+           "Class_80 · underwriting expense"
+          ],
+          "cr": [
+           "No Class"
+          ]
+         }
+        ]
+       },
+       {
+        "id": "s1",
+        "lane": "out",
+        "seq": 3,
+        "title": "Statutory 1",
+        "sub": "BU10000 + ALLOC",
+        "description": "Subtotal that the second pass reads.",
+        "evidence": [
+         "CO:INS-FIN-CUBE"
+        ],
+        "process": [],
+        "in": [],
+        "out": [
+         "Statutory 1"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "rates",
+        "lane": "rates",
+        "seq": 3,
+        "title": "Time-study rates",
+        "sub": "Class Allocation Rates",
+        "description": "One rate set per department from a work study, loaded on BU10000 · No Product · No State and held flat all year.",
+        "evidence": [
+         "CO:INS-ALLOC-RATES"
+        ],
+        "process": [
+         "IT departments: 13% LAE · 38% acquisition · 49% underwriting",
+         "Claims: 100% LAE",
+         "Sales, marketing and creative: 100% acquisition",
+         "Product, underwriting, treasury, government affairs, regulatory taxes: 100% underwriting",
+         "Customer service: 19% · 1% · 80%",
+         "Accounting and FP&A: 14% · 8% · 78%",
+         "Pricing analytics: 28% · 12% · 60%",
+         "Executive, HR, legal, audit, facilities and other corporate: 42% · 26% · 32%",
+         "Investments: 100% Class_90"
+        ],
+        "in": [
+         "Department time study"
+        ],
+        "out": [
+         "Class Allocation Rates"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "study",
+        "lane": "calc",
+        "seq": 4,
+        "title": "Time-study spread",
+        "sub": "ALLOC2",
+        "description": "What is still on No Class after the first pass is multiplied by the department's rates into the classes and reversed off No Class, for other insurance expense on all products and states.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "ALLOC2 = Statutory 1 → No Class × Class Allocation Rates"
+        ],
+        "in": [
+         "Statutory 1",
+         "Class Allocation Rates"
+        ],
+        "out": [
+         "ALLOC2"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ],
+        "entries": [
+         {
+          "event": "ALLOC2 (View member)",
+          "dr": [
+           "Class_60 / 70 / 80 / 90 by rate"
+          ],
+          "cr": [
+           "No Class (full amount)"
+          ]
+         }
+        ]
+       },
+       {
+        "id": "s2",
+        "lane": "out",
+        "seq": 5,
+        "title": "Statutory 2",
+        "sub": "+ ALLOC2",
+        "description": "Every expense now has a class.",
+        "evidence": [
+         "CO:INS-FIN-CUBE"
+        ],
+        "process": [],
+        "in": [],
+        "out": [
+         "Statutory 2"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       }
+      ],
+      "flows": [
+       {
+        "from": "src",
+        "to": "direct",
+        "kind": "acct",
+        "label": "fixed accounts"
+       },
+       {
+        "from": "direct",
+        "to": "s1",
+        "kind": "acct"
+       },
+       {
+        "from": "s1",
+        "to": "study",
+        "kind": "acct",
+        "label": "No Class"
+       },
+       {
+        "from": "rates",
+        "to": "study",
+        "kind": "doc",
+        "label": "rates"
+       },
+       {
+        "from": "study",
+        "to": "s2",
+        "kind": "acct"
+       }
+      ],
+      "notes": [
+       {
+        "title": "Why class matters.",
+        "text": "Class is what lets the cube produce a statutory P&L: it separates loss adjustment, acquisition and general underwriting expense, which the annual statement and the rating agencies report separately."
+       },
+       {
+        "title": "Static rates.",
+        "text": "The 2021 rates are the same in every month. When the time study is redone, record its date so a year's statutory results can be traced to the study used."
+       }
+      ]
+     },
+     {
+      "id": "state",
+      "label": "State",
+      "lede": "Expense on No State is spread to Washington, Oregon, Idaho and South Carolina in proportion to the month's gross written premium, product by product.",
+      "lanes": [
+       {
+        "id": "rates",
+        "label": "Rates"
+       },
+       {
+        "id": "src",
+        "label": "Source"
+       },
+       {
+        "id": "calc",
+        "label": "Calc script"
+       },
+       {
+        "id": "out",
+        "label": "Result"
+       }
+      ],
+      "steps": [
+       {
+        "id": "rates",
+        "lane": "rates",
+        "seq": 1,
+        "title": "State GWP %",
+        "sub": "State Allocation Rates",
+        "description": "For each product: the state's current-month GWP ÷ the product's total GWP. Washington is set to 1 minus the other states, so each set adds to 100%.",
+        "evidence": [
+         "CO:INS-ALLOC-RATES"
+        ],
+        "process": [
+         "January 2021, auto: WA 88.6% · OR 11.4%",
+         "January 2021, home: WA 92.4% · OR 7.6%",
+         "Idaho and South Carolina: 0 (no premium written)"
+        ],
+        "in": [
+         "Current-month GWP by product and state"
+        ],
+        "out": [
+         "State Allocation Rates"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "src",
+        "lane": "src",
+        "seq": 1,
+        "title": "Statutory 2",
+        "sub": "No State",
+        "description": "Other insurance expense on No State, already split by class.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [],
+        "in": [
+         "Statutory 2 · No State"
+        ],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "excl",
+        "lane": "src",
+        "seq": 2,
+        "title": "Already coded",
+        "sub": "left out of the run",
+        "description": "Commissions coded to their channel stay put: direct agent commissions (710050, 710051) on D1420 and community agent commissions (710100, 710150, 710200, 710100CA) on D1440; so do premium taxes and regulatory fees (616100, 616150) and state business taxes (770250, 770255) on D9998, reports & surveys (740100) on the product and underwriting departments, and credit card fees (749150) on Treasury.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "spread",
+        "lane": "calc",
+        "seq": 3,
+        "title": "Spread to states",
+        "sub": "ALLOC3",
+        "description": "No State × the state rate, written to each real state.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "ALLOC3 = Statutory 2 → No State × State Allocation Rates"
+        ],
+        "in": [
+         "Statutory 2",
+         "State Allocation Rates"
+        ],
+        "out": [
+         "ALLOC3"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ],
+        "entries": [
+         {
+          "event": "ALLOC3 (View member)",
+          "dr": [
+           "WA · OR · ID · SC by rate"
+          ],
+          "cr": [
+           "—"
+          ]
+         }
+        ]
+       },
+       {
+        "id": "offset",
+        "lane": "calc",
+        "seq": 4,
+        "title": "Clear No State",
+        "sub": "ALLOC4",
+        "description": "The same amount reversed off No State on its own View member.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "ALLOC4 = Statutory 2 → No State × −1"
+        ],
+        "in": [],
+        "out": [
+         "ALLOC4"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ],
+        "entries": [
+         {
+          "event": "ALLOC4 (View member)",
+          "dr": [
+           "—"
+          ],
+          "cr": [
+           "No State (full amount)"
+          ]
+         }
+        ]
+       },
+       {
+        "id": "s3",
+        "lane": "out",
+        "seq": 5,
+        "title": "Statutory 3",
+        "sub": "+ ALLOC3 + ALLOC4",
+        "description": "Every expense now has a state.",
+        "evidence": [
+         "CO:INS-FIN-CUBE"
+        ],
+        "process": [],
+        "in": [],
+        "out": [
+         "Statutory 3"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       }
+      ],
+      "flows": [
+       {
+        "from": "src",
+        "to": "spread",
+        "kind": "acct",
+        "label": "No State"
+       },
+       {
+        "from": "rates",
+        "to": "spread",
+        "kind": "doc",
+        "label": "rates"
+       },
+       {
+        "from": "spread",
+        "to": "offset",
+        "kind": "acct"
+       },
+       {
+        "from": "offset",
+        "to": "s3",
+        "kind": "acct"
+       }
+      ],
+      "notes": [
+       {
+        "title": "Check the saved script.",
+        "text": "The copy of the state script in the folder multiplies by \"State Allocation Rates\"-\"BU10000\" (a minus) where the other scripts use the cross-dimension operator ->. Confirm that the deployed rule uses ->."
+       }
+      ]
+     },
+     {
+      "id": "product",
+      "label": "Product",
+      "lede": "Expense on No Product is spread to the products in proportion to the month's gross written premium, state by state.",
+      "lanes": [
+       {
+        "id": "rates",
+        "label": "Rates"
+       },
+       {
+        "id": "src",
+        "label": "Source"
+       },
+       {
+        "id": "calc",
+        "label": "Calc script"
+       },
+       {
+        "id": "out",
+        "label": "Result"
+       }
+      ],
+      "steps": [
+       {
+        "id": "rates",
+        "lane": "rates",
+        "seq": 1,
+        "title": "Product GWP %",
+        "sub": "Product Allocation Rates",
+        "description": "For each state and in total: the product's current-month GWP ÷ total GWP, and they add to 100%.",
+        "evidence": [
+         "CO:INS-ALLOC-RATES"
+        ],
+        "process": [
+         "January 2021, all states: auto 70.2% · home 23.3% · dwelling 2.4% · umbrella 2.1% · condo, renters and marine about 2.1% together"
+        ],
+        "in": [
+         "Current-month GWP by product and state"
+        ],
+        "out": [
+         "Product Allocation Rates"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "src",
+        "lane": "src",
+        "seq": 1,
+        "title": "Statutory 3",
+        "sub": "No Product",
+        "description": "Other insurance expense on No Product, with class and state already set.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [],
+        "in": [
+         "Statutory 3 · No Product"
+        ],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "excl",
+        "lane": "src",
+        "seq": 2,
+        "title": "Already coded",
+        "sub": "left out of the run",
+        "description": "Commissions coded to their channel stay put: direct agent commissions (710050, 710051) on D1420 and community agent commissions (710100, 710150, 710200, 710100CA) on D1440; so do premium taxes and regulatory fees (616100, 616150) and state business taxes (770250, 770255) on D9998, reports & surveys (740100) on the product and underwriting departments, and credit card fees (749150) on Treasury.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "spread",
+        "lane": "calc",
+        "seq": 3,
+        "title": "Spread and clear",
+        "sub": "ALLOC5",
+        "description": "No Product × the product rate goes to each product, and the same amount is reversed off No Product on the same View member.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "ALLOC5 = Statutory 3 → No Product × Product Allocation Rates",
+         "ALLOC5 on No Product = Statutory 3 → No Product × −1"
+        ],
+        "in": [
+         "Statutory 3",
+         "Product Allocation Rates"
+        ],
+        "out": [
+         "ALLOC5"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ],
+        "entries": [
+         {
+          "event": "ALLOC5 (View member)",
+          "dr": [
+           "Products (P310 … P593) by rate"
+          ],
+          "cr": [
+           "No Product (full amount)"
+          ]
+         }
+        ]
+       },
+       {
+        "id": "s4",
+        "lane": "out",
+        "seq": 4,
+        "title": "Statutory 4",
+        "sub": "+ ALLOC5",
+        "description": "Every expense now has class, state and product. The statutory line-of-business hierarchy (homeowners, auto liability, auto physical damage, other liability, special property) rolls the products up.",
+        "evidence": [
+         "CO:INS-FIN-CUBE"
+        ],
+        "process": [],
+        "in": [],
+        "out": [
+         "Statutory 4"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       }
+      ],
+      "flows": [
+       {
+        "from": "src",
+        "to": "spread",
+        "kind": "acct",
+        "label": "No Product"
+       },
+       {
+        "from": "rates",
+        "to": "spread",
+        "kind": "doc",
+        "label": "rates"
+       },
+       {
+        "from": "spread",
+        "to": "s4",
+        "kind": "acct"
+       }
+      ],
+      "notes": [
+       {
+        "title": "Scale.",
+        "text": "In December 2021, 75% of year-to-date other insurance expense was on No Product before this step, so the product view of expense comes mostly from the GWP mix."
+       }
+      ]
+     },
+     {
+      "id": "channel",
+      "label": "Channel",
+      "lede": "Department expense that has no sales channel is moved to the four channels: community agents, direct agents, house support and digital. The sales channels keep their own costs and receive a share of the overhead pool.",
+      "lanes": [
+       {
+        "id": "rates",
+        "label": "Rates"
+       },
+       {
+        "id": "pool",
+        "label": "Overhead pool"
+       },
+       {
+        "id": "calc",
+        "label": "Calc script"
+       },
+       {
+        "id": "chan",
+        "label": "Sales channels"
+       },
+       {
+        "id": "out",
+        "label": "Result"
+       }
+      ],
+      "steps": [
+       {
+        "id": "rates",
+        "lane": "rates",
+        "seq": 1,
+        "title": "Channel rates",
+        "sub": "three rate sets",
+        "description": "All three sets are loaded on BU10000.",
+        "evidence": [
+         "CO:INS-ALLOC-RATES",
+         "CO:INS-ALLOC"
+        ],
+        "process": [
+         "Sales Channel Rates: new & renewal GWP by channel, for each product and state (January 2021, WA auto: house support 56%, community agents about 39%, direct agents 2.5%, digital 2.6%)",
+         "Marketing to Direct/Digital: direct vs digital GWP split (WA about 96/4, OR about 85/15)",
+         "CSD to Community Agent: 25% of customer service"
+        ],
+        "in": [
+         "New & renewal GWP by channel"
+        ],
+        "out": [
+         "Three rate sets"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "pool",
+        "lane": "pool",
+        "seq": 2,
+        "title": "Build the overhead pool",
+        "sub": "ALLOC6",
+        "description": "Every underwriting department except sales, customer service and marketing is reversed out of its own department into a pool.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "ALLOC6 = Statutory 4 × −1",
+         "Not pooled: D1420, D1430, D1440, D1510, D1410, D1520, D1530, D3350, D1310",
+         "Commissions coded to their channel stay put: direct agent commissions (710050, 710051) on D1420 and community agent commissions (710100, 710150, 710200, 710100CA) on D1440"
+        ],
+        "in": [
+         "Statutory 4"
+        ],
+        "out": [
+         "ALLOC6"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ],
+        "entries": [
+         {
+          "event": "ALLOC6 (View member)",
+          "dr": [
+           "—"
+          ],
+          "cr": [
+           "Overhead departments (IT, finance, HR, claims, legal, executive …)"
+          ]
+         }
+        ]
+       },
+       {
+        "id": "spread",
+        "lane": "calc",
+        "seq": 3,
+        "title": "Spread the pool",
+        "sub": "ALLOC7",
+        "description": "The pool total for Total Underwriting is multiplied by the sales channel rates into the channel departments.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "ALLOC7 = (ALLOC6 → Total Underwriting) × Sales Channel Rates × −1"
+        ],
+        "in": [
+         "ALLOC6",
+         "Sales Channel Rates"
+        ],
+        "out": [
+         "ALLOC7"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ],
+        "entries": [
+         {
+          "event": "ALLOC7 (View member)",
+          "dr": [
+           "Channel departments by new & renewal GWP"
+          ],
+          "cr": [
+           "— (the pool credit is in ALLOC6)"
+          ]
+         }
+        ]
+       },
+       {
+        "id": "chan",
+        "lane": "chan",
+        "seq": 4,
+        "title": "Four sales channels",
+        "sub": "plus roll-ups",
+        "description": "Community agents (D1440), direct agents (D1420, D1430, sales management), house support (customer service) and digital (D2410). Direct agents plus house support make the direct channel, and with digital the total direct channel.",
+        "evidence": [
+         "CO:INS-ALLOC",
+         "CO:INS-FIN-CUBE"
+        ],
+        "process": [],
+        "in": [],
+        "out": [
+         "Channel P&L"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "mktg",
+        "lane": "calc",
+        "seq": 5,
+        "title": "Marketing",
+        "sub": "ALLOC8",
+        "description": "Marketing (D1310) goes to the direct and digital channels by their GWP split, and is reversed off D1310 on the same member.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "ALLOC8 = Statutory 4 → D1310 × Marketing to Direct/Digital rates",
+         "ALLOC8 on D1310 = Statutory 4 × −1"
+        ],
+        "in": [
+         "Statutory 4 · D1310"
+        ],
+        "out": [
+         "ALLOC8"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ],
+        "entries": [
+         {
+          "event": "ALLOC8 (View member)",
+          "dr": [
+           "Direct · digital channels"
+          ],
+          "cr": [
+           "D1310 marketing"
+          ]
+         }
+        ]
+       },
+       {
+        "id": "csd",
+        "lane": "calc",
+        "seq": 6,
+        "title": "Customer service",
+        "sub": "ALLOC9 · ALLOC10",
+        "description": "25% of customer service goes to the community agent channel for work done on its behalf, and is credited back to customer service.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [
+         "ALLOC9 = Statutory 4 → Customer Service × CSD to Community Agent rate",
+         "ALLOC10 on D1510 = ALLOC9 → D1440 × −1"
+        ],
+        "in": [
+         "Statutory 4 · Customer Service"
+        ],
+        "out": [
+         "ALLOC9, ALLOC10"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ],
+        "entries": [
+         {
+          "event": "ALLOC9 / ALLOC10 (View members)",
+          "dr": [
+           "D1440 community agents"
+          ],
+          "cr": [
+           "D1510 customer service"
+          ]
+         }
+        ]
+       },
+       {
+        "id": "stat",
+        "lane": "out",
+        "seq": 7,
+        "title": "Statutory (Allocated) View",
+        "sub": "BU10000 + ALLOC … ALLOC10",
+        "description": "The final view also adds AllocAdj, AllocAdj2 and Rounding for manual corrections.",
+        "evidence": [
+         "CO:INS-FIN-CUBE"
+        ],
+        "process": [],
+        "in": [],
+        "out": [
+         "Statutory (Allocated) View"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       }
+      ],
+      "flows": [
+       {
+        "from": "pool",
+        "to": "spread",
+        "kind": "acct",
+        "label": "pool"
+       },
+       {
+        "from": "rates",
+        "to": "spread",
+        "kind": "doc",
+        "label": "GWP rates"
+       },
+       {
+        "from": "spread",
+        "to": "chan",
+        "kind": "acct"
+       },
+       {
+        "from": "rates",
+        "to": "mktg",
+        "kind": "doc",
+        "label": "direct/digital"
+       },
+       {
+        "from": "mktg",
+        "to": "chan",
+        "kind": "acct"
+       },
+       {
+        "from": "rates",
+        "to": "csd",
+        "kind": "doc",
+        "label": "25%"
+       },
+       {
+        "from": "csd",
+        "to": "chan",
+        "kind": "acct"
+       },
+       {
+        "from": "chan",
+        "to": "stat",
+        "kind": "acct"
+       }
+      ],
+      "notes": [
+       {
+        "title": "Digital is different.",
+        "text": "The digital channel doesn't keep the IT department costs; it only receives its share of the overhead pool."
+       },
+       {
+        "title": "One department takes the credit.",
+        "text": "The methodology says D1510, D1530 and D1410 each give 25% to the community agents. The script credits the full amount to D1510, so the channel totals are right but the department split isn't."
+       }
+      ]
+     },
+     {
+      "id": "premloss",
+      "label": "Premium & losses",
+      "lede": "Stage 4: premium and losses arrive in the GL with state and product but no channel. The Planning load gives them one, using the month's contract-type mix from the policy and claims data.",
+      "lanes": [
+       {
+        "id": "src",
+        "label": "Policy & claims data",
+        "external": true
+       },
+       {
+        "id": "rates",
+        "label": "Rates in Planning"
+       },
+       {
+        "id": "load",
+        "label": "Planning load"
+       },
+       {
+        "id": "out",
+        "label": "Result"
+       }
+      ],
+      "steps": [
+       {
+        "id": "prem",
+        "lane": "src",
+        "seq": 1,
+        "title": "Premium by contract type",
+        "sub": "policy warehouse",
+        "description": "Exceed reporting gives the contract type behind each month's premium, which maps to a sales channel.",
+        "evidence": [
+         "CO:INS-ALLOC"
+        ],
+        "process": [],
+        "in": [
+         "Exceed premium reporting (EDW)"
+        ],
+        "out": [
+         "Premium mix by channel"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         },
+         {
+          "label": "ADW, integrations and reporting",
+          "path": "insurance/data-and-reporting.md"
+         }
+        ]
+       },
+       {
+        "id": "loss",
+        "lane": "src",
+        "seq": 2,
+        "title": "Losses incurred by contract type",
+        "sub": "claims statistics",
+        "description": "The monthly claims statistics in the data warehouse give the losses incurred % by contract type, extracted with SQL from Exceed data.",
+        "evidence": [
+         "CO:INS-ALLOC"
+        ],
+        "process": [],
+        "in": [
+         "Monthly claims statistics (ADW)"
+        ],
+        "out": [
+         "Loss mix by channel"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         },
+         {
+          "label": "ADW, integrations and reporting",
+          "path": "insurance/data-and-reporting.md"
+         }
+        ]
+       },
+       {
+        "id": "rates",
+        "lane": "rates",
+        "seq": 2,
+        "title": "Allocation rates",
+        "sub": "premium and loss rate accounts",
+        "description": "The rates are entered in Planning on dedicated accounts.",
+        "evidence": [
+         "CO:INS-FIN-CUBE",
+         "CO:INS-ALLOC"
+        ],
+        "process": [
+         "Premium: new, renewal and new-and-renewal written premium rates",
+         "Losses: gross paid, gross reserve, salvage, subrogation and reinsurance paid rates"
+        ],
+        "in": [],
+        "out": [
+         "Allocation Rates - Premium / Losses"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "tb",
+        "lane": "load",
+        "seq": 1,
+        "title": "To-be-allocated accounts",
+        "sub": "TBAlloc",
+        "description": "Premium and loss balances first load onto to-be-allocated accounts: written, unearned and ceded premium, premium offsets and fees, paid losses, reserves (case, IBNR), LAE, salvage, subrogation and reinsurance recoveries.",
+        "evidence": [
+         "CO:INS-FIN-CUBE"
+        ],
+        "process": [
+         "Trial balance load from the GL"
+        ],
+        "in": [
+         "GL balances"
+        ],
+        "out": [
+         "Premium and loss accounts To Be Allocated"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "alloc",
+        "lane": "load",
+        "seq": 3,
+        "title": "Allocate at load",
+        "sub": "data load script",
+        "description": "The load script multiplies each to-be-allocated balance by the matching rate and writes it to the real accounts by channel.",
+        "evidence": [
+         "CO:INS-ALLOC"
+        ],
+        "process": [
+         "Planning data load with allocation"
+        ],
+        "in": [
+         "TBAlloc balances",
+         "Rates"
+        ],
+        "out": [
+         "Premium and losses by channel"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "out",
+        "lane": "out",
+        "seq": 4,
+        "title": "Channel P&L",
+        "sub": "premium · losses · expense",
+        "description": "With Stage 3's expense allocation, every line of the statutory P&L now has a channel.",
+        "evidence": [
+         "CO:INS-ALLOC"
+        ],
+        "process": [],
+        "in": [],
+        "out": [
+         "Statutory P&L by channel"
+        ],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       }
+      ],
+      "flows": [
+       {
+        "from": "prem",
+        "to": "rates",
+        "kind": "doc",
+        "label": "premium mix"
+       },
+       {
+        "from": "loss",
+        "to": "rates",
+        "kind": "doc",
+        "label": "loss mix"
+       },
+       {
+        "from": "tb",
+        "to": "alloc",
+        "kind": "ledger"
+       },
+       {
+        "from": "rates",
+        "to": "alloc",
+        "kind": "doc",
+        "label": "rates"
+       },
+       {
+        "from": "alloc",
+        "to": "out",
+        "kind": "acct"
+       }
+      ],
+      "notes": [
+       {
+        "title": "Commissions are already coded.",
+        "text": "Community agent commissions arrive with state, product and channel. Direct agent commissions arrive through payroll and get them at the month-end accrual (stage 2), using the new & renewal commissions and GWP by channel report."
+       }
+      ]
+     },
+     {
+      "id": "controls",
+      "label": "Checks & improvements",
+      "lede": "How the run is checked today, what the scripts and workbooks show, and what would make the process repeatable and auditable.",
+      "lanes": [
+       {
+        "id": "chk",
+        "label": "Checks today"
+       },
+       {
+        "id": "gap",
+        "label": "Findings"
+       },
+       {
+        "id": "tgt",
+        "label": "Target"
+       }
+      ],
+      "steps": [
+       {
+        "id": "zero",
+        "lane": "chk",
+        "seq": 1,
+        "title": "Zero-sum by view",
+        "sub": "master allocation check",
+        "description": "Every ALLOC member must net to zero for the total of product, state, department and class, and the allocated view must equal the management view.",
+        "evidence": [
+         "CO:INS-ALLOC-RATES"
+        ],
+        "process": [
+         "Master allocation check workbook (all View members, all months)"
+        ],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "pl",
+        "lane": "chk",
+        "seq": 2,
+        "title": "Allocated vs unallocated P&L",
+        "sub": "year-end tie-out",
+        "description": "The statutory income statement by line of business is compared with the management P&L by product and state. The underwriting result is the same in both (2021: within $2 of rounding).",
+        "evidence": [
+         "CO:INS-ALLOC-PL"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "pov",
+        "lane": "gap",
+        "seq": 1,
+        "title": "Period typed into every script",
+        "sub": "Actual · FY22 · Feb · Final",
+        "description": "Each script starts with a fixed period, so someone edits all four scripts every month. A missed edit re-runs last month.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "manual",
+        "lane": "gap",
+        "seq": 2,
+        "title": "Rates built and pushed by hand",
+        "sub": "Smart View workbooks",
+        "description": "Rates are calculated in Excel from cube GWP and submitted back. The sheets show #DIV/0! in months not yet closed, and nobody signs off before the push.",
+        "evidence": [
+         "CO:INS-ALLOC-RATES"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "clear",
+        "lane": "gap",
+        "seq": 3,
+        "title": "No clear step",
+        "sub": "stale cells",
+        "description": "The scripts don't clear the ALLOC members before they write. If a combination disappears (for example a department's expense moves), its old allocated value stays.",
+        "evidence": [
+         "CO:INS-ALLOC-CALC",
+         "INFERRED"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "defects",
+        "lane": "gap",
+        "seq": 4,
+        "title": "Script defects",
+        "sub": "state rate · customer-service credit",
+        "description": "The state script copy uses - instead of ->, and the customer-service credit lands on D1510 only (see the State and Channel scenarios).",
+        "evidence": [
+         "CO:INS-ALLOC-CALC",
+         "CO:INS-ALLOC"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "doc",
+        "lane": "gap",
+        "seq": 5,
+        "title": "Methodology out of date",
+        "sub": "May 2021 text",
+        "description": "The methodology still describes loading PeopleSoft financials; the GL moved to Fusion in January 2021. The class time study isn't dated.",
+        "evidence": [
+         "CO:INS-ALLOC"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "prompts",
+        "lane": "tgt",
+        "seq": 1,
+        "title": "Runtime prompts",
+        "sub": "or substitution variables",
+        "description": "Take the year and month from substitution variables (the cube already has YTDCurrentMonth and similar) or runtime prompts, and run the four scripts as one ordered ruleset.",
+        "evidence": [
+         "INFERRED",
+         "CO:INS-FIN-CUBE"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "incube",
+        "lane": "tgt",
+        "seq": 2,
+        "title": "Rates calculated in the cube",
+        "sub": "from GWP accounts",
+        "description": "Calculate the GWP rates in a calc script from the new & renewal GWP accounts already in the cube. Keep the workbook as a review report with sign-off.",
+        "evidence": [
+         "INFERRED"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "cleardata",
+        "lane": "tgt",
+        "seq": 3,
+        "title": "Clear, run, check",
+        "sub": "one job",
+        "description": "Start with CLEARDATA on ALLOC … ALLOC10 for the period, end with the zero-sum check as a validation report, and keep the job log as evidence.",
+        "evidence": [
+         "INFERRED"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "own",
+        "lane": "tgt",
+        "seq": 4,
+        "title": "Fix and version the scripts",
+        "sub": "change control",
+        "description": "Correct the two defects and keep the scripts, rate sources and time study under change control, with the run date and approver per month.",
+        "evidence": [
+         "INFERRED"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       },
+       {
+        "id": "refresh",
+        "lane": "tgt",
+        "seq": 5,
+        "title": "Refresh the methodology",
+        "sub": "yearly",
+        "description": "Update the document for the Fusion source and date the time study. Say whether statutory dimensions stay in the cube only or also go to a statutory ledger.",
+        "evidence": [
+         "INFERRED"
+        ],
+        "process": [],
+        "in": [],
+        "out": [],
+        "docs": [
+         {
+          "label": "Statutory allocations",
+          "path": "insurance/processes/statutory-allocations.md"
+         }
+        ]
+       }
+      ],
+      "flows": [
+       {
+        "from": "pov",
+        "to": "prompts",
+        "kind": "ext"
+       },
+       {
+        "from": "manual",
+        "to": "incube",
+        "kind": "ext"
+       },
+       {
+        "from": "clear",
+        "to": "cleardata",
+        "kind": "ext"
+       },
+       {
+        "from": "zero",
+        "to": "cleardata",
+        "kind": "ext",
+        "label": "automate"
+       },
+       {
+        "from": "defects",
+        "to": "own",
+        "kind": "ext"
+       },
+       {
+        "from": "doc",
+        "to": "refresh",
+        "kind": "ext"
+       }
+      ],
+      "notes": [
+       {
+        "title": "Findings are from the files.",
+        "text": "The scripts and workbooks in the folder are 2021–2022 copies. Check the deployed rules before acting on the script findings."
+       },
+       {
+        "title": "Where this could run.",
+        "text": "The same steps can be Planning business rules (Calculation Manager) with runtime prompts and a job console audit trail. That's a choice for the EPM roadmap, not something the files decide."
+       }
+      ]
      }
     ]
    }

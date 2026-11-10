@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.0 — 2026-11-09
+- Insurance map: new **Allocations** tab after Close process (workflows, seven scenarios): the four allocation stages (direct coding, accounting GWP journals, the Financials Essbase cube allocation, premium and loss channel at the Planning load); **Class** (ALLOC, ALLOC2: fixed accounts to underwriting, department time study), **State** (ALLOC3/4) and **Product** (ALLOC5) by current-month GWP; **Channel** (ALLOC6–10: overhead pool, new & renewal GWP spread, marketing direct/digital split, 25% customer service to community agents); **Premium & losses** (to-be-allocated accounts and contract-type rates); **Checks & improvements** (zero-sum check, fixed period in every script, rates built by hand, no clear step, two script defects, methodology out of date, and the target).
+- The Close process allocation box and the EPM and OAC nodes point to the tab. New `insurance/processes/statutory-allocations.md` (evidence `CO:INS-ALLOC`, `CO:INS-ALLOC-CALC`, `CO:INS-ALLOC-RATES`, `CO:INS-FIN-CUBE`, `CO:INS-ALLOC-PL`; anonymised).
+
 ## 0.12.0 — 2026-10-21
 - Procure to Pay now shows the Subledger Accounting rules on all three maps (P2P only; other workstreams unchanged).
   - **Travel**: new **XLA** card between Payment and Settlement: the custom `CORP_GAAP_SLAM` method on the primary and STAT secondary ledgers, Payables account rules, spend category → charge account mapping sets (separate France set), period-end receipt accrual, payment accounted once at issue, the change path and the open TAB question. Evidence in `processes/p2p-end-to-end.md`.
